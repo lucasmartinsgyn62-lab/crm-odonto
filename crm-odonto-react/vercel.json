@@ -1,0 +1,12 @@
+{
+  "buildCommand": "pnpm build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }],
+  "crons": [
+    {
+      "path": "/api/backup",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

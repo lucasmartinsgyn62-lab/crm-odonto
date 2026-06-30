@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCRM } from '../context/CRMContext';
+import { supabase } from '../lib/supabase';
 
 const MODULE_LABELS = {
   dashboard:      'Dashboard',
@@ -162,6 +163,11 @@ export default function SuperAdmin() {
   const [showUserForm,   setShowUserForm]   = useState(false);
   const [editUser,       setEditUser]       = useState(null);
 
+  // Backup
+  const [backups,       setBackups]       = useState([]);
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [exporting,     setExporting]     = useState(false);
+
   const loadTenants = useCallback(async () => {
     setLoading(true);
     const data = await superAdmin.listTenants();
@@ -176,9 +182,17 @@ export default function SuperAdmin() {
     setLoading(false);
   }, []);
 
+  const loadBackups = useCallback(async () => {
+    setBackupLoading(true);
+    const { data } = await supabase.from('backups').select('id,created_at,tipo,size_kb').order('created_at', { ascending: false }).limit(30);
+    setBackups(data || []);
+    setBackupLoading(false);
+  }, []);
+
   useEffect(() => { loadTenants(); }, []);
   useEffect(() => {
     if (tab === 'usuarios') loadUsers(selectedTenant?.id || null);
+    if (tab === 'backup') loadBackups();
   }, [tab, selectedTenant]);
 
   async function handleSaveTenant(fields) {
@@ -210,6 +224,27 @@ export default function SuperAdmin() {
 
   const tenantName = name => tenants.find(t => t.id === name)?.nome || name;
 
+  async function handleExportBackup() {
+    setExporting(true);
+    const tables = ['tenants','profiles','clientes','dentistas','origens','agenda_slots','caixa_dia','historico_fechamentos'];
+    const result = {};
+    for (const t of tables) {
+      const { data } = await supabase.from(t).select('*');
+      result[t] = data || [];
+    }
+    const blob = new Blob([JSON.stringify({ version:'1.0', timestamp: new Date().toISOString(), ...result }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup-crm-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    // Salva registro do backup manual no Supabase
+    await supabase.from('backups').insert({ tipo: 'manual', size_kb: Math.round(JSON.stringify(result).length / 1024), data: result });
+    setExporting(false);
+    loadBackups();
+  }
+
   return (
     <div style={{minHeight:'100vh',background:'#0a0a0a',color:'#fff'}}>
       {/* Header */}
@@ -229,7 +264,7 @@ export default function SuperAdmin() {
 
       {/* Tabs */}
       <div style={{padding:'0 24px',borderBottom:'1px solid rgba(255,255,255,.08)',display:'flex',gap:0}}>
-        {[{id:'clinicas',label:'🏥 Clínicas'},{id:'usuarios',label:'👥 Usuários'}].map(t => (
+        {[{id:'clinicas',label:'🏥 Clínicas'},{id:'usuarios',label:'👥 Usuários'},{id:'backup',label:'💾 Backup'}].map(t => (
           <button key={t.id} onClick={() => { setTab(t.id); setSelectedTenant(null); }}
             style={{padding:'14px 20px',background:'transparent',border:'none',color: tab===t.id ? '#a78bfa' : '#666',
               borderBottom: tab===t.id ? '2px solid #7c3aed' : '2px solid transparent',
@@ -375,6 +410,57 @@ export default function SuperAdmin() {
           </>
         )}
       </div>
+
+        {/* ── ABA BACKUP ── */}
+        {tab === 'backup' && (
+          <>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
+              <div>
+                <h2 style={{margin:0,fontSize:20}}>Backup de Dados</h2>
+                <p style={{margin:'4px 0 0',color:'#666',fontSize:13}}>Backup automático diário às 3h. Últimos 30 registros.</p>
+              </div>
+              <button className="mbtn" style={{margin:0,padding:'8px 18px',fontSize:13}} onClick={handleExportBackup} disabled={exporting}>
+                {exporting ? 'Exportando...' : '⬇ Exportar Backup Agora'}
+              </button>
+            </div>
+
+            {backupLoading ? (
+              <div style={{textAlign:'center',padding:40,color:'#666'}}>Carregando...</div>
+            ) : backups.length === 0 ? (
+              <div style={{textAlign:'center',padding:60,color:'#444',border:'1px dashed rgba(255,255,255,.1)',borderRadius:12}}>
+                <div style={{fontSize:32,marginBottom:12}}>💾</div>
+                <div>Nenhum backup ainda. O primeiro automático roda às 3h.</div>
+                <div style={{marginTop:8,fontSize:13,color:'#555'}}>Clique em "Exportar Backup Agora" para criar um manual.</div>
+              </div>
+            ) : (
+              <div style={{display:'grid',gap:8}}>
+                {backups.map(b => {
+                  const dt = new Date(b.created_at);
+                  const dtStr = dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+                  return (
+                    <div key={b.id} style={{background:'#111',border:'1px solid rgba(255,255,255,.08)',borderRadius:10,padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                      <div style={{display:'flex',alignItems:'center',gap:14}}>
+                        <div style={{fontSize:22}}>💾</div>
+                        <div>
+                          <div style={{fontWeight:600,fontSize:14}}>{dtStr}</div>
+                          <div style={{color:'#555',fontSize:12,marginTop:2}}>{b.size_kb} KB</div>
+                        </div>
+                      </div>
+                      <span style={{
+                        background: b.tipo==='manual' ? 'rgba(124,58,237,.15)' : 'rgba(34,197,94,.1)',
+                        color: b.tipo==='manual' ? '#a78bfa' : '#4ade80',
+                        border: `1px solid ${b.tipo==='manual' ? 'rgba(124,58,237,.3)':'rgba(74,222,128,.3)'}`,
+                        fontSize:11,padding:'2px 10px',borderRadius:20
+                      }}>
+                        {b.tipo === 'manual' ? 'Manual' : 'Automático'}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
 
       {/* Modais */}
       {showTenantForm && (
