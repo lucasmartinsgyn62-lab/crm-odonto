@@ -14,6 +14,9 @@ const MENU = [
   { section: 'CAIXA' },
   { id: 'caixa',          label: 'Fechamento de Caixa', icon: 'ti-cash-register',    perm: 'caixa' },
   { id: 'historico-caixa',label: 'Histórico de Caixa', icon: 'ti-history',          perm: 'historico_caixa' },
+  { section: 'AUTOMAÇÃO' },
+  { id: 'whatsapp',       label: 'WhatsApp & IA',       icon: 'ti-brand-whatsapp',   perm: 'whatsapp' },
+  { id: 'pipeline',       label: 'Vendas Pipeline',     icon: 'ti-layout-kanban',    perm: 'pipeline' },
 ];
 
 export default function Sidebar() {
@@ -46,8 +49,7 @@ export default function Sidebar() {
   return (
     <div className="sidebar">
       <div className="sb-logo">
-        <h2>SUA LOGO AQUI</h2>
-        <p>CRM ODONTOLÓGICO</p>
+        <img src="/logo-avancer.svg" alt="AvancerCRM" style={{ height: 52, width: 'auto', display: 'block', margin: '0 auto' }} />
       </div>
       <div className="sb-menu">
         {isRec && (

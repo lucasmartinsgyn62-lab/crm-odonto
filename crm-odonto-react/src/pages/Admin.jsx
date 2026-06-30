@@ -8,6 +8,8 @@ import Origens from '../components/admin/Origens';
 import Relatorio from '../components/admin/Relatorio';
 import Caixa from '../components/admin/Caixa';
 import HistoricoCaixa from '../components/admin/HistoricoCaixa';
+import Whatsapp from '../components/admin/Whatsapp';
+import VendasPipeline from '../components/admin/VendasPipeline';
 import Calendar from '../components/shared/Calendar';
 import ProntuarioModal from '../components/modals/ProntuarioModal';
 import CaixaModal from '../components/modals/CaixaModal';
@@ -21,6 +23,8 @@ const PANELS = {
   relatorio: Relatorio,
   caixa: Caixa,
   'historico-caixa': HistoricoCaixa,
+  whatsapp:  Whatsapp,
+  pipeline:  VendasPipeline,
 };
 
 const PANEL_TITLES = {
@@ -32,6 +36,8 @@ const PANEL_TITLES = {
   relatorio: 'Relatórios',
   caixa: 'Fechamento de Caixa',
   'historico-caixa': 'Histórico de Caixa',
+  whatsapp: 'WhatsApp & IA',
+  pipeline: 'Vendas Pipeline',
 };
 
 export default function Admin() {
