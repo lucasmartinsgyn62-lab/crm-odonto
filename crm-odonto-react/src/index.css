@@ -417,3 +417,5 @@ table.tbl tbody tr:hover td{background:#fafaf8}
   .mpront-g2,.mpront-g3{grid-template-columns:1fr}
   .gg2,.gg3{grid-template-columns:1fr}
 }
+
+@keyframes spin { to { transform: rotate(360deg); } }

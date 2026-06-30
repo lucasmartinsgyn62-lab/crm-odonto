@@ -5,23 +5,27 @@ import { useCRM } from '../../context/CRMContext';
 export default function LoginModal({ onClose }) {
   const { login } = useCRM();
   const navigate = useNavigate();
-  const [user, setUser] = useState('');
-  const [pass, setPass] = useState('');
-  const [err, setErr] = useState(false);
+  const [email, setEmail] = useState('');
+  const [pass, setPass]   = useState('');
+  const [err, setErr]     = useState('');
+  const [loading, setLoading] = useState(false);
 
-  function doLogin() {
-    if (login(user, pass)) {
+  async function doLogin() {
+    if (!email.trim() || !pass.trim()) return;
+    setLoading(true);
+    setErr('');
+    const profile = await login(email.trim(), pass);
+    setLoading(false);
+    if (profile) {
       onClose();
-      navigate('/admin');
+      if (profile.role === 'super_admin') navigate('/superadmin');
+      else navigate('/admin');
     } else {
-      setErr(true);
-      setTimeout(() => setErr(false), 3000);
+      setErr('E-mail ou senha incorretos.');
     }
   }
 
-  function handleKey(e) {
-    if (e.key === 'Enter') doLogin();
-  }
+  function handleKey(e) { if (e.key === 'Enter') doLogin(); }
 
   return (
     <div className="modal-ov open" onClick={e => e.target === e.currentTarget && onClose()}>
@@ -33,15 +37,16 @@ export default function LoginModal({ onClose }) {
         </div>
         <h3>Área Administrativa</h3>
         <p className="mdesc">Acesso restrito a administradores</p>
-        {err && <div className="merr">⚠️ Usuário ou senha incorretos.</div>}
+        {err && <div className="merr">⚠️ {err}</div>}
         <input
           className="minp"
-          type="text"
-          placeholder="Usuário"
-          value={user}
-          onChange={e => setUser(e.target.value)}
+          type="email"
+          placeholder="E-mail"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
           onKeyDown={handleKey}
-          autoComplete="username"
+          autoComplete="email"
+          disabled={loading}
         />
         <input
           className="minp"
@@ -51,8 +56,11 @@ export default function LoginModal({ onClose }) {
           onChange={e => setPass(e.target.value)}
           onKeyDown={handleKey}
           autoComplete="current-password"
+          disabled={loading}
         />
-        <button className="mbtn" onClick={doLogin}>Entrar no Sistema</button>
+        <button className="mbtn" onClick={doLogin} disabled={loading}>
+          {loading ? 'Entrando...' : 'Entrar no Sistema'}
+        </button>
       </div>
     </div>
   );
