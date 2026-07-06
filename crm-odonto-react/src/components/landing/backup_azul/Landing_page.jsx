@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Ticker from '../components/landing/Ticker';
 import Navbar from '../components/landing/Navbar';
-import BrandReveal from '../components/landing/BrandReveal';
 import Hero from '../components/landing/Hero';
 import Sobre from '../components/landing/Sobre';
 import Depoimentos from '../components/landing/Depoimentos';
@@ -101,7 +100,6 @@ export default function Landing() {
         <Ticker />
         <Navbar onLoginClick={() => setShowLogin(true)} />
         <Hero onAgendarClick={scrollToContato} />
-        <BrandReveal />
 
         {/* Wave connector */}
         <div style={{ marginTop: -2, lineHeight: 0, background: 'transparent' }}>

@@ -29,7 +29,12 @@ export default function Navbar({ onLoginClick }) {
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         style={{ cursor: 'pointer', lineHeight: 1 }}
       >
-        <img src="/logo-avancer.svg" alt="AvancerCRM" style={{ height: 44, width: 'auto', display: 'block' }} />
+        <h2 style={{ fontFamily: '"Cormorant Garamond", serif', color: '#fff', fontSize: 22, fontWeight: 700, margin: 0 }}>
+          SUA LOGO AQUI
+        </h2>
+        <span style={{ color: 'rgba(144,202,249,.8)', fontSize: 9, letterSpacing: 3, fontWeight: 500, display: 'block', marginTop: 2 }}>
+          SEU CONSULTÓRIO
+        </span>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>

@@ -32,7 +32,7 @@ export default function LoginModal({ onClose }) {
       <div className="mbox">
         <button className="mclose" onClick={onClose}>✕</button>
         <div className="mlogo">
-          <div className="ht" style={{fontSize:16,color:'var(--v2)'}}>SUA LOGO AQUI</div>
+          <img src="/logo-avancer.svg" alt="AvancerCRM" style={{ height: 56, width: 'auto', display: 'block', margin: '0 auto 8px' }} />
           <div className="hs">SISTEMA ADMINISTRATIVO</div>
         </div>
         <h3>Área Administrativa</h3>

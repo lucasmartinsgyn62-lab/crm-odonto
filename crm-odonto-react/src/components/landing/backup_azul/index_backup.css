@@ -22,9 +22,6 @@ body{font-family:"Inter",sans-serif;background:var(--b1);color:var(--preto);over
 @keyframes revealUp{from{opacity:0;transform:translateY(48px)}to{opacity:1;transform:translateY(0)}}
 @keyframes revealLeft{from{opacity:0;transform:translateX(-48px)}to{opacity:1;transform:translateX(0)}}
 @keyframes revealRight{from{opacity:0;transform:translateX(48px)}to{opacity:1;transform:translateX(0)}}
-@keyframes brandEnter{from{opacity:0;transform:scale(.78) translateY(24px)}to{opacity:1;transform:scale(1) translateY(0)}}
-@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes glowPulse{0%,100%{transform:scale(1);opacity:.55}50%{transform:scale(1.18);opacity:.9}}
 
 .a1{animation:fadeInUp .6s ease both}
 .a2{animation:fadeInUp .6s .15s ease both}
@@ -49,18 +46,6 @@ nav.main-nav{background:var(--v2);height:68px;display:flex;align-items:center;ju
 nav.main-nav.scrolled{background:rgba(0,40,130,.92);backdrop-filter:blur(16px);box-shadow:0 4px 24px rgba(0,20,80,.3)}
 .nav-logo h2{font-family:"Cormorant Garamond",serif;color:#fff;font-size:23px;font-weight:700;line-height:1;cursor:pointer}
 .nav-logo span{color:var(--b3);font-size:9px;letter-spacing:3px;font-weight:500;display:block}
-
-/* ─── Brand Reveal Section ─── */
-.brand-reveal{background:linear-gradient(135deg,rgba(0,33,100,.92) 0%,rgba(0,87,184,.85) 55%,rgba(25,118,210,.72) 100%),url('https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&q=85') center/cover no-repeat;background-attachment:fixed;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:96px 2rem 72px;position:relative;overflow:hidden}
-.brand-reveal__glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(25,118,210,.45) 0%,rgba(0,87,184,.12) 55%,transparent 80%);animation:glowPulse 3.6s ease-in-out infinite;pointer-events:none}
-.brand-reveal__logo{width:660px;height:auto;max-width:80vw;display:block;position:relative;z-index:1;animation:brandEnter .6s ease-out both,logoFloat 4s ease-in-out 0.6s infinite;filter:drop-shadow(0 0 28px rgba(25,118,210,.7)) drop-shadow(0 0 10px rgba(255,255,255,.25)) brightness(1.08)}
-.brand-reveal__tagline{position:relative;z-index:1;margin-top:2rem;font-size:11px;font-weight:700;letter-spacing:4px;color:rgba(255,255,255,.45);text-transform:uppercase;animation:brandEnter .6s .25s ease-out both}
-@media(max-width:600px){.brand-reveal{padding:128px 1rem 56px}.brand-reveal__glow{width:260px;height:260px}}
-
-/* ─── Hero Logo ─── */
-.hero-logo{height:66px;width:auto;display:block;margin-bottom:1.4rem;cursor:pointer;filter:drop-shadow(0 2px 12px rgba(144,202,249,.3));animation:fadeInUp .3s ease-out both;transition:transform .2s ease}
-.hero-logo:hover{transform:scale(1.05)}
-@media(max-width:768px){.hero-logo{height:48px}}
 .nav-links{display:flex;align-items:center;gap:1.8rem}
 .nav-links a{color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;font-weight:500;cursor:pointer;transition:.2s}
 .nav-links a:hover{color:#fff}

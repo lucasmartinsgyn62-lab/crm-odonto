@@ -17,6 +17,8 @@ const MENU = [
   { section: 'AUTOMAÇÃO' },
   { id: 'whatsapp',       label: 'WhatsApp & IA',       icon: 'ti-brand-whatsapp',   perm: 'whatsapp' },
   { id: 'pipeline',       label: 'Vendas Pipeline',     icon: 'ti-layout-kanban',    perm: 'pipeline' },
+  { id: 'automacao',      label: 'Automação',           icon: 'ti-robot',            perm: 'automacao',
+    href: import.meta.env.VITE_AUTOMACAO_URL || 'http://localhost:3006' },
 ];
 
 export default function Sidebar() {
@@ -65,10 +67,11 @@ export default function Sidebar() {
             <div
               key={item.id}
               className={`mi${activePanel === item.id ? ' active' : ''}`}
-              onClick={() => setActivePanel(item.id)}
+              onClick={() => item.href ? window.open(item.href, '_blank', 'noopener') : setActivePanel(item.id)}
             >
               <i className={`ti ${item.icon}`}></i>
               {item.label}
+              {item.href && <i className="ti ti-external-link" style={{ marginLeft: 'auto', fontSize: 12, opacity: .6 }}></i>}
             </div>
           );
         })}

@@ -60,12 +60,6 @@ export default function Hero({ onAgendarClick }) {
 
         {/* ESQUERDA — copy */}
         <div>
-          <img
-            src="/logo-avancer.svg"
-            alt="AvancerCRM"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="hero-logo"
-          />
           <div className="hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '.5rem', marginBottom: '1.6rem' }}>
             ✦ &nbsp;ODONTOLOGIA DE EXCELÊNCIA
           </div>

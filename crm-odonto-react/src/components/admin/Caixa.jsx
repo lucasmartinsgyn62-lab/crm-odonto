@@ -36,9 +36,13 @@ function FormaCell({ e }) {
   return <td>{e.forma || '—'}</td>;
 }
 
+const SENHA_FECHAMENTO = '1234';
+
 export default function Caixa() {
   const { state, dispatch, showToast, usuario } = useCRM();
   const [filtroData, setFiltroData] = useState('');
+  const [showSenha, setShowSenha] = useState(false);
+  const [senha, setSenha] = useState('');
 
   const entries = filtroData
     ? state.caixaDia.filter(e => {
@@ -53,15 +57,25 @@ export default function Caixa() {
 
   const { total, pix, din, deb, cred, conv } = somarFormas(entries);
 
-  function fecharCaixa() {
-    if (usuario?.perfil !== 'administrador') {
+  function abrirSenhaFechamento() {
+    if (usuario?.role !== 'admin' && usuario?.role !== 'super_admin') {
       showToast('Apenas o Administrador pode fechar o caixa.', 'warning'); return;
     }
     if (!state.caixaDia.length) { showToast('Caixa vazio, nada a fechar', 'warning'); return; }
-    if (!window.confirm(
-      `Confirmar fechamento do caixa?\n\nTotal de atendimentos: ${state.caixaDia.length}\n\nEsta ação encerrará o caixa do dia.`
-    )) return;
+    setSenha('');
+    setShowSenha(true);
+  }
 
+  function confirmarSenhaFechamento() {
+    if (senha !== SENHA_FECHAMENTO) {
+      showToast('Senha incorreta', 'error');
+      return;
+    }
+    setShowSenha(false);
+    fecharCaixa();
+  }
+
+  function fecharCaixa() {
     const dt = new Date();
     const { total: tot, pix: px, din: dn, deb: db, cred: cr, conv: cv } = somarFormas(state.caixaDia);
     const recepcs = [...new Set(state.caixaDia.map(e => e.recepcionista || '').filter(Boolean))];
@@ -124,8 +138,8 @@ export default function Caixa() {
             </div>
           </div>
           <div className="th-r">
-            {usuario?.perfil === 'administrador' && (
-              <button className="btsv btn-fechar-caixa" onClick={fecharCaixa}>
+            {(usuario?.role === 'admin' || usuario?.role === 'super_admin') && (
+              <button className="btsv btn-fechar-caixa" onClick={abrirSenhaFechamento}>
                 <i className="ti ti-lock"></i> Fechar Caixa do Dia
               </button>
             )}
@@ -171,6 +185,27 @@ export default function Caixa() {
           </tbody>
         </table>
       </div>
+
+      {showSenha && (
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}}>
+          <div style={{background:'#fff',borderRadius:'var(--r)',padding:'1.5rem',width:320,maxWidth:'90%'}}>
+            <h3 style={{margin:'0 0 .3rem'}}><i className="ti ti-lock"></i> Confirmar Fechamento</h3>
+            <p style={{fontSize:12,color:'var(--cinza)',margin:'0 0 1rem'}}>
+              Digite a senha de administrador para encerrar o caixa do dia ({state.caixaDia.length} atendimento{state.caixaDia.length===1?'':'s'}).
+            </p>
+            <input
+              type="password" className="inf" autoFocus value={senha} placeholder="Senha"
+              onChange={e=>setSenha(e.target.value)}
+              onKeyDown={e=>{ if (e.key==='Enter') confirmarSenhaFechamento(); }}
+              style={{width:'100%',marginBottom:'1rem'}}
+            />
+            <div style={{display:'flex',gap:'.5rem',justifyContent:'flex-end'}}>
+              <button className="btn-pront" onClick={()=>setShowSenha(false)}>Cancelar</button>
+              <button className="btsv btn-fechar-caixa" onClick={confirmarSenhaFechamento}>Confirmar Fechamento</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
