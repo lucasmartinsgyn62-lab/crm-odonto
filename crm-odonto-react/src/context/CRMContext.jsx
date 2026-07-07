@@ -12,11 +12,11 @@ function todayStr() {
 
 const ADMIN_PERMS = {
   dashboard:true, agenda:true, clientes:true, dentistas:true,
-  origens:true, procedimentos:true, relatorio:true, caixa:true, historico_caixa:true
+  origens:true, procedimentos:true, relatorio:true, caixa:true, historico_caixa:true, auditoria:true
 };
 const RECEPCAO_PERMS = {
   dashboard:false, agenda:true, clientes:true, dentistas:false,
-  origens:false, procedimentos:false, relatorio:false, caixa:false, historico_caixa:false
+  origens:false, procedimentos:false, relatorio:false, caixa:false, historico_caixa:false, auditoria:false
 };
 
 export function CRMProvider({ children }) {
@@ -44,8 +44,10 @@ export function CRMProvider({ children }) {
   // refs para evitar closures obsoletos no dispatch
   const agendaRef   = useRef(agenda);
   const origensRef  = useRef(origens);
+  const clientesRef = useRef(clientes);
   useEffect(() => { agendaRef.current  = agenda; }, [agenda]);
   useEffect(() => { origensRef.current = origens; }, [origens]);
+  useEffect(() => { clientesRef.current = clientes; }, [clientes]);
 
   const tenantId    = usuario?.tenant_id;
   const permissions = usuario?.permissions || ADMIN_PERMS;
@@ -199,11 +201,42 @@ export function CRMProvider({ children }) {
   }
 
   // ── Auth ──────────────────────────────────────────────────────
+  async function registrarLogin(profile, email) {
+    if (profile?.tenant_id) {
+      supabase.from('audit_log').insert({
+        tenant_id: profile.tenant_id, usuario: profile.nome || email, usuario_id: profile.id,
+        acao: 'login', entidade: 'sessão', descricao: `Entrou no sistema (${profile.role || ''})`,
+      }).then(() => {}, () => {});
+    }
+  }
+
   const login = useCallback(async (email, senha) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
-    if (error || !data.user) return null;
+    if (error || !data.user) return { error: 'E-mail ou senha incorretos.' };
+
+    // 2FA: se a conta tem fator verificado, o login só completa após o código
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (aal?.currentLevel === 'aal1' && aal?.nextLevel === 'aal2') {
+      const { data: fatores } = await supabase.auth.mfa.listFactors();
+      const totp = (fatores?.totp || []).find(f => f.status === 'verified');
+      if (totp) return { mfaRequired: true, factorId: totp.id, email };
+    }
+
     const profile = await loadProfile(data.user.id);
-    return profile;
+    registrarLogin(profile, email);
+    return { profile };
+  }, []);
+
+  // Verifica o código 2FA e finaliza o login
+  const verifyMfaLogin = useCallback(async (factorId, code, email) => {
+    const { data: ch, error: e1 } = await supabase.auth.mfa.challenge({ factorId });
+    if (e1) return { error: e1.message };
+    const { error: e2 } = await supabase.auth.mfa.verify({ factorId, challengeId: ch.id, code: String(code).trim() });
+    if (e2) return { error: 'Código inválido.' };
+    const { data: sess } = await supabase.auth.getUser();
+    const profile = await loadProfile(sess.user.id);
+    registrarLogin(profile, email);
+    return { profile };
   }, []);
 
   const logout = useCallback(async () => {
@@ -231,6 +264,17 @@ export function CRMProvider({ children }) {
     return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
   }, [selectedDate]);
 
+  // Registra um evento na trilha de auditoria (best-effort, não bloqueia a ação)
+  const logAudit = useCallback((acao, entidade, descricao) => {
+    if (!tenantId) return;
+    supabase.from('audit_log').insert({
+      tenant_id: tenantId,
+      usuario: usuario?.nome || usuario?.email || '—',
+      usuario_id: usuario?.id || null,
+      acao, entidade, descricao,
+    }).then(() => {}, () => {});
+  }, [tenantId, usuario]);
+
   // ── Dispatch shim — mantém compatibilidade com componentes existentes ──
   const dispatch = useCallback(async (action) => {
     const tid = tenantId;
@@ -242,17 +286,21 @@ export function CRMProvider({ children }) {
           .insert({ ...action.payload, tenant_id: tid })
           .select().single();
         if (!error && data) setClientes(prev => [...prev, data]);
+        logAudit('criou', 'paciente', `Cadastrou o paciente ${action.payload?.nome || ''}`);
         break;
       }
       case 'UPDATE_CLIENTE': {
         const { id, ...rest } = action.payload;
         await supabase.from('clientes').update(rest).eq('id', id);
         setClientes(prev => prev.map(c => c.id === id ? { ...c, ...action.payload } : c));
+        logAudit('editou', 'paciente', `Editou o paciente ${action.payload?.nome || clientesRef.current.find(c => c.id === id)?.nome || ''}`);
         break;
       }
       case 'DELETE_CLIENTE': {
+        const nome = clientesRef.current.find(c => c.id === action.payload)?.nome || '';
         await supabase.from('clientes').delete().eq('id', action.payload);
         setClientes(prev => prev.filter(c => c.id !== action.payload));
+        logAudit('excluiu', 'paciente', `Excluiu o paciente ${nome}`);
         break;
       }
 
@@ -263,10 +311,15 @@ export function CRMProvider({ children }) {
           { onConflict: 'tenant_id,ag_key,horario' }
         );
         setAgenda(prev => ({ ...prev, [agKey]: { ...(prev[agKey]||{}), [horario]: slot } }));
+        if (slot?.nome) {
+          const [dent, data] = agKey.includes('||') ? agKey.split('||') : ['', agKey];
+          logAudit('editou', 'agenda', `${slot.nome} — ${horario.replace('-ENCAIXE',' (encaixe)')} de ${data}${dent ? ' com ' + dent : ''}${slot.status ? ' [' + slot.status + ']' : ''}`);
+        }
         break;
       }
       case 'CLEAR_AGENDA_SLOT': {
         const { agKey, horario } = action.payload;
+        const nomeAnt = agendaRef.current[agKey]?.[horario]?.nome || '';
         await supabase.from('agenda_slots').delete()
           .eq('tenant_id', tid).eq('ag_key', agKey).eq('horario', horario);
         setAgenda(prev => {
@@ -274,6 +327,7 @@ export function CRMProvider({ children }) {
           delete day[horario];
           return { ...prev, [agKey]: day };
         });
+        logAudit('excluiu', 'agenda', `Removeu o horário ${horario.replace('-ENCAIXE',' (encaixe)')}${nomeAnt ? ' de ' + nomeAnt : ''}`);
         break;
       }
 
@@ -282,17 +336,20 @@ export function CRMProvider({ children }) {
           .insert({ ...action.payload, tenant_id: tid })
           .select().single();
         if (!error && data) setDentistas(prev => [...prev, data]);
+        logAudit('criou', 'dentista', `Cadastrou o dentista ${action.payload?.nome || ''}`);
         break;
       }
       case 'UPDATE_DENTISTA': {
         const { id, ...rest } = action.payload;
         await supabase.from('dentistas').update(rest).eq('id', id);
         setDentistas(prev => prev.map(d => d.id === id ? { ...d, ...action.payload } : d));
+        logAudit('editou', 'dentista', `Editou o dentista ${action.payload?.nome || ''}`);
         break;
       }
       case 'DELETE_DENTISTA': {
         await supabase.from('dentistas').delete().eq('id', action.payload);
         setDentistas(prev => prev.filter(d => d.id !== action.payload));
+        logAudit('excluiu', 'dentista', `Excluiu um dentista`);
         break;
       }
 
@@ -317,6 +374,7 @@ export function CRMProvider({ children }) {
           { onConflict: 'tenant_id,chave' }
         );
         setCaixaSenha(senha);
+        logAudit('editou', 'configuração', 'Alterou a senha de fechamento de caixa');
         break;
       }
 
@@ -327,17 +385,20 @@ export function CRMProvider({ children }) {
         if (!error && data) {
           setProcedimentos(prev => [...prev, data].sort((a, b) => a.nome.localeCompare(b.nome)));
         }
+        logAudit('criou', 'procedimento', `Cadastrou "${action.payload?.nome}" (R$ ${action.payload?.valor})`);
         return { data, error };
       }
       case 'UPDATE_PROCEDIMENTO': {
         const { id, ...rest } = action.payload;
         await supabase.from('procedimentos').update(rest).eq('id', id);
         setProcedimentos(prev => prev.map(p => p.id === id ? { ...p, ...rest } : p));
+        logAudit('editou', 'procedimento', `Editou "${rest.nome}" (R$ ${rest.valor})`);
         break;
       }
       case 'DELETE_PROCEDIMENTO': {
         await supabase.from('procedimentos').delete().eq('id', action.payload);
         setProcedimentos(prev => prev.filter(p => p.id !== action.payload));
+        logAudit('excluiu', 'procedimento', 'Excluiu um procedimento');
         break;
       }
       case 'IMPORT_PROCEDIMENTOS': {
@@ -353,6 +414,7 @@ export function CRMProvider({ children }) {
             return [...byNome.values()].sort((a, b) => a.nome.localeCompare(b.nome));
           });
         }
+        logAudit('criou', 'procedimento', `Importou ${action.payload?.length || 0} procedimentos${action.payload?.[0]?.convenio ? ' do convênio ' + action.payload[0].convenio : ''}`);
         return { data, error };
       }
 
@@ -376,6 +438,7 @@ export function CRMProvider({ children }) {
         await supabase.from('caixa_dia').delete().eq('tenant_id', tid);
         setHistoricoFechamentos(prev => [fechamento, ...prev]);
         setCaixaDia([]);
+        logAudit('fechou_caixa', 'caixa', `Fechou o caixa: ${fechamento?.atendimentos || 0} atendimentos, total R$ ${(fechamento?.total || 0).toFixed(2)}`);
         break;
       }
 
@@ -412,7 +475,7 @@ export function CRMProvider({ children }) {
 
       default: break;
     }
-  }, [tenantId, usuario]);
+  }, [tenantId, usuario, logAudit]);
 
   // ── Funções Super Admin ───────────────────────────────────────
   const superAdmin = {
@@ -498,6 +561,7 @@ export function CRMProvider({ children }) {
       todayStr, pad,
       superAdmin,
       procNames, procPrecos, procCores,
+      caixaSenha, loadAgendaMes, logAudit, verifyMfaLogin,
       caixaSenha, loadAgendaMes,
     }}>
       {children}

@@ -12,6 +12,7 @@ const MENU = [
   { id: 'procedimentos',  label: 'Procedimentos',       icon: 'ti-dental',           perm: 'procedimentos' },
   { section: 'ANÁLISE' },
   { id: 'relatorio',      label: 'Relatórios',          icon: 'ti-chart-bar',        perm: 'relatorio' },
+  { id: 'auditoria',      label: 'Auditoria',           icon: 'ti-history-toggle',   perm: 'auditoria' },
   { section: 'CAIXA' },
   { id: 'caixa',          label: 'Fechamento de Caixa', icon: 'ti-cash-register',    perm: 'caixa' },
   { id: 'historico-caixa',label: 'Histórico de Caixa', icon: 'ti-history',          perm: 'historico_caixa' },
@@ -84,12 +85,13 @@ export default function Sidebar() {
         })}
       </div>
       <div className="sb-foot">
-        <div className="sb-user">
+        <div className="sb-user" onClick={() => setActivePanel('seguranca')} style={{ cursor: 'pointer' }} title="Segurança da conta (2FA)">
           <div className="sb-av">{initials}</div>
           <div>
             <div className="sb-un">{usuario?.nome || 'Usuário'}</div>
             <div className="sb-ur">{isAdmin ? 'Acesso total' : isRec ? 'Recepção' : usuario?.role}</div>
           </div>
+          <i className="ti ti-shield-lock" style={{ marginLeft: 'auto', fontSize: 15, opacity: .7 }}></i>
         </div>
         <button className="btn-out" onClick={handleLogout}>
           <i className="ti ti-logout" style={{fontSize:13,verticalAlign:-2}}></i> Sair

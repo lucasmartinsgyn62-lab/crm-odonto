@@ -9,6 +9,8 @@ import Procedimentos from '../components/admin/Procedimentos';
 import Relatorio from '../components/admin/Relatorio';
 import Caixa from '../components/admin/Caixa';
 import HistoricoCaixa from '../components/admin/HistoricoCaixa';
+import Auditoria from '../components/admin/Auditoria';
+import Seguranca from '../components/admin/Seguranca';
 import Whatsapp from '../components/admin/Whatsapp';
 import VendasPipeline from '../components/admin/VendasPipeline';
 import Calendar from '../components/shared/Calendar';
@@ -25,6 +27,8 @@ const PANELS = {
   relatorio: Relatorio,
   caixa: Caixa,
   'historico-caixa': HistoricoCaixa,
+  auditoria: Auditoria,
+  seguranca: Seguranca,
   whatsapp:  Whatsapp,
   pipeline:  VendasPipeline,
 };
@@ -39,6 +43,8 @@ const PANEL_TITLES = {
   relatorio: 'Relatórios',
   caixa: 'Fechamento de Caixa',
   'historico-caixa': 'Histórico de Caixa',
+  auditoria: 'Trilha de Auditoria',
+  seguranca: 'Segurança da Conta',
   whatsapp: 'WhatsApp & IA',
   pipeline: 'Vendas Pipeline',
 };

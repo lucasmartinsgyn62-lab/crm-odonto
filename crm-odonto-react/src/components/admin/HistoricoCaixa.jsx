@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { useCRM } from '../../context/CRMContext';
 
 function fmtR(v) { return 'R$ ' + (v || 0).toFixed(2).replace('.', ','); }
@@ -31,9 +31,8 @@ export default function HistoricoCaixa() {
             <tr className="er"><td colSpan={10}>Nenhum fechamento registrado.</td></tr>
           )}
           {hist.map((f, idx) => (
-            <>
+            <Fragment key={idx}>
               <tr
-                key={`row-${idx}`}
                 style={{ cursor: 'pointer' }}
                 onClick={() => toggle(idx)}
                 title="Clique para ver detalhes"
@@ -98,7 +97,7 @@ export default function HistoricoCaixa() {
                   </td>
                 </tr>
               )}
-            </>
+            </Fragment>
           ))}
         </tbody>
       </table>
