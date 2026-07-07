@@ -70,23 +70,29 @@ export function CRMProvider({ children }) {
   }, []);
 
   // Carrega a agenda de UM mês (lazy) e mescla no estado — evita baixar o histórico inteiro no login.
-  // Cache de PROMESSA por tenant+mês: imune a corridas (StrictMode, efeitos duplicados, ordem de execução).
+  // loadedMonthsRef = Map de chamadas EM VOO (dedup contra corridas: StrictMode/efeitos duplicados).
+  // Ao terminar, a chave é removida — então cada navegação revalida (dados sempre frescos), mas
+  // chamadas simultâneas do mesmo mês compartilham a mesma requisição.
   const loadAgendaMes = useCallback((mm, yyyy, tid) => {
     const t = tid || tenantId;
     if (!t) return Promise.resolve();
     const chave = `${t}|${mm}/${yyyy}`;
     if (loadedMonthsRef.current.has(chave)) return loadedMonthsRef.current.get(chave);
     const p = (async () => {
-      const { data, error } = await supabase.from('agenda_slots')
-        .select('*').eq('tenant_id', t).like('ag_key', `%/${mm}/${yyyy}`);
-      if (error) { loadedMonthsRef.current.delete(chave); return; }
-      setAgenda(prev => {
-        const map = { ...prev };
-        (data || []).forEach(row => {
-          map[row.ag_key] = { ...(map[row.ag_key] || {}), [row.horario]: row.slot_data };
+      try {
+        const { data, error } = await supabase.from('agenda_slots')
+          .select('*').eq('tenant_id', t).like('ag_key', `%/${mm}/${yyyy}`);
+        if (error) return;
+        setAgenda(prev => {
+          const map = { ...prev };
+          (data || []).forEach(row => {
+            map[row.ag_key] = { ...(map[row.ag_key] || {}), [row.horario]: row.slot_data };
+          });
+          return map;
         });
-        return map;
-      });
+      } finally {
+        loadedMonthsRef.current.delete(chave);
+      }
     })();
     loadedMonthsRef.current.set(chave, p);
     return p;

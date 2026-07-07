@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { STATUS_LIST, isAtendido } from '../../constants';
+import { STATUS_LIST, isAtendido, num } from '../../constants';
 
 function fmtR(v) { return 'R$ ' + (v||0).toFixed(2).replace('.', ','); }
 function ticket(receita, count) { return count > 0 ? fmtR(receita / count) : '—'; }
@@ -64,7 +64,7 @@ export default function Relatorio() {
     return coletar(state.agenda, String(m).padStart(2, '0'), String(a));
   }, [state.agenda, mes, ano]);
 
-  const valorReal = e => parseFloat(e.valor || 0);
+  const valorReal = e => num(e.valor);
 
   // Totais
   const totalGeral = entries.length;

@@ -8,5 +8,5 @@ export const supabase = createClient(url, key);
 // Cliente secundário sem persistência de sessão — usado para criar usuários
 // sem substituir a sessão do super-admin logado
 export const supabaseSignup = createClient(url, key, {
-  auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false }
+  auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false, storageKey: 'crm-signup' }
 });

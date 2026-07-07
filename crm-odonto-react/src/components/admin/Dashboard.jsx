@@ -1,5 +1,5 @@
 import { useCRM } from '../../context/CRMContext';
-import { STATUS_BADGE, isAtendido } from '../../constants';
+import { STATUS_BADGE, isAtendido, num } from '../../constants';
 
 function fmtR(v) { return 'R$ ' + (v||0).toFixed(2).replace('.', ','); }
 
@@ -26,7 +26,7 @@ export default function Dashboard() {
   const receita = slots
     .filter(([, s]) => isAtendido(s.status))
     .reduce((sum, [, s]) => {
-      if (s.valor) return sum + parseFloat(s.valor);
+      if (s.valor) return sum + num(s.valor);
       const procs = s.procedimentosRealizados || [];
       return sum + procs.reduce((a, p) => a + (p.preco || 0), 0);
     }, 0);
@@ -95,7 +95,7 @@ export default function Dashboard() {
             {slots.sort((a,b) => a[0].localeCompare(b[0])).map(([h, s, dent]) => {
               const badge = STATUS_BADGE[s.status] || 'b-ag';
               const procs = (s.areas || []).join(', ') || '—';
-              const val = s.valor ? fmtR(parseFloat(s.valor)) : '—';
+              const val = s.valor ? fmtR(num(s.valor)) : '—';
               return (
                 <tr key={`${dent}|${h}`}>
                   <td>{h.replace('-ENCAIXE',' (encaixe)')}</td>

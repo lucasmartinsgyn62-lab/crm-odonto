@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { HORARIOS, STATUS_LIST, STATUS_BADGE, TIPO_LIST, DURACOES, isAtendido } from '../../constants';
+import { HORARIOS, STATUS_LIST, STATUS_BADGE, TIPO_LIST, DURACOES, isAtendido, num } from '../../constants';
 
 const STATUS_ROW_CLASS = {
   'AGENDADO':              'row-agendado',
@@ -203,7 +203,10 @@ function ValorInput({ value, onCommit }) {
 
   function commit() {
     setFocused(false);
-    const v = buf.replace(',', '.').trim();
+    // sanitiza: só número válido e não-negativo; senão volta ao valor anterior
+    const n = parseFloat(buf.replace(',', '.').replace(/[^\d.-]/g, ''));
+    const v = (isNaN(n) || n < 0) ? '' : String(Math.round(n * 100) / 100);
+    setBuf(v);
     if (v !== String(value ?? '')) onCommit(v);
   }
 
@@ -215,7 +218,7 @@ function ValorInput({ value, onCommit }) {
       style={{ width: 72, fontWeight: 700, color: 'var(--v2)' }}
       value={buf}
       onFocus={() => setFocused(true)}
-      onChange={e => setBuf(e.target.value)}
+      onChange={e => setBuf(e.target.value.replace(/[^\d.,]/g, ''))}
       onBlur={commit}
       onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur(); }}
       title="Calculado pelos procedimentos — edite se precisar"
@@ -319,7 +322,7 @@ export default function Agenda() {
     const wppUrl = getWppUrl(slotKey);
     const duracao = s.duracao || 30;
     const totalVal = s.valor
-      ? parseFloat(s.valor).toFixed(2)
+      ? num(s.valor).toFixed(2)
       : (s.areas || []).reduce((sum, a) => sum + (procPrecos[a] || 0), 0).toFixed(2);
 
     const [hh, mm] = h.split(':').map(Number);

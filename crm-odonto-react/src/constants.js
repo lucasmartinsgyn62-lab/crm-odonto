@@ -1,3 +1,4 @@
+export function num(v){ const n = parseFloat(String(v==null?0:v).replace(',','.')); return isNaN(n)?0:n; }
 export const STATUS_LIST = [
   'AGENDADO','AGENDADO AVALIAÇÃO','CONFIRMADO','CONFIRMADO AVALIAÇÃO',
   'AGUARDANDO','RECEPÇÃO','EM ATENDIMENTO','ATENDIDO',
