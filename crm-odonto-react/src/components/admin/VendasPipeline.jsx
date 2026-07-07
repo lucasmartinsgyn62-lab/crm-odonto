@@ -117,7 +117,7 @@ export default function VendasPipeline() {
   async function addColumn() {
     if (!newColName.trim()) return;
     const ordem = cols.length;
-    const { data, error } = await supabase.from('pipeline_colunas').insert({ tenant_id:tenantId, nome:newColName.trim(), cor:'#1976D2', ordem }).select().single();
+    const { data, error } = await supabase.from('pipeline_colunas').insert({ tenant_id:tenantId, nome:newColName.trim(), cor:'#7C3AED', ordem }).select().single();
     if (error) { showToast('Erro: '+error.message,'error'); return; }
     setCols(p=>[...p,data]);
     setNewColName(''); setAddCol(false);

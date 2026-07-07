@@ -50,7 +50,15 @@ export default function Sidebar() {
   return (
     <div className="sidebar">
       <div className="sb-logo">
-        <img src="/logo-avancer.svg" alt="AvancerCRM" style={{ height: 52, width: 'auto', display: 'block', margin: '0 auto' }} />
+        <img
+          src="/logo-avancer-branca.png"
+          alt="AvancerCRM"
+          style={{
+            height: 96, width: 'auto', display: 'block', margin: '0 auto',
+            animation: 'logoFloat 4s ease-in-out infinite',
+            filter: 'drop-shadow(0 0 14px rgba(255,255,255,.35)) drop-shadow(0 0 6px rgba(196,181,253,.5))',
+          }}
+        />
       </div>
       <div className="sb-menu">
         {isRec && (

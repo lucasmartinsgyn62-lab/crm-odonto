@@ -27,7 +27,7 @@ function ClienteCombo({ value, options, onSelect }) {
 
   useEffect(() => {
     function onDocClick(e) {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) { setOpen(false); setQuery(''); }
     }
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
@@ -46,18 +46,18 @@ function ClienteCombo({ value, options, onSelect }) {
 
   return (
     <div ref={wrapRef} style={{ position: 'relative', maxWidth: 160 }}>
-      <button
+      {!open && (<button
         type="button"
         className="ssel"
         style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', background: '#fff' }}
-        onClick={() => setOpen(o => !o)}
+        onClick={() => { setQuery(''); setOpen(o => !o); }}
         title="Clique para pesquisar paciente"
       >
         <i className="ti ti-search" style={{ fontSize: 12, color: 'var(--v2)', flexShrink: 0 }}></i>
         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: value ? 'inherit' : '#999' }}>
           {value || '— vazio —'}
         </span>
-      </button>
+      </button>)}
       {open && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, zIndex: 60, marginTop: 2,
@@ -76,7 +76,7 @@ function ClienteCombo({ value, options, onSelect }) {
               placeholder="Pesquisar paciente..."
               value={query}
               onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && filtered.length === 1) choose(filtered[0]); if (e.key === 'Escape') setOpen(false); }}
+              onKeyDown={e => { if (e.key === 'Enter' && filtered.length === 1) choose(filtered[0]); if (e.key === 'Escape') { setOpen(false); setQuery(''); } }}
             />
           </div>
           <div style={{ padding: '4px 0' }}>
@@ -114,7 +114,7 @@ function ProcCombo({ options, cores, precos, onSelect }) {
 
   useEffect(() => {
     function onDocClick(e) {
-      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) { setOpen(false); setQuery(''); }
     }
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
@@ -133,16 +133,16 @@ function ProcCombo({ options, cores, precos, onSelect }) {
 
   return (
     <div ref={wrapRef} style={{ position: 'relative', maxWidth: 150, marginTop: 2 }}>
-      <button
+      {!open && (<button
         type="button"
         className="ssel"
         style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', background: '#fff' }}
-        onClick={() => setOpen(o => !o)}
+        onClick={() => { setQuery(''); setOpen(o => !o); }}
         title="Clique para pesquisar procedimento"
       >
         <i className="ti ti-search" style={{ fontSize: 12, color: 'var(--v2)', flexShrink: 0 }}></i>
         <span style={{ color: '#999' }}>+ procedimento</span>
-      </button>
+      </button>)}
       {open && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, zIndex: 60, marginTop: 2,
@@ -161,7 +161,7 @@ function ProcCombo({ options, cores, precos, onSelect }) {
               placeholder="Pesquisar procedimento..."
               value={query}
               onChange={e => setQuery(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter' && filtered.length === 1) choose(filtered[0]); if (e.key === 'Escape') setOpen(false); }}
+              onKeyDown={e => { if (e.key === 'Enter' && filtered.length === 1) choose(filtered[0]); if (e.key === 'Escape') { setOpen(false); setQuery(''); } }}
             />
           </div>
           <div style={{ padding: '4px 0' }}>
@@ -226,6 +226,13 @@ function ValorInput({ value, onCommit }) {
 export default function Agenda() {
   const { state, dispatch, selectedDentista, setSelectedDentista, getAgKey, getDateStr, setProntuarioModal, setCaixaModal, showToast, procNames, procPrecos, procCores } = useCRM();
   const [filtroStatus, setFiltroStatus] = useState('');
+
+  // A agenda é sempre de um dentista real — sem "— Selecione —" (agenda fantasma).
+  useEffect(() => {
+    if (!selectedDentista && state.dentistas.length > 0) {
+      setSelectedDentista(state.dentistas[0].nome);
+    }
+  }, [selectedDentista, state.dentistas, setSelectedDentista]);
 
   const agKey = getAgKey();
   const ag = state.agenda[agKey] || {};
@@ -528,7 +535,6 @@ export default function Agenda() {
               <i className="ti ti-stethoscope" style={{ color: 'var(--v2)', fontSize: 14 }}></i>
               <label>Dentista:</label>
               <select className="dent-sel" value={selectedDentista} onChange={e => setSelectedDentista(e.target.value)}>
-                <option value="">— Selecione —</option>
                 {state.dentistas.map(d => <option key={d.id} value={d.nome}>{d.nome}</option>)}
               </select>
             </div>

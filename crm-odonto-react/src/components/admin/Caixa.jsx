@@ -36,10 +36,10 @@ function FormaCell({ e }) {
   return <td>{e.forma || '—'}</td>;
 }
 
-const SENHA_FECHAMENTO = '123';
+
 
 export default function Caixa() {
-  const { state, dispatch, showToast, usuario } = useCRM();
+  const { state, dispatch, showToast, usuario, caixaSenha } = useCRM();
   const [filtroData, setFiltroData] = useState('');
   const [showSenha, setShowSenha] = useState(false);
   const [senha, setSenha] = useState('');
@@ -67,7 +67,7 @@ export default function Caixa() {
   }
 
   function confirmarSenhaFechamento() {
-    if (senha !== SENHA_FECHAMENTO) {
+    if (senha !== caixaSenha) {
       showToast('Senha incorreta', 'error');
       return;
     }
@@ -138,11 +138,20 @@ export default function Caixa() {
             </div>
           </div>
           <div className="th-r">
-            {(usuario?.role === 'admin' || usuario?.role === 'super_admin') && (
+            {(usuario?.role === 'admin' || usuario?.role === 'super_admin') && (<>
+              <button className="btn-pront" style={{marginRight:6}} title="Alterar senha de fechamento (por clínica)" onClick={() => {
+                const atual = window.prompt('Senha ATUAL de fechamento:');
+                if (atual === null) return;
+                if (atual !== caixaSenha) { showToast('Senha atual incorreta', 'error'); return; }
+                const nova = window.prompt('NOVA senha de fechamento:');
+                if (!nova || !nova.trim()) return;
+                dispatch({ type: 'SET_CAIXA_SENHA', payload: nova.trim() });
+                showToast('✔ Senha do caixa atualizada!');
+              }}>🔑</button>
               <button className="btsv btn-fechar-caixa" onClick={abrirSenhaFechamento}>
                 <i className="ti ti-lock"></i> Fechar Caixa do Dia
               </button>
-            )}
+            </>)}
           </div>
         </div>
 

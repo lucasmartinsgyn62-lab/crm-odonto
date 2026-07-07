@@ -1531,7 +1531,7 @@ document.addEventListener("click", function(e){
 function getAg(m){if(!S.agenda[m])S.agenda[m]={};return S.agenda[m];}
 function calcVal(a){return(a||[]).reduce(function(s,x){return s+(AREAS_PRECOS[x]||0);},0);}
 function getRevPagto(r){
-  if((r.status||"")==="FINALIZADO") return Number(r.valorPago)||0;
+  if((r.status||"")==="FINALIZADO") return Number(r.pagtoValor)||0;
   return calcVal(r.areas||[]);
 }
 function fmt(v){return"R$ "+Number(v).toFixed(2).replace(".",",");}
@@ -1816,47 +1816,48 @@ function rAg(){
   var cntEl=document.getElementById("ag-cnt");
   if(cntEl)cntEl.textContent=count+" preenchido"+(count!==1?"s":"");
 }
-var _caixaPendente=null;
+var _pagtoCtx={mes:null,h:null,sel:null,prev:null};
 function updR(sel,mes,h,campo){
   if(!S.agenda[mes])S.agenda[mes]={};
   if(!S.agenda[mes][h])S.agenda[mes][h]={};
   if(campo==="status"&&sel.value==="FINALIZADO"){
-    var agObj=S.agenda[mes][h];
-    var valorBase=calcVal(agObj.areas||[]);
-    abrirModalCaixa(mes,h,valorBase);
+    _pagtoCtx={mes:mes,h:h,sel:sel,prev:S.agenda[mes][h].status||""};
+    abrirModalPagto();
     return;
   }
   S.agenda[mes][h][campo]=sel.value;
   saveS();rDash();
 }
-function abrirModalCaixa(mes,h,valorBase){
-  var agObj=(S.agenda[mes]&&S.agenda[mes][h])||{};
-  _caixaPendente={mes:mes,h:h};
-  var nEl=document.getElementById("caixa-nome");
-  var vEl=document.getElementById("caixa-valor");
-  var fEl=document.getElementById("caixa-forma");
-  if(nEl)nEl.textContent=agObj.nome||"Paciente";
-  if(vEl)vEl.value=agObj.valorPago>0?agObj.valorPago:(valorBase||"").toString();
-  if(fEl)fEl.value=agObj.formaPagamento||"";
-  document.getElementById("modal-caixa").classList.add("open");
+function abrirModalPagto(){
+  var r=S.agenda[_pagtoCtx.mes]&&S.agenda[_pagtoCtx.mes][_pagtoCtx.h]||{};
+  var sugestao=calcVal(r.areas||[]);
+  var vEl=document.getElementById("pagto-valor");
+  var fEl=document.getElementById("pagto-forma");
+  var nEl=document.getElementById("pagto-paciente");
+  if(nEl)nEl.textContent=r.nome||"";
+  if(vEl)vEl.value=r.pagtoValor!=null&&r.pagtoValor!==""?r.pagtoValor:sugestao||"";
+  if(fEl)fEl.value=r.pagtoForma||"";
+  document.getElementById("modal-pagto").classList.add("open");
+  setTimeout(function(){if(vEl)vEl.focus();},150);
 }
-function fecharModalCaixa(){
-  _caixaPendente=null;
-  var m=document.getElementById("modal-caixa");
-  if(m)m.classList.remove("open");
-  rAg();
+function fecharModalPagto(cancelar){
+  document.getElementById("modal-pagto").classList.remove("open");
+  if(cancelar&&_pagtoCtx.sel){
+    _pagtoCtx.sel.value=_pagtoCtx.prev;
+  }
 }
 function confirmarPagamento(){
-  if(!_caixaPendente)return;
-  var mes=_caixaPendente.mes,h=_caixaPendente.h;
-  var valor=parseFloat(document.getElementById("caixa-valor").value)||0;
-  var forma=document.getElementById("caixa-forma").value;
-  if(!forma){toast("⚠️ Selecione a forma de pagamento.");return;}
-  S.agenda[mes][h].status="FINALIZADO";
-  S.agenda[mes][h].valorPago=valor;
-  S.agenda[mes][h].formaPagamento=forma;
-  saveS();fecharModalCaixa();rDash();
-  toast("✔ Pagamento confirmado — "+forma+(valor>0?" — R$ "+valor.toFixed(2).replace(".",","):""));
+  var valor=parseFloat(document.getElementById("pagto-valor").value)||0;
+  var forma=document.getElementById("pagto-forma").value;
+  var ctx=_pagtoCtx;
+  if(!S.agenda[ctx.mes])S.agenda[ctx.mes]={};
+  if(!S.agenda[ctx.mes][ctx.h])S.agenda[ctx.mes][ctx.h]={};
+  S.agenda[ctx.mes][ctx.h].status="FINALIZADO";
+  S.agenda[ctx.mes][ctx.h].pagtoValor=valor;
+  S.agenda[ctx.mes][ctx.h].pagtoForma=forma;
+  saveS();rDash();
+  fecharModalPagto(false);
+  toast("✔ Atendimento finalizado"+(forma?" — "+forma:"")+(valor>0?" — R$ "+valor.toFixed(2).replace(".",","):""));
 }
 
 // CLIENTES
@@ -2861,37 +2862,39 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 <!-- MODAL PAGAMENTO (FINALIZADO) -->
-<div class="modal-ov" id="modal-caixa" style="z-index:700">
-  <div class="mbox" style="max-width:460px">
-    <button class="mclose" onclick="fecharModalCaixa()">✕</button>
-    <h3 style="color:var(--v2);margin:0 0 .3rem;font-size:1.1rem">💳 Confirmar Pagamento</h3>
-    <p style="font-size:12px;color:var(--cinza);margin-bottom:.8rem">Revise o valor e selecione a forma de pagamento</p>
-    <div id="caixa-nome" style="font-size:13px;font-weight:700;color:var(--v2);background:var(--fundo);border:1px solid var(--borda);border-radius:var(--r);padding:.45rem .8rem;margin-bottom:1.1rem"></div>
+<div class="modal-ov" id="modal-pagto" style="z-index:700">
+  <div class="mbox" style="max-width:420px">
+    <button class="mclose" onclick="fecharModalPagto(true)">✕</button>
+    <h2 style="margin:0 0 .4rem;font-size:1.15rem;color:var(--titulo)">💳 Registrar Pagamento</h2>
+    <p style="font-size:12px;color:var(--cinza);margin-bottom:.5rem">Confirme os dados para finalizar o atendimento.</p>
+    <div id="pagto-paciente" style="font-size:13px;font-weight:700;color:var(--v2);background:var(--fundo);border-radius:var(--r);padding:.45rem .8rem;margin-bottom:1rem"></div>
 
-    <label style="font-size:11px;font-weight:700;color:var(--cinza);display:block;margin-bottom:.35rem;letter-spacing:.5px">VALOR TOTAL (R$)</label>
-    <input type="number" id="caixa-valor" step="0.01" min="0" placeholder="0,00"
-      style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--borda);border-radius:var(--r);font-size:1rem;font-family:inherit;color:var(--preto);background:#fff;margin-bottom:1rem;outline:none">
+    <label style="font-size:12px;font-weight:600;color:var(--cinza);display:block;margin-bottom:.4rem">VALOR COBRADO (R$)</label>
+    <input id="pagto-valor" type="number" min="0" step="0.01" placeholder="0,00"
+      style="width:100%;padding:.65rem .8rem;border:1.5px solid var(--borda);border-radius:var(--r);font-size:1rem;font-family:inherit;color:var(--titulo);background:var(--fundo);margin-bottom:1rem">
 
-    <label style="font-size:11px;font-weight:700;color:var(--cinza);display:block;margin-bottom:.35rem;letter-spacing:.5px">FORMA DE PAGAMENTO</label>
-    <select id="caixa-forma"
-      style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--borda);border-radius:var(--r);font-size:.9rem;font-family:inherit;color:var(--preto);background:#fff;margin-bottom:1.5rem;outline:none">
+    <label style="font-size:12px;font-weight:600;color:var(--cinza);display:block;margin-bottom:.4rem">FORMA DE PAGAMENTO</label>
+    <select id="pagto-forma"
+      style="width:100%;padding:.65rem .8rem;border:1.5px solid var(--borda);border-radius:var(--r);font-size:.9rem;font-family:inherit;color:var(--titulo);background:var(--fundo);margin-bottom:1.5rem">
       <option value="">— Selecione —</option>
-      <option value="Dinheiro">Dinheiro</option>
-      <option value="PIX">PIX</option>
-      <option value="Cartão Débito">Cartão Débito</option>
-      <option value="Cartão Crédito">Cartão Crédito</option>
-      <option value="Convênio">Convênio</option>
-      <option value="Outros">Outros</option>
+      <option>Dinheiro</option>
+      <option>Cartão de Crédito</option>
+      <option>Cartão de Débito</option>
+      <option>PIX</option>
+      <option>Convênio</option>
+      <option>Outros</option>
     </select>
 
-    <button onclick="confirmarPagamento()"
-      style="width:100%;padding:.8rem;background:var(--v2);border:none;border-radius:var(--r);font-size:.95rem;font-weight:700;color:#fff;cursor:pointer;margin-bottom:.5rem">
-      ✔ Confirmar Pagamento
-    </button>
-    <button onclick="fecharModalCaixa()"
-      style="width:100%;padding:.7rem;background:var(--fundo);border:1.5px solid var(--borda);border-radius:var(--r);font-size:.9rem;color:var(--cinza);cursor:pointer">
-      Cancelar
-    </button>
+    <div style="display:flex;gap:.7rem">
+      <button onclick="fecharModalPagto(true)"
+        style="flex:1;padding:.7rem;background:var(--fundo);border:1.5px solid var(--borda);border-radius:var(--r);font-size:.9rem;color:var(--cinza);cursor:pointer">
+        Cancelar
+      </button>
+      <button onclick="confirmarPagamento()"
+        style="flex:2;padding:.7rem;background:var(--v3);border:none;border-radius:var(--r);font-size:.9rem;font-weight:700;color:#fff;cursor:pointer">
+        ✔ Confirmar Finalização
+      </button>
+    </div>
   </div>
 </div>
 

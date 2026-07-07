@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { NEG_LIST, TIPO_LIST } from '../../constants';
+import { supabase } from '../../lib/supabase';
+import { TIPO_LIST } from '../../constants';
 
 const EMPTY_PRONT = {
   alergias:'',doencas:'',medicamentos:'',gestante:'',
@@ -8,17 +9,38 @@ const EMPTY_PRONT = {
   queixa:'',perio:'',higiene:'',bruxismo:'',
   tratamento:'',proximo:'',sessoes:'',obscli:''
 };
-const EMPTY_CLI = {nome:'',wpp:'',orig:'',tipo:'NOVO',areas:[],neg:'',obs:'',prontuario:{...EMPTY_PRONT}};
+const EMPTY_CLI = {nome:'',wpp:'',orig:'',tipo:'NOVO',areas:[],obs:'',prontuario:{...EMPTY_PRONT}};
 
 export default function Clientes() {
-  const { state, dispatch, showToast, setProntuarioModal, procNames } = useCRM();
+  const { state, dispatch, showToast, setProntuarioModal, usuario } = useCRM();
   const [form, setForm] = useState({...EMPTY_CLI, prontuario:{...EMPTY_PRONT}});
   const [editId, setEditId] = useState(null);
   const [busca, setBusca] = useState('');
   const [prontAberto, setProntAberto] = useState(false);
+  const [imgPreview, setImgPreview] = useState(null);
+  const fileRef = useRef(null);
 
   function setField(f, v) { setForm(prev => ({...prev, [f]: v})); }
   function setPront(f, v) { setForm(prev => ({...prev, prontuario:{...prev.prontuario, [f]:v}})); }
+
+  async function handleAnexos(e) {
+    const files = Array.from(e.target.files);
+    e.target.value = '';
+    if (!files.length) return;
+    const novos = [...(form.prontuario.imagens || [])];
+    for (const f of files) {
+      const path = `${usuario?.tenant_id || 'geral'}/${crypto.randomUUID()}-${f.name.replace(/[^\w.\-]/g, '_')}`;
+      const { error } = await supabase.storage.from('prontuarios').upload(path, f);
+      if (error) { showToast('Falha no upload: ' + error.message, 'error'); continue; }
+      const { data: pub } = supabase.storage.from('prontuarios').getPublicUrl(path);
+      novos.push({ name: f.name, url: pub.publicUrl, path, tipo: f.type, dt: new Date().toISOString() });
+    }
+    setPront('imagens', novos);
+  }
+
+  function remAnexo(idx) {
+    setPront('imagens', (form.prontuario.imagens || []).filter((_, i) => i !== idx));
+  }
 
   function salvar() {
     if (!form.nome.trim()) { showToast('Nome é obrigatório', 'warning'); return; }
@@ -74,14 +96,6 @@ export default function Clientes() {
           <div className="fgg"><label>Tipo paciente</label>
             <select className="inf" value={form.tipo} onChange={e => setField('tipo', e.target.value)}>
               {TIPO_LIST.map(t => <option key={t}>{t}</option>)}
-            </select>
-          </div>
-        </div>
-        <div className="gg3">
-          <div className="fgg"><label>Negociação padrão</label>
-            <select className="inf" value={form.neg} onChange={e => setField('neg', e.target.value)}>
-              <option value="">—</option>
-              {NEG_LIST.map(n => <option key={n}>{n}</option>)}
             </select>
           </div>
         </div>
@@ -168,8 +182,31 @@ export default function Clientes() {
             <div className="fgg" style={{marginTop:'.3rem'}}><label>📝 Observações clínicas</label>
               <textarea className="inf" rows="3" placeholder="Anotações livres do dentista..." style={{height:70,resize:'vertical'}} value={form.prontuario.obscli} onChange={e => setPront('obscli', e.target.value)}/>
             </div>
+
+            <div style={{fontSize:10,fontWeight:700,color:'var(--cinza)',letterSpacing:1,textTransform:'uppercase',paddingBottom:'.3rem',borderBottom:'1px solid #f0f0f0',marginTop:'.3rem'}}>📎 Imagens e Anexos</div>
+            <div>
+              <input ref={fileRef} type="file" accept="image/*,.pdf" multiple style={{display:'none'}} onChange={handleAnexos}/>
+              <button type="button" className="btsv" onClick={() => fileRef.current.click()}><i className="ti ti-upload"></i> Anexar Imagem/Arquivo</button>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(90px,1fr))',gap:'.6rem',marginTop:'.8rem'}}>
+                {(form.prontuario.imagens || []).map((img, i) => (
+                  <div key={i} style={{position:'relative',borderRadius:8,overflow:'hidden',cursor:'pointer',aspectRatio:'1',background:'#f5f5f5',border:'1px solid var(--borda)'}}>
+                    {String(img.tipo||'').includes('pdf')
+                      ? <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',flexDirection:'column',fontSize:11,color:'var(--cinza)',padding:4,textAlign:'center'}}>📄<span style={{overflow:'hidden',textOverflow:'ellipsis',maxWidth:'100%'}}>{img.name}</span></div>
+                      : <img src={img.url || img.data} style={{width:'100%',height:'100%',objectFit:'cover'}} onClick={() => setImgPreview(img.url || img.data)} alt=""/>}
+                    <button type="button" onClick={() => remAnexo(i)} style={{position:'absolute',top:2,right:2,background:'rgba(0,0,0,.6)',color:'#fff',border:'none',borderRadius:'50%',width:18,height:18,fontSize:10,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
+                  </div>
+                ))}
+              </div>
+              {(form.prontuario.imagens || []).length === 0 && <p style={{fontSize:11,color:'#bbb',marginTop:6}}>Nenhum anexo. Os anexos são salvos junto com o paciente.</p>}
+            </div>
           </div>
         </div>
+        )}
+
+        {imgPreview && (
+          <div onClick={() => setImgPreview(null)} style={{position:'fixed',inset:0,background:'rgba(0,0,0,.85)',zIndex:800,display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <img src={imgPreview} style={{maxWidth:'90vw',maxHeight:'85vh',borderRadius:12}} alt=""/>
+          </div>
         )}
 
         <div style={{display:'flex',gap:'.7rem',alignItems:'center',marginTop:'.7rem'}}>
@@ -189,10 +226,10 @@ export default function Clientes() {
         <table className="tbl">
           <thead><tr>
             <th>NOME</th><th>WHATSAPP</th><th>ORIGEM</th><th>PROCEDIMENTOS</th>
-            <th>TIPO</th><th>NEGOCIAÇÃO</th><th>PRONTUÁRIO</th><th>AÇÕES</th>
+            <th>TIPO</th><th>PRONTUÁRIO</th><th>AÇÕES</th>
           </tr></thead>
           <tbody>
-            {clientes.length === 0 && <tr className="er"><td colSpan={8}>Nenhum paciente encontrado.</td></tr>}
+            {clientes.length === 0 && <tr className="er"><td colSpan={7}>Nenhum paciente encontrado.</td></tr>}
             {clientes.map(c => (
               <tr key={c.id}>
                 <td>{c.nome}</td>
@@ -206,7 +243,6 @@ export default function Clientes() {
                 <td>{c.orig || '—'}</td>
                 <td style={{fontSize:11}}>{(c.areas||[]).map(a => <span key={a} className="atag">{a}</span>)}</td>
                 <td><span className={`badge ${c.tipo==='NOVO'?'b-rec':'b-fin'}`}>{c.tipo||'—'}</span></td>
-                <td style={{fontSize:11}}>{c.neg||'—'}</td>
                 <td>
                   <button className="btn-pront" onClick={() => {
                     // Find a slot for this client to open prontuario

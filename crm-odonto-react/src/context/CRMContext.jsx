@@ -30,6 +30,8 @@ export function CRMProvider({ children }) {
   const [caixaDia,              setCaixaDia]             = useState([]);
   const [historicoFechamentos,  setHistoricoFechamentos] = useState([]);
   const [procedimentos,         setProcedimentos]        = useState([]);
+  const [caixaSenha,            setCaixaSenha]           = useState('123');
+  const loadedMonthsRef = useRef(new Map());
   const [dataLoading,           setDataLoading]          = useState(false);
 
   const [toast,             setToast]           = useState(null);
@@ -42,7 +44,7 @@ export function CRMProvider({ children }) {
   // refs para evitar closures obsoletos no dispatch
   const agendaRef   = useRef(agenda);
   const origensRef  = useRef(origens);
-  useEffect(() => { agendaRef.current  = agenda;  }, [agenda]);
+  useEffect(() => { agendaRef.current  = agenda; }, [agenda]);
   useEffect(() => { origensRef.current = origens; }, [origens]);
 
   const tenantId    = usuario?.tenant_id;
@@ -67,9 +69,65 @@ export function CRMProvider({ children }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Carrega a agenda de UM mês (lazy) e mescla no estado — evita baixar o histórico inteiro no login.
+  // Cache de PROMESSA por tenant+mês: imune a corridas (StrictMode, efeitos duplicados, ordem de execução).
+  const loadAgendaMes = useCallback((mm, yyyy, tid) => {
+    const t = tid || tenantId;
+    if (!t) return Promise.resolve();
+    const chave = `${t}|${mm}/${yyyy}`;
+    if (loadedMonthsRef.current.has(chave)) return loadedMonthsRef.current.get(chave);
+    const p = (async () => {
+      const { data, error } = await supabase.from('agenda_slots')
+        .select('*').eq('tenant_id', t).like('ag_key', `%/${mm}/${yyyy}`);
+      if (error) { loadedMonthsRef.current.delete(chave); return; }
+      setAgenda(prev => {
+        const map = { ...prev };
+        (data || []).forEach(row => {
+          map[row.ag_key] = { ...(map[row.ag_key] || {}), [row.horario]: row.slot_data };
+        });
+        return map;
+      });
+    })();
+    loadedMonthsRef.current.set(chave, p);
+    return p;
+  }, [tenantId]);
+
   // ── Carregar dados quando tenant muda ────────────────────────
   useEffect(() => {
     if (tenantId) loadAllData(tenantId);
+  }, [tenantId]);
+
+  // ── Lazy-load do mês visível na agenda ────────────────────────
+  useEffect(() => {
+    if (!tenantId || !selectedDate) return;
+    loadAgendaMes(pad(selectedDate.getMonth() + 1), String(selectedDate.getFullYear()));
+  }, [tenantId, selectedDate, loadAgendaMes]);
+
+  // ── Realtime: mudanças de outras recepções aparecem sem recarregar ──
+  useEffect(() => {
+    if (!tenantId) return;
+    const ch = supabase.channel(`rt-${tenantId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'agenda_slots', filter: `tenant_id=eq.${tenantId}` }, payload => {
+        if (payload.eventType === 'DELETE') {
+          const row = payload.old;
+          if (!row?.ag_key) return;
+          setAgenda(prev => {
+            const dia = { ...(prev[row.ag_key] || {}) };
+            delete dia[row.horario];
+            return { ...prev, [row.ag_key]: dia };
+          });
+        } else {
+          const row = payload.new;
+          setAgenda(prev => ({ ...prev, [row.ag_key]: { ...(prev[row.ag_key] || {}), [row.horario]: row.slot_data } }));
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'clientes', filter: `tenant_id=eq.${tenantId}` }, payload => {
+        if (payload.eventType === 'INSERT') setClientes(prev => prev.some(c => c.id === payload.new.id) ? prev : [...prev, payload.new]);
+        if (payload.eventType === 'UPDATE') setClientes(prev => prev.map(c => c.id === payload.new.id ? payload.new : c));
+        if (payload.eventType === 'DELETE') setClientes(prev => prev.filter(c => c.id !== payload.old?.id));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
   }, [tenantId]);
 
   async function loadProfile(userId) {
@@ -79,6 +137,7 @@ export function CRMProvider({ children }) {
   }
 
   function clearData() {
+    loadedMonthsRef.current = new Map();
     setClientes([]); setAgenda({}); setOrigens([]);
     setDentistas([]); setCaixaDia([]); setHistoricoFechamentos([]);
     setProcedimentos([]);
@@ -108,28 +167,28 @@ export function CRMProvider({ children }) {
 
   async function loadAllData(tid) {
     setDataLoading(true);
-    const [c, d, o, ag, cx, hx] = await Promise.all([
+    const hoje = new Date();
+    const prox = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+    const [c, d, o, cx, hx, cfg] = await Promise.all([
       supabase.from('clientes').select('*').eq('tenant_id', tid).order('created_at'),
       supabase.from('dentistas').select('*').eq('tenant_id', tid).order('created_at'),
       supabase.from('origens').select('*').eq('tenant_id', tid),
-      supabase.from('agenda_slots').select('*').eq('tenant_id', tid),
       supabase.from('caixa_dia').select('*').eq('tenant_id', tid),
       supabase.from('historico_fechamentos').select('*').eq('tenant_id', tid).order('created_at', { ascending: false }),
+      supabase.from('configuracoes').select('valor').eq('tenant_id', tid).eq('chave', 'caixa_config').maybeSingle(),
     ]);
     if (c.data)  setClientes(c.data);
     if (d.data)  setDentistas(d.data);
     if (o.data)  setOrigens(o.data.map(x => x.nome));
-    if (ag.data) {
-      const map = {};
-      ag.data.forEach(row => {
-        if (!map[row.ag_key]) map[row.ag_key] = {};
-        map[row.ag_key][row.horario] = row.slot_data;
-      });
-      setAgenda(map);
-    }
     if (cx.data) setCaixaDia(cx.data.map(r => r.data));
     if (hx.data) setHistoricoFechamentos(hx.data.map(r => r.fechamento));
-    await loadProcedimentos(tid);
+    if (cfg.data?.valor?.senhaFechamento) setCaixaSenha(String(cfg.data.valor.senhaFechamento));
+    setAgenda({});
+    await Promise.all([
+      loadAgendaMes(pad(hoje.getMonth() + 1), String(hoje.getFullYear()), tid),
+      loadAgendaMes(pad(prox.getMonth() + 1), String(prox.getFullYear()), tid),
+      loadProcedimentos(tid),
+    ]);
     setDataLoading(false);
   }
 
@@ -169,6 +228,7 @@ export function CRMProvider({ children }) {
   // ── Dispatch shim — mantém compatibilidade com componentes existentes ──
   const dispatch = useCallback(async (action) => {
     const tid = tenantId;
+    const editor = usuario?.nome || usuario?.email || null;
     switch (action.type) {
 
       case 'ADD_CLIENTE': {
@@ -193,7 +253,7 @@ export function CRMProvider({ children }) {
       case 'SET_AGENDA_SLOT': {
         const { agKey, horario, slot } = action.payload;
         await supabase.from('agenda_slots').upsert(
-          { tenant_id: tid, ag_key: agKey, horario, slot_data: slot },
+          { tenant_id: tid, ag_key: agKey, horario, slot_data: slot, updated_by: editor },
           { onConflict: 'tenant_id,ag_key,horario' }
         );
         setAgenda(prev => ({ ...prev, [agKey]: { ...(prev[agKey]||{}), [horario]: slot } }));
@@ -240,6 +300,17 @@ export function CRMProvider({ children }) {
         await supabase.from('origens').delete()
           .eq('tenant_id', tid).eq('nome', action.payload);
         setOrigens(prev => prev.filter(o => o !== action.payload));
+        break;
+      }
+
+      case 'SET_CAIXA_SENHA': {
+        const senha = String(action.payload || '').trim();
+        if (!senha) break;
+        await supabase.from('configuracoes').upsert(
+          { tenant_id: tid, chave: 'caixa_config', valor: { senhaFechamento: senha } },
+          { onConflict: 'tenant_id,chave' }
+        );
+        setCaixaSenha(senha);
         break;
       }
 
@@ -306,7 +377,7 @@ export function CRMProvider({ children }) {
         const { agKey, horario, atualizacoes } = action.payload;
         const slot = { ...(agendaRef.current[agKey]?.[horario]||{}), atualizacoes };
         await supabase.from('agenda_slots').upsert(
-          { tenant_id: tid, ag_key: agKey, horario, slot_data: slot },
+          { tenant_id: tid, ag_key: agKey, horario, slot_data: slot, updated_by: editor },
           { onConflict: 'tenant_id,ag_key,horario' }
         );
         setAgenda(prev => ({ ...prev, [agKey]: { ...(prev[agKey]||{}), [horario]: slot } }));
@@ -316,7 +387,7 @@ export function CRMProvider({ children }) {
         const { agKey, horario, procedimentosRealizados } = action.payload;
         const slot = { ...(agendaRef.current[agKey]?.[horario]||{}), procedimentosRealizados };
         await supabase.from('agenda_slots').upsert(
-          { tenant_id: tid, ag_key: agKey, horario, slot_data: slot },
+          { tenant_id: tid, ag_key: agKey, horario, slot_data: slot, updated_by: editor },
           { onConflict: 'tenant_id,ag_key,horario' }
         );
         setAgenda(prev => ({ ...prev, [agKey]: { ...(prev[agKey]||{}), [horario]: slot } }));
@@ -326,7 +397,7 @@ export function CRMProvider({ children }) {
         const { agKey, horario, imagens } = action.payload;
         const slot = { ...(agendaRef.current[agKey]?.[horario]||{}), imagens };
         await supabase.from('agenda_slots').upsert(
-          { tenant_id: tid, ag_key: agKey, horario, slot_data: slot },
+          { tenant_id: tid, ag_key: agKey, horario, slot_data: slot, updated_by: editor },
           { onConflict: 'tenant_id,ag_key,horario' }
         );
         setAgenda(prev => ({ ...prev, [agKey]: { ...(prev[agKey]||{}), [horario]: slot } }));
@@ -335,7 +406,7 @@ export function CRMProvider({ children }) {
 
       default: break;
     }
-  }, [tenantId]);
+  }, [tenantId, usuario]);
 
   // ── Funções Super Admin ───────────────────────────────────────
   const superAdmin = {
@@ -421,6 +492,7 @@ export function CRMProvider({ children }) {
       todayStr, pad,
       superAdmin,
       procNames, procPrecos, procCores,
+      caixaSenha, loadAgendaMes,
     }}>
       {children}
     </CRMContext.Provider>

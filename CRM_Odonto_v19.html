@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="description" content="CRM Odontológico — sistema completo para gestão de pacientes, agendamentos e prontuários do seu consultório odontológico."/>
-<title>CRM Odontológico — Seu Consultório</title>
+<title>CRM Odontológico v19 — Seu Consultório</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
@@ -263,7 +263,7 @@ footer{background:#111;padding:3rem}
 .adm-top h1{font-size:17px;font-weight:700;color:var(--preto)}
 .top-r{display:flex;align-items:center;gap:1rem}
 .sel-top{border:1.5px solid var(--borda);border-radius:8px;padding:.4rem .75rem;font-size:12px;font-family:"Inter",sans-serif;background:#fff;cursor:pointer;outline:none}
-.adm-body{padding:1.8rem;flex:1}
+.adm-body{padding:1.8rem;flex:1;overflow-x:hidden}
 .panel{display:none}
 .panel.active{display:block;animation:fadeInUp .35s ease}
 /* CARDS */
@@ -298,7 +298,16 @@ table.tbl tbody tr:hover td{background:#fafaf8}
 .b-fin{background:#E8F5E9;color:#1B5E20}.b-ag{background:#E8EAF6;color:#283593}
 .b-flt{background:#FFEBEE;color:#B71C1C}.b-re{background:#F3E5F5;color:#4A148C}
 .b-agu{background:#FFFDE7;color:#F57F17}.b-rec{background:#E3F2FD;color:#0D47A1}
-.b-atm{background:#E0F2F1;color:#004D40}.b-gvd{background:#E8F5E9;color:#2E7D32}
+.b-atm{background:#E0F2F1;color:#004D40}.b-gvd{background:#E8F5E9;color:#2E7D32}.b-aval{background:#F3E5F5;color:#6A1B9A}
+/* Cores de linha da agenda por status — aplica em todos os td da linha */
+.ag-row.row-atendido td{background:#F1F8E9}
+.ag-row.row-em-atend td{background:#E0F7FA}
+.ag-row.row-recepcao td{background:#E3F2FD}
+.ag-row.row-aguardando td{background:#FFFDE7}
+.ag-row.row-falta-grave td{background:#FFEBEE}
+.ag-row.row-falta-leve td{background:#FFF3E0}
+.ag-row.row-reagendou td{background:#F3E5F5}
+.ag-row.row-avaliacao td{background:#EDE7F6}
 .ssel{border:1.5px solid var(--borda);border-radius:5px;padding:.2rem .45rem;font-size:10px;font-family:"Inter",sans-serif;background:#fff;cursor:pointer;outline:none;max-width:158px}
 .atag{background:var(--vc);color:var(--v3);border-radius:4px;padding:.12rem .4rem;font-size:9px;font-weight:600;margin:.1rem;display:inline-block;border:1px solid var(--vm)}
 /* FORM ADMIN */
@@ -324,27 +333,8 @@ table.tbl tbody tr:hover td{background:#fafaf8}
 .cbl span{font-weight:700;color:var(--preto)}
 .cbbg{height:7px;background:#f0f0f0;border-radius:4px;overflow:hidden}
 .cbf{height:100%;background:var(--v4);border-radius:4px;transition:width .6s ease}
-/* META */
-.meta-box{background:var(--v1);border-radius:var(--r);padding:1.4rem;margin-bottom:1.2rem;border:1px solid rgba(255,255,255,.05)}
-.meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem}
-.meta-item{text-align:center}
-.meta-lbl{font-size:9px;letter-spacing:1.5px;color:rgba(255,255,255,.4);font-weight:700;text-transform:uppercase;margin-bottom:.4rem}
-.meta-val{font-family:"Inter",sans-serif;font-size:24px;font-weight:700;color:#fff;line-height:1}
-.meta-val.ouro{color:var(--ouro2)}
-.meta-val.verde{color:var(--v4)}
-.meta-val.red{color:#EF9A9A}
-.meta-input{width:100%;background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.15);border-radius:7px;padding:.5rem .75rem;font-size:14px;color:#fff;font-family:"Inter",sans-serif;font-weight:700;outline:none;text-align:center}
-.meta-input:focus{border-color:var(--ouro2)}
-.meta-prog{background:rgba(255,255,255,.06);border-radius:6px;padding:.6rem 1rem;margin-top:.5rem;font-size:11px;color:rgba(255,255,255,.6);text-align:center}
-.meta-status{font-size:12px;font-weight:700;color:#fff}
-/* PICO */
-.pico-tbl{width:100%;border-collapse:collapse;font-size:12px}
-.pico-tbl th{background:var(--v2);color:#fff;padding:.6rem .9rem;text-align:left;font-size:10px;font-weight:700;letter-spacing:.5px}
-.pico-tbl td{padding:.6rem .9rem;border-bottom:1px solid #f5f5f5;vertical-align:middle}
-.pico-tbl tr:last-child td{border:none}
-.pico-bar{height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden;width:80px;display:inline-block}
-.pico-bar-f{height:100%;background:var(--v4);border-radius:3px}
-.pico-badge{display:inline-flex;align-items:center;gap:.3rem;background:#FFF3E0;color:#E65100;border-radius:5px;padding:.2rem .5rem;font-size:10px;font-weight:700}
+
+
 
 /* CALENDÁRIO */
 .cal-btn{display:inline-flex;align-items:center;gap:.5rem;background:#fff;border:1.5px solid var(--borda);border-radius:10px;padding:.4rem .9rem;font-size:12px;font-weight:600;color:var(--v2);cursor:pointer;transition:.2s;white-space:nowrap;box-shadow:var(--shadow)}
@@ -508,10 +498,6 @@ label     { font-size: 11px; font-weight: 700; letter-spacing: .3px; }
 .dent-rel-stat-v { font-size: 17px; font-weight: 700; }
 .dent-rel-stat-l { font-size: 9px;  font-weight: 700; letter-spacing: .8px; }
 
-/* Meta box */
-.meta-lbl  { font-size: 11px; font-weight: 700; letter-spacing: .3px; }
-.meta-val  { font-size: 18px; font-weight: 800; }
-.meta-status { font-size: 14px; font-weight: 800; }
 
 /* Agenda — horários */
 .ag-thead th { font-size: 10px; font-weight: 800; letter-spacing: .8px; }
@@ -567,8 +553,11 @@ nav{position:fixed;top:40px;left:0;right:0;z-index:300;transition:all .4s}
 /* RECEPÇÃO */
 body.perfil-rec .mi[onclick*="'dashboard'"],
 body.perfil-rec .mi[onclick*="'relatorio'"],
-body.perfil-rec .mi[onclick*="'origens'"]{display:none}
-body.perfil-rec .sb-sec{display:none}
+body.perfil-rec .mi[onclick*="'origens'"],
+body.perfil-rec .mi[onclick*="'dentistas'"],
+body.perfil-rec .mi[onclick*="'historico-caixa'"]{display:none}
+body.perfil-rec .sb-sec:not(.sb-sec-caixa){display:none}
+body.perfil-rec .btn-fechar-caixa{display:none!important}
 body.perfil-rec .sb-badge-rec{display:flex!important}
 .sb-badge-rec{display:none;background:rgba(255,255,255,.18);color:#fff;font-size:9px;
   font-weight:700;letter-spacing:1.5px;padding:.3rem 1rem;border-radius:20px;
@@ -697,6 +686,25 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
               💾 Registrar atualização
             </button>
             <span style="font-size:10px;color:var(--cinza-cl)">A data é inserida automaticamente</span>
+      <div class="mpront-sec">
+        <div class="mpront-sec-title"><i class="ti ti-clipboard-list"></i> PROCEDIMENTOS DO DIA</div>
+        <div class="mpront-sec-body" id="pront-procs-body" style="display:block;padding:1rem 1.1rem">
+          <div id="pront-procs-list"></div>
+          <div class="fgg" style="margin-top:.7rem">
+            <label>Adicionar Procedimento</label>
+            <select id="pront-proc-sel" class="inf"><option value="">Selecione...</option></select>
+          </div>
+          <button class="btsv" style="margin-top:.5rem" onclick="addProcPront()"><i class="ti ti-plus"></i> Adicionar</button>
+        </div>
+      </div>
+      <div class="mpront-sec">
+        <div class="mpront-sec-title"><i class="ti ti-photo"></i> IMAGENS E ANEXOS</div>
+        <div class="mpront-sec-body" style="display:block;padding:1rem 1.1rem">
+          <input type="file" id="pront-img-input" accept="image/*" multiple style="display:none" onchange="uploadImgPront(event)"/>
+          <button class="btsv" onclick="document.getElementById('pront-img-input').click()"><i class="ti ti-upload"></i> Anexar Imagem</button>
+          <div id="pront-imgs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:.7rem;margin-top:.9rem"></div>
+        </div>
+      </div>
           </div>
         </div>
       </div>
@@ -985,14 +993,17 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
       <div class="sb-menu">
         <div class="sb-badge-rec">👤 Modo Recep&ccedil;&atilde;o</div>
         <div class="sb-sec">PRINCIPAL</div>
-        <div class="mi active" onclick="sp('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard Diária</div>
-        <div class="mi" onclick="sp('agenda',this)"><i class="ti ti-calendar"></i>Agenda</div>
+        <div class="mi active" onclick="sp('agenda',this)"><i class="ti ti-calendar"></i>Agenda</div>
         <div class="sb-sec">GESTÃO</div>
         <div class="mi" onclick="sp('clientes',this)"><i class="ti ti-users"></i>Clientes</div>
         <div class="mi" onclick="sp('dentistas',this)"><i class="ti ti-stethoscope"></i>Dentistas</div>
         <div class="mi" onclick="sp('origens',this)"><i class="ti ti-map-pin"></i>Origens</div>
         <div class="sb-sec">ANÁLISE</div>
         <div class="mi" onclick="sp('relatorio',this)"><i class="ti ti-chart-bar"></i>Relatórios</div>
+        <div class="mi" onclick="sp('dashboard',this)"><i class="ti ti-layout-dashboard"></i>Dashboard Diária</div>
+        <div class="sb-sec sb-sec-caixa">CAIXA</div>
+        <div class="mi" onclick="sp('caixa',this)"><i class="ti ti-cash-register"></i>Fechamento de Caixa</div>
+        <div class="mi" onclick="sp('historico-caixa',this)"><i class="ti ti-history"></i>Histórico de Caixa</div>
       </div>
       <div class="sb-foot">
         <div class="sb-user"><div class="sb-av">AD</div><div><div class="sb-un">Administrador</div><div class="sb-ur">Acesso total</div></div></div>
@@ -1031,7 +1042,7 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
       <div class="adm-body">
 
         <!-- DASHBOARD -->
-        <div id="panel-dashboard" class="panel active">
+        <div id="panel-dashboard" class="panel">
           <div class="kr kr4" id="kpi1"></div>
           <div class="kr kr3" id="kpi2"></div>
           <div class="tc"><div class="th"><h3>Últimos atendimentos</h3></div>
@@ -1041,7 +1052,7 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
         </div>
 
         <!-- AGENDA -->
-        <div id="panel-agenda" class="panel">
+        <div id="panel-agenda" class="panel active">
           <div class="tc ag-tc">
             <div class="th">
               <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
@@ -1056,7 +1067,7 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
               </div>
               <div class="th-r">
                 <select class="sel" id="ag-filtro" onchange="rAg()">
-                  <option value="">Todos os status</option><option>AGUARDANDO</option><option>RECEPÇÃO</option><option>EM ATENDIMENTO</option><option>FINALIZADO</option><option>FALTOU SEM AVISO</option><option>FALTOU COM AVISO</option><option>REAGENDOU</option>                </select>
+                  <option value="">Todos os status</option><option>AGUARDANDO</option><option>RECEPÇÃO</option><option>EM ATENDIMENTO</option><option>ATENDIDO</option><option>AVALIAÇÃO</option><option>FALTOU SEM AVISO</option><option>FALTOU COM AVISO</option><option>REAGENDOU</option>                </select>
                 <span style="font-size:11px;color:var(--cinza-cl)" id="ag-cnt"></span>
               </div>
             </div>
@@ -1189,7 +1200,7 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
         </div>
 
         <!-- RELATÓRIO -->
-        <div id="panel-relatorio" class="panel">
+        <div id="panel-relatorio" class="panel" style="overflow-y:auto;max-height:calc(100vh - 120px)">
           <!-- CABEÇALHO GERENCIAL -->
           <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.4rem">
             <div>
@@ -1222,52 +1233,13 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
           </div>
           <!-- CARDS POR DENTISTA -->
           <div class="dent-rel-grid" id="rel-dent-cards"></div>
-          <!-- META MENSAL -->
-          <div class="meta-box" id="meta-box">
-            <div style="color:rgba(255,255,255,.5);font-size:9px;letter-spacing:2px;font-weight:700;margin-bottom:.8rem;text-transform:uppercase">▌ META MENSAL — DEFINA SUAS METAS</div>
-            <div class="meta-grid">
-              <div class="meta-item">
-                <div class="meta-lbl">Meta Faturamento</div>
-                <input class="meta-input" id="meta-fat" type="number" value="5000" oninput="rRel()"/>
-              </div>
-              <div class="meta-item">
-                <div class="meta-lbl">Meta Atendimentos</div>
-                <input class="meta-input" id="meta-at" type="number" value="80" oninput="rRel()"/>
-              </div>
-              <div class="meta-item">
-                <div class="meta-lbl">Realizado Fat.</div>
-                <div class="meta-val verde" id="m-rfat">R$ 0,00</div>
-              </div>
-              <div class="meta-item">
-                <div class="meta-lbl">Realizado Atend.</div>
-                <div class="meta-val verde" id="m-rat">0</div>
-              </div>
-              <div class="meta-item">
-                <div class="meta-lbl">% Meta Fat.</div>
-                <div class="meta-val ouro" id="m-pfat">0%</div>
-              </div>
-              <div class="meta-item">
-                <div class="meta-lbl">% Meta Atend.</div>
-                <div class="meta-val ouro" id="m-pat">0%</div>
-              </div>
-              <div class="meta-item">
-                <div class="meta-lbl">Projeção Mês</div>
-                <div class="meta-val" id="m-proj">R$ 0,00</div>
-              </div>
-              <div class="meta-item">
-                <div class="meta-lbl">Status Geral</div>
-                <div class="meta-status" id="m-status">—</div>
-              </div>
-            </div>
-            <div class="meta-prog" id="m-prog">Preencha a agenda para ver o progresso</div>
-          </div>
           <!-- KPIs -->
           <div class="kr kr4" id="rel-k1"></div>
           <div class="kr kr3" id="rel-k2"></div>
           <!-- NOVO vs RETORNO -->
           <div class="tc" style="margin-bottom:1.2rem">
             <div class="th"><h3>Novo vs Retorno</h3></div>
-            <table class="tbl"><thead><tr><th>TIPO</th><th>QTD TOTAL</th><th>FINALIZADOS</th><th>RECEITA</th><th>% DO TOTAL</th><th>TICKET MÉDIO</th></tr></thead>
+            <table class="tbl"><thead><tr><th>TIPO</th><th>QTD TOTAL</th><th>ATENDIDOS</th><th>RECEITA</th><th>% DO TOTAL</th><th>TICKET MÉDIO</th></tr></thead>
             <tbody id="rel-nvr"></tbody></table>
           </div>
           <!-- STATUS + ORIGEM -->
@@ -1283,12 +1255,7 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
               <tbody id="rel-or"></tbody>
             </div>
           </div>
-          <!-- HORÁRIO DE PICO -->
-          <div class="tc" style="margin-bottom:1.2rem">
-            <div class="th"><h3>Horário de Pico</h3></div>
-            <table class="pico-tbl"><thead><tr><th>FAIXA HORÁRIA</th><th>QTD ATEND.</th><th>RECEITA</th><th>% DO DIA</th><th>GRÁFICO</th><th>PICO?</th></tr></thead>
-            <tbody id="rel-pico"></tbody></table>
-          </div>
+
           <!-- PROCEDIMENTOS -->
           <div class="tc" style="margin-bottom:1.2rem">
             <div class="th"><h3>Procedimentos Mais Realizados</h3></div>
@@ -1301,8 +1268,33 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
             <table class="tbl"><thead><tr><th>TIPO NEGOCIAÇÃO</th><th>QTD</th><th>VALOR ENVOLVIDO</th><th>% DOS ATEND.</th><th>TICKET MÉDIO</th></tr></thead>
             <tbody id="rel-neg"></tbody>
           </div>
+        </div><!-- /panel-relatorio -->
 
+        <div id="panel-caixa" class="panel">
+          <div class="kr kr2" id="caixa-kpis"></div>
+          <div class="tc">
+            <div class="th">
+              <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+                <h3><i class="ti ti-cash-register"></i> Atendimentos ATENDIDOS</h3>
+                <div style="display:flex;align-items:center;gap:.5rem">
+                  <label style="font-size:12px;font-weight:600;color:var(--cinza)">Data:</label>
+                  <input type="date" id="caixa-data-filtro" class="sel" style="font-size:12px;padding:.3rem .6rem;border-radius:7px;border:1.5px solid var(--borda)" onchange="renderCaixa()"/>
+                </div>
+              </div>
+              <div class="th-r"><button class="btsv btn-fechar-caixa" onclick="fecharCaixaDia()"><i class="ti ti-lock"></i> Fechar Caixa do Dia</button></div>
+            </div>
+            <div class="cbw" id="caixa-formas" style="padding:1rem 1.3rem"></div>
+            <table class="tbl" id="tbl-caixa"><thead><tr><th>Paciente</th><th>Dentista</th><th>Procedimentos</th><th>Forma Pag.</th><th>Valor</th><th>Recepcionista</th></tr></thead><tbody id="tbody-caixa"></tbody></table>
+          </div>
         </div>
+
+        <div id="panel-historico-caixa" class="panel">
+          <div class="tc">
+            <div class="th"><h3><i class="ti ti-history"></i> Histórico de Fechamentos</h3></div>
+            <table class="tbl" id="tbl-historico"><thead><tr><th>Data</th><th>Hora Fech.</th><th>Atendimentos</th><th>Pix</th><th>Dinheiro</th><th>Cartão Déb.</th><th>Cartão Créd.</th><th>Convênio</th><th>Total</th><th>Fechado por</th></tr></thead><tbody id="tbody-historico"></tbody></table>
+          </div>
+        </div>
+
         </div>
     </div>
   </div>
@@ -1310,7 +1302,7 @@ body.perfil-rec .sb-badge-rec{display:flex!important}
 
 <script>
 // ══ DADOS ══
-const STATUS_LIST=['AGUARDANDO', 'RECEPÇÃO', 'EM ATENDIMENTO', 'FINALIZADO', 'FALTOU SEM AVISO', 'FALTOU COM AVISO', 'REAGENDOU'];
+const STATUS_LIST=['AGUARDANDO', 'RECEPÇÃO', 'EM ATENDIMENTO', 'ATENDIDO', 'AVALIAÇÃO', 'FALTOU SEM AVISO', 'FALTOU COM AVISO', 'REAGENDOU'];
 const AREAS_LIST=['Consulta Odontológica','Avaliação Completa','Limpeza (Profilaxia)','Aplicação de Flúor','Raspagem Periodontal','Clareamento Dental Caseiro','Clareamento Dental em Consultório','Clareamento Interno','Restauração em Resina','Restauração Estética','Faceta em Resina','Faceta em Porcelana','Lente de Contato Dental','Tratamento de Canal (Incisivo)','Tratamento de Canal (Pré-Molar)','Tratamento de Canal (Molar)','Retratamento de Canal','Extração Simples','Extração de Siso Simples','Extração de Siso Incluso','Frenectomia','Biópsia Bucal','Gengivoplastia','Enxerto Gengival','Cirurgia Periodontal','Implante Dentário Unitário','Coroa sobre Implante','Prótese Protocolo','Enxerto Ósseo','Levantamento de Seio Maxilar','Coroa Metálica','Coroa em Porcelana','Coroa em Zircônia','Ponte Fixa (por elemento)','Prótese Parcial Removível','Prótese Total (Dentadura)','Prótese Flexível','Aparelho Metálico Convencional','Manutenção Ortodôntica','Aparelho Estético','Alinhadores Transparentes','Contenção Ortodôntica','Placa de Bruxismo','Radiografia Periapical','Radiografia Panorâmica','Tomografia Odontológica','Escaneamento Intraoral','Toxina Botulínica (Botox)','Preenchimento Labial','Bioestimulador de Colágeno','Bichectomia','Lipo de Papada Enzimática','Laserterapia','Atendimento de Urgência','Selante Dentário','Pino de Fibra de Vidro','Núcleo Metálico Fundido','Remoção de Tártaro','Ajuste Oclusal','Placa Clareadora','Reembasamento de Prótese','Conserto de Prótese','Exodontia de Raiz Residual','Ulectomia','Ulotomia','Exposição de Dente Incluso','Tração Ortodôntica','Odontopediatria (Consulta Infantil)','Tratamento Restaurador Atraumático (ART)','Pulpotomia','Pulpectomia','Mantenedor de Espaço','Aplicação de Cariostático','Remineralização Dental','Cirurgia de Freio Labial','Cirurgia de Freio Lingual','Enxerto de Tecido Conjuntivo','Aumento de Coroa Clínica','Prótese Provisória','Coroa Provisória','Mockup Estético','Planejamento Digital do Sorriso','Escultura Dental em Resina','Fechamento de Diastema em Resina','Recimentação de Coroa','Recimentação de Faceta','Recimentação de Prótese','Ajuste de Prótese','Documentação Ortodôntica Completa','Fotografia Odontológica','Perícia Odontológica','Laudo Odontológico','Sedação Consciente','Sedação com Óxido Nitroso','Atendimento Domiciliar','Consulta de Avaliação para Implantes','Consulta de Harmonização Facial','Microagulhamento Facial','Peeling Químico Facial','Fios de Sustentação Facial','Rinomodelação','Preenchimento de Malar','Preenchimento de Mandíbula','Preenchimento de Mento','Preenchimento de Olheiras','Aplicação de Enzimas Faciais','Jato de Bicarbonato','Dessensibilização Dentária','Remoção de Faceta','Remoção de Aparelho Ortodôntico','Instalação de Contenção','Consulta de Retorno','Avaliação de ATM','Tratamento para DTM','Placa Miorrelaxante','Teste de Vitalidade Pulpar','Controle de Placa Bacteriana','Aplicação de Verniz Fluoretado','Cirurgia Parendodôntica','Apicectomia','Hemissecção Dentária','Odontossecção','Tratamento de Periimplantite','Manutenção de Implante','Carga Imediata em Implante','Prótese Overdenture','Prótese Tipo Protocolo Superior e Inferior','Documentação para Alinhadores','Escaneamento para Alinhadores','Instalação de Mini-Implante Ortodôntico','Remoção de Mini-Implante Ortodôntico'];
 const ORIGENS_DEF=['Instagram', 'Indicação de amigo', 'Google', 'Facebook', 'TikTok', 'Panfleto/Outdoor', 'Passou na frente', 'Outros'];
 const NEG_LIST=['SEM DESCONTO', 'DESCONTO %', 'PACOTE FECHADO', 'CORTESIA', 'PERMUTA'];
@@ -1319,29 +1311,21 @@ const AREAS_PRECOS={'Consulta Odontológica':100,'Avaliação Completa':150,'Lim
 const HORARIOS=['08:00', '08:05', '08:10', '08:15', '08:20', '08:25', '08:30', '08:35', '08:40', '08:45', '08:50', '08:55', '09:00', '09:05', '09:10', '09:15', '09:20', '09:25', '09:30', '09:35', '09:40', '09:45', '09:50', '09:55', '10:00', '10:05', '10:10', '10:15', '10:20', '10:25', '10:30', '10:35', '10:40', '10:45', '10:50', '10:55', '11:00', '11:05', '11:10', '11:15', '11:20', '11:25', '11:30', '11:35', '11:40', '11:45', '11:50', '11:55', '12:00', '12:05', '12:10', '12:15', '12:20', '12:25', '12:30', '12:35', '12:40', '12:45', '12:50', '12:55', '13:00', '13:05', '13:10', '13:15', '13:20', '13:25', '13:30', '13:35', '13:40', '13:45', '13:50', '13:55', '14:00', '14:05', '14:10', '14:15', '14:20', '14:25', '14:30', '14:35', '14:40', '14:45', '14:50', '14:55', '15:00', '15:05', '15:10', '15:15', '15:20', '15:25', '15:30', '15:35', '15:40', '15:45', '15:50', '15:55', '16:00', '16:05', '16:10', '16:15', '16:20', '16:25', '16:30', '16:35', '16:40', '16:45', '16:50', '16:55', '17:00', '17:05', '17:10', '17:15', '17:20', '17:25', '17:30', '17:35', '17:40', '17:45', '17:50', '17:55', '18:00', '18:05', '18:10', '18:15', '18:20', '18:25', '18:30', '18:35', '18:40', '18:45', '18:50', '18:55', '19:00', '19:05', '19:10', '19:15', '19:20', '19:25', '19:30', '19:35', '19:40', '19:45', '19:50', '19:55', '20:00'];
 const MESES=["JULHO","AGOSTO","SETEMBRO","OUTUBRO","NOVEMBRO","DEZEMBRO","JANEIRO","FEVEREIRO","MARÇO","ABRIL","MAIO","JUNHO"]; // legado
 
-const FAIXAS_PICO=[
-  {lbl:"08:00 – 09:59",ini:"08:00",fim:"09:59"},
-  {lbl:"10:00 – 11:59",ini:"10:00",fim:"11:59"},
-  {lbl:"12:00 – 13:59",ini:"12:00",fim:"13:59"},
-  {lbl:"14:00 – 15:59",ini:"14:00",fim:"15:59"},
-  {lbl:"16:00 – 17:59",ini:"16:00",fim:"17:59"},
-  {lbl:"18:00 – 19:59",ini:"18:00",fim:"19:59"},
-  {lbl:"20:00",ini:"20:00",fim:"20:00"}
-];
 
 const STATUS_BADGE={
   "AGUARDANDO":"b-agu","RECEPÇÃO":"b-rec","EM ATENDIMENTO":"b-atm",
-  "FINALIZADO":"b-fin","FALTOU SEM AVISO":"b-flt","FALTOU COM AVISO":"b-flt","REAGENDOU":"b-re"
+  "ATENDIDO":"b-fin","FALTOU SEM AVISO":"b-flt","FALTOU COM AVISO":"b-flt",  "REAGENDOU":"b-re","AVALIAÇÃO":"b-aval"
 };
 
-let S={clientes:[],agenda:{},origens:[...ORIGENS_DEF],leads:[],
+let S={clientes:[],agenda:{},origens:[...ORIGENS_DEF],leads:[],caixaDia:[],historicoFechamentos:[],
   dentistas:[
     {id:1,nome:"FULANO",esp:"Clínico Geral",cro:"CRO-GO 11111",tel:"(62) 9 1111-1111"},
     {id:2,nome:"BELTRANO",esp:"Ortodontia",cro:"CRO-GO 22222",tel:"(62) 9 2222-2222"}
   ]
 };
 
-function loadS(){try{var d=localStorage.getItem("harmony_v4");if(d){var p=JSON.parse(d);S.clientes=p.clientes||[];S.agenda=p.agenda||{};S.origens=p.origens||S.origens;S.leads=p.leads||[];S.dentistas=p.dentistas||S.dentistas;}}catch(e){}}
+function loadS(){try{var d=localStorage.getItem("harmony_v4");if(d){var p=JSON.parse(d);S.clientes=p.clientes||[];S.agenda=p.agenda||{};S.origens=p.origens||S.origens;S.leads=p.leads||[];S.dentistas=p.dentistas||S.dentistas;S.caixaDia=p.caixaDia||[];S.historicoFechamentos=p.historicoFechamentos||[];}}catch(e){}if(!S.caixaDia)S.caixaDia=[];if(!S.historicoFechamentos)S.historicoFechamentos=[];}
+loadS(); // carrega localStorage ANTES do código de dados iniciais
   // Dados de teste para FULANO e BELTRANO
   if(!S.dentistas||!S.dentistas.length){
     S.dentistas=[
@@ -1349,7 +1333,7 @@ function loadS(){try{var d=localStorage.getItem("harmony_v4");if(d){var p=JSON.p
       {id:2,nome:"BELTRANO",esp:"Ortodontia",cro:"CRO-GO 22222",tel:"(62) 9 2222-2222"}
     ];
   }
-  var _hoje="26/06/2026";
+  var _hj=new Date();var _hoje=_pad(_hj.getDate())+"/"+_pad(_hj.getMonth()+1)+"/"+_hj.getFullYear();
   var _kF="FULANO||"+_hoje;
   var _kB="BELTRANO||"+_hoje;
   if(!S.agenda[_kF]){
@@ -1530,10 +1514,6 @@ document.addEventListener("click", function(e){
 });
 function getAg(m){if(!S.agenda[m])S.agenda[m]={};return S.agenda[m];}
 function calcVal(a){return(a||[]).reduce(function(s,x){return s+(AREAS_PRECOS[x]||0);},0);}
-function getRevPagto(r){
-  if((r.status||"")==="FINALIZADO") return Number(r.valorPago)||0;
-  return calcVal(r.areas||[]);
-}
 function fmt(v){return"R$ "+Number(v).toFixed(2).replace(".",",");}
 function pct(v,t){return t>0?Math.round(v/t*100)+"%":"0%";}
 function sid(id){var el=document.getElementById(id);if(el)el.scrollIntoView({behavior:"smooth"});}
@@ -1545,42 +1525,37 @@ function openLogin(){document.getElementById("modal").classList.add("open");}
 function closeLogin(){document.getElementById("modal").classList.remove("open");document.getElementById("merr").style.display="none";}
 function doLogin(){
   var u=document.getElementById("iu").value.trim().toLowerCase();
-  var p=document.getElementById("ip").value;
-  if(u==="administrador"&&p==="123456@#"){
+  var p=document.getElementById("ip").value.trim();
+  if(u==="admin"&&p==="admin123"){
+    _usuarioAtual={perfil:'administrador',nome:'Administrador',login:'admin'};
     closeLogin();
     document.body.classList.remove("perfil-rec");
     document.getElementById("pg-site").classList.remove("active");
     document.getElementById("pg-admin").classList.add("active");
-    var el=document.querySelector(".sb-un"); if(el) el.textContent="Administrador";
-    var er=document.querySelector(".sb-ur"); if(er) er.textContent="Acesso total";
-    var ea=document.querySelector(".sb-av"); if(ea) ea.textContent="AD";
-    var lbl=document.getElementById("top-perfil-label"); if(lbl) lbl.textContent="Administrador";
+    var elA=document.querySelector(".sb-un"); if(elA) elA.textContent="Administrador";
+    var erA=document.querySelector(".sb-ur"); if(erA) erA.textContent="Acesso total";
+    var eaA=document.querySelector(".sb-av"); if(eaA) eaA.textContent="AD";
+    var lblA=document.getElementById("top-perfil-label"); if(lblA) lblA.textContent="Administrador";
     initAdm();
-  } else if(u==="recepcao"&&p==="2026@"){
+  } else if(u==="recepcao"&&p==="recepcao123"){
+    _usuarioAtual={perfil:'recepcao',nome:'Recepção',login:'recepcao'};
     closeLogin();
     document.body.classList.add("perfil-rec");
     document.getElementById("pg-site").classList.remove("active");
     document.getElementById("pg-admin").classList.add("active");
-    var el=document.querySelector(".sb-un"); if(el) el.textContent="Recepção";
-    var er=document.querySelector(".sb-ur"); if(er) er.textContent="Agenda e Clientes";
-    var ea=document.querySelector(".sb-av"); if(ea) ea.textContent="RC";
-    var lbl=document.getElementById("top-perfil-label"); if(lbl) lbl.textContent="Recepção";
+    var elR=document.querySelector(".sb-un"); if(elR) elR.textContent="Recepção";
+    var erR=document.querySelector(".sb-ur"); if(erR) erR.textContent="Agenda e Clientes";
+    var eaR=document.querySelector(".sb-av"); if(eaR) eaR.textContent="RC";
+    var lblR=document.getElementById("top-perfil-label"); if(lblR) lblR.textContent="Recepção";
     initAdm();
-    setTimeout(function(){
-      // Reinicializar calendário para recepção
-      var h=new Date();
-      _calDiaSel=h; _calAno=h.getFullYear(); _calMes=h.getMonth();
-      var btn=document.getElementById("cal-label-btn");
-      if(btn) btn.textContent=calFmtBtn(_calDiaSel);
-      // Abrir aba agenda
-      var mi=document.querySelector(".mi[onclick*=\"agenda\"]");
-      if(mi) sp("agenda",mi);
-    },80);
+    var mi=document.querySelector(".mi[onclick*=\"'agenda'\"]");
+    if(mi) sp("agenda",mi);
   } else {
     document.getElementById("merr").style.display="block";
   }
 }
 function doLogout(){
+  _usuarioAtual={perfil:'',nome:'',login:''};
   document.getElementById("pg-admin").classList.remove("active");
   document.getElementById("pg-site").classList.add("active");
   document.getElementById("iu").value="";
@@ -1648,7 +1623,7 @@ function sp(id,el){
   document.querySelectorAll(".mi").forEach(function(m){m.classList.remove("active");});
   document.getElementById("panel-"+id).classList.add("active");
   el.classList.add("active");
-  var titles={dashboard:"Dashboard Diária",agenda:"Agenda",clientes:"Clientes",dentistas:"Dentistas",relatorio:"Relatórios",origens:"Origens"};
+  var titles={dashboard:"Dashboard Diária",agenda:"Agenda",clientes:"Clientes",dentistas:"Dentistas",relatorio:"Relatórios",origens:"Origens",caixa:"Fechamento de Caixa","historico-caixa":"Histórico de Caixa"};
   document.getElementById("adm-title").textContent=titles[id]||id;
   if(id==="dashboard")rDash();
   if(id==="agenda")rAg();
@@ -1656,28 +1631,29 @@ function sp(id,el){
   if(id==="relatorio")rRel();
   if(id==="origens")rOrig();
   if(id==="dentistas")rDent();
+  if(id==="caixa")renderCaixa();
+  if(id==="historico-caixa")renderHistorico();
 }
 function onMes(){rDash();rAg();rRel();}
 
 // DASHBOARD
 function rDash(){
-  // Dashboard do DIA selecionado para o dentista selecionado
   var dent=getDentSel();
   var chave=dent ? dent+"||"+getMes() : getMes();
-  var mes=chave, data=getAg(chave);
+  var data=getAg(chave);
   var rec=0,ag=0,flt=0,cort=0,atend=0;
   Object.values(data).forEach(function(r){
     if(!r.nome)return;ag++;
     var v=getRevPagto(r);
-    if(r.status==="FINALIZADO"||r.status==="EM ATENDIMENTO"||r.status==="RECEPÇÃO"){rec+=v;atend++;}
+    if(r.status==="ATENDIDO"||r.status==="EM ATENDIMENTO"||r.status==="RECEPÇÃO"){rec+=v;atend++;}
     if(r.status==="FALTOU SEM AVISO"||r.status==="FALTOU COM AVISO")flt++;
     if(r.neg==="CORTESIA")cort++;
   });
   var tk=atend>0?rec/atend:0;
   document.getElementById("kpi1").innerHTML=
-    kc("RECEITA BRUTA",fmt(rec),"Atendidos no mês","verde")+
+    kc("RECEITA BRUTA",fmt(rec),"Atendidos no dia","verde")+
     kc("TOTAL AGENDADOS",ag,"Clientes com nome","")+
-    kc("FINALIZADOS",atend,"Sessões concluídas","verde")+
+    kc("ATENDIDOS",atend,"Sessões concluídas","verde")+
     kc("FALTAS",flt,"Com e sem aviso","red");
   document.getElementById("kpi2").innerHTML=
     kc("TICKET MÉDIO",fmt(tk),"Por atendimento","teal")+
@@ -1690,8 +1666,8 @@ function rDash(){
     var h=e[0],r=e[1];
     var v=getRevPagto(r);
     var area=(r.areas&&r.areas.filter(Boolean)[0])||"—";
-    var valCell=r.status==="FINALIZADO"
-      ?(v>0?'<span style="font-weight:700;color:var(--v3)">'+fmt(v)+'</span>'+(r.pagtoForma?'<br><span style="font-size:10px;color:var(--cinza)">'+r.pagtoForma+'</span>':'')
+    var valCell=r.status==="ATENDIDO"
+      ?(v>0?'<span style="font-weight:700;color:var(--v3)">'+fmt(v)+'</span>'+(r.formaPagamento?'<br><span style="font-size:10px;color:var(--cinza)">'+r.formaPagamento+'</span>':'')
           :'<span style="font-size:11px;color:#bbb">Pagto pendente</span>')
       :'<span style="color:var(--cinza);font-size:11px">'+fmt(calcVal(r.areas||[]))+'</span>';
     return'<tr><td style="font-weight:700;color:var(--v2)">'+h+'</td>'+
@@ -1723,13 +1699,26 @@ function autoFillFromClient(mes, h, nomeVal){
     S.agenda[mes][h].neg=cli.neg||"";
     S.agenda[mes][h].obs=cli.obs||"";
     S.agenda[mes][h].wpp=cli.wpp||"";
+    S.agenda[mes][h].tipo=cli.tipo||"NOVO";
   } else {
     S.agenda[mes][h].nome=nomeVal;
   }
   saveS();
   rAg();
   rDash();
+  var pr=document.getElementById("panel-relatorio");
+  if(pr&&pr.classList.contains("active"))rRel();
 }
+var STATUS_ROW_CLASS={
+  "ATENDIDO":         "row-atendido",
+  "EM ATENDIMENTO":   "row-em-atend",
+  "RECEPÇÃO":         "row-recepcao",
+  "AGUARDANDO":       "row-aguardando",
+  "FALTOU SEM AVISO": "row-falta-grave",
+  "FALTOU COM AVISO": "row-falta-leve",
+  "REAGENDOU":        "row-reagendou",
+  "AVALIAÇÃO":        "row-avaliacao"
+};
 function rAg(){
   var dent=getDentSel();
   var chave=getAgKey();
@@ -1765,7 +1754,8 @@ function rAg(){
       : '<span style="color:#ccc;font-size:11px">—</span>';
     var areaCell=(areaTags||'<span style="color:#ccc;font-size:11px">—</span>')
       +(val>0?'<div style="font-size:10px;font-weight:700;color:var(--v2);margin-top:2px">'+fmt(val)+'</div>':"");
-    return '<tr>'+
+    var trClass=STATUS_ROW_CLASS[r.status]||"";
+    return '<tr class="ag-row '+trClass+'">'+
       '<td style="font-weight:700;color:var(--v2);white-space:nowrap;font-size:12px">'+h+'</td>'+
       '<td style="min-width:160px">'+
         '<select class="ssel ag-cli" data-mes="'+chave+'" data-h="'+h+'" style="width:100%;font-size:11px;padding:3px 5px">'+
@@ -1790,7 +1780,7 @@ function rAg(){
         '</select>'+
       '</td>'+
       '<td>'+
-        (r.nome?'<button class="btn-pront" onclick="abrirPront(\'' + (r.nome||'').replace(/'/g,"\\'")+  '\')" >🦷 Prontuário</button>':'<span style="color:#ccc;font-size:11px">—</span>')+
+        (r.nome?'<button class="btn-pront" onclick="abrirPront(\'' + (r.nome||'').replace(/'/g,"\\'")+  '\',\'' + chave + '\',\'' + h + '\')" >🦷 Prontuário</button>':'<span style="color:#ccc;font-size:11px">—</span>')+
       '</td>'+
       '<td style="max-width:120px;font-size:11px;color:var(--cinza)">'+(r.obs||'<span style="color:#ccc">—</span>')+'</td>'+
       '<td style="min-width:130px">'+wppLink+'</td>'+
@@ -1816,47 +1806,23 @@ function rAg(){
   var cntEl=document.getElementById("ag-cnt");
   if(cntEl)cntEl.textContent=count+" preenchido"+(count!==1?"s":"");
 }
-var _caixaPendente=null;
 function updR(sel,mes,h,campo){
   if(!S.agenda[mes])S.agenda[mes]={};
   if(!S.agenda[mes][h])S.agenda[mes][h]={};
-  if(campo==="status"&&sel.value==="FINALIZADO"){
+  if(campo==="status"&&sel.value==="ATENDIDO"){
+    S.agenda[mes][h].status="ATENDIDO";
+    saveS();
     var agObj=S.agenda[mes][h];
-    var valorBase=calcVal(agObj.areas||[]);
-    abrirModalCaixa(mes,h,valorBase);
+    var procs=agObj.procedimentosRealizados||[];
+    var valorBase=procs.reduce(function(acc,p){return acc+(p.realizado?(p.preco||0):0);},0);
+    if(valorBase===0)valorBase=calcVal(agObj.areas||[]);
+    abrirModalCaixa(mes,h,agObj,valorBase);
     return;
   }
   S.agenda[mes][h][campo]=sel.value;
   saveS();rDash();
-}
-function abrirModalCaixa(mes,h,valorBase){
-  var agObj=(S.agenda[mes]&&S.agenda[mes][h])||{};
-  _caixaPendente={mes:mes,h:h};
-  var nEl=document.getElementById("caixa-nome");
-  var vEl=document.getElementById("caixa-valor");
-  var fEl=document.getElementById("caixa-forma");
-  if(nEl)nEl.textContent=agObj.nome||"Paciente";
-  if(vEl)vEl.value=agObj.valorPago>0?agObj.valorPago:(valorBase||"").toString();
-  if(fEl)fEl.value=agObj.formaPagamento||"";
-  document.getElementById("modal-caixa").classList.add("open");
-}
-function fecharModalCaixa(){
-  _caixaPendente=null;
-  var m=document.getElementById("modal-caixa");
-  if(m)m.classList.remove("open");
-  rAg();
-}
-function confirmarPagamento(){
-  if(!_caixaPendente)return;
-  var mes=_caixaPendente.mes,h=_caixaPendente.h;
-  var valor=parseFloat(document.getElementById("caixa-valor").value)||0;
-  var forma=document.getElementById("caixa-forma").value;
-  if(!forma){toast("⚠️ Selecione a forma de pagamento.");return;}
-  S.agenda[mes][h].status="FINALIZADO";
-  S.agenda[mes][h].valorPago=valor;
-  S.agenda[mes][h].formaPagamento=forma;
-  saveS();fecharModalCaixa();rDash();
-  toast("✔ Pagamento confirmado — "+forma+(valor>0?" — R$ "+valor.toFixed(2).replace(".",","):""));
+  var pr=document.getElementById("panel-relatorio");
+  if(pr&&pr.classList.contains("active"))rRel();
 }
 
 // CLIENTES
@@ -1936,7 +1902,23 @@ function savCli(){
     toast("✅ Cliente <strong>"+nome+"</strong> salvo!");
   }
   S.clientes.sort(function(a,b){return a.nome.localeCompare(b.nome,"pt-BR");});
-  saveS();rCli();popSel();
+  // Propagar dados atualizados para todos os slots de agenda que referenciam este cliente
+  Object.keys(S.agenda).forEach(function(chave){
+    Object.keys(S.agenda[chave]).forEach(function(h){
+      var slot=S.agenda[chave][h];
+      if(slot&&slot.nome===c.nome){
+        slot.areas=c.areas||slot.areas;
+        slot.orig=c.orig||slot.orig;
+        slot.neg=c.neg||slot.neg;
+        slot.wpp=c.wpp||slot.wpp;
+        slot.tipo=c.tipo||slot.tipo;
+        slot.obs=c.obs||slot.obs;
+      }
+    });
+  });
+  saveS();rCli();popSel();rDash();
+  var pr=document.getElementById("panel-relatorio");
+  if(pr&&pr.classList.contains("active"))rRel();
   limparFormCli();
 }
 function limparFormCli(){
@@ -2021,11 +2003,8 @@ function pertenceAoMes(chave, mesAno){
 
 function rRel(){
   var mesAno = getRelMes();
-  var mfEl=document.getElementById("meta-fat"), maEl=document.getElementById("meta-at");
-  var mf=mfEl?Number(mfEl.value)||5000:5000;
-  var ma=maEl?Number(maEl.value)||80:80;
   var rec=0,atend=0,flt=0,cort=0,ag=0;
-  var stC={},orC={},arC={},negC={},negV={},fxC={},fxV={};
+  var stC={},orC={},arC={},negC={},negV={};
 
   // VARRER TODA a agenda do mês — TODOS os dentistas
   Object.keys(S.agenda).forEach(function(chave){
@@ -2035,44 +2014,26 @@ function rRel(){
       if(!r||!r.nome) return; ag++;
       var v=getRevPagto(r);
       var st=r.status||"";
-      if(st==="FINALIZADO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"){rec+=v;atend++;}
+      if(st==="ATENDIDO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"){rec+=v;atend++;}
       if(st==="FALTOU SEM AVISO"||st==="FALTOU COM AVISO")flt++;
       if(r.neg==="CORTESIA")cort++;
       if(st)stC[st]=(stC[st]||0)+1;
       if(r.orig)orC[r.orig]=(orC[r.orig]||0)+1;
       (r.areas||[]).filter(Boolean).forEach(function(a){arC[a]=(arC[a]||0)+1;});
-      if(r.neg){negC[r.neg]=(negC[r.neg]||0)+1;negV[r.neg]=(negV[r.neg]||0)+(st==="FINALIZADO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"?v:0);}
-      FAIXAS_PICO.forEach(function(f){
-        if(h>=f.ini&&h<=f.fim&&(st==="FINALIZADO"||st==="EM ATENDIMENTO")){
-          fxC[f.lbl]=(fxC[f.lbl]||0)+1;fxV[f.lbl]=(fxV[f.lbl]||0)+v;
-        }
-      });
+      if(r.neg){negC[r.neg]=(negC[r.neg]||0)+1;negV[r.neg]=(negV[r.neg]||0)+(st==="ATENDIDO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"?v:0);}
     });
   });
 
   var tk=atend>0?rec/atend:0;
-  var pfat=mf>0?rec/mf:0; var pat=ma>0?atend/ma:0;
-  var partesMes=mesAno.split("/"); var mesN=parseInt(partesMes[0]); var anoN=parseInt(partesMes[1]);
-  var diasMes=new Date(anoN,mesN,0).getDate();
-  var diaAtual=new Date().getMonth()+1===mesN&&new Date().getFullYear()===anoN?new Date().getDate():diasMes;
-  var proj=diaAtual>0&&rec>0?rec/(diaAtual/diasMes):0;
 
   // Renderizar cards de dentistas
   rRelCards(mesAno);
-
-  // META
-  var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
-  set("m-rfat",fmt(rec)); set("m-rat",atend);
-  set("m-pfat",Math.round(pfat*100)+"%"); set("m-pat",Math.round(pat*100)+"%");
-  set("m-proj",fmt(proj));
-  set("m-status",pfat>=1?"✅ META ATINGIDA":pfat>=0.7?"🟡 NO CAMINHO":"🔴 ABAIXO DA META");
-  set("m-prog","Faturamento: "+Math.round(pfat*100)+"% da meta  |  Atendimentos: "+Math.round(pat*100)+"% da meta");
 
   // KPIs
   var k1=document.getElementById("rel-k1"),k2=document.getElementById("rel-k2");
   if(k1)k1.innerHTML=
     kc("TOTAL AGENDADOS",ag,"Todos os profissionais","")+
-    kc("FINALIZADOS",atend,"Atendimentos realizados","verde")+
+    kc("ATENDIDOS",atend,"Atendimentos realizados","verde")+
     kc("EM ATEND.",(stC["EM ATENDIMENTO"]||0),"Em curso","")+
     kc("RECEPÇÃO",(stC["RECEPÇÃO"]||0),"Na sala de espera","");
   if(k2)k2.innerHTML=
@@ -2089,7 +2050,7 @@ function rRel(){
       var tp=r.tipo&&nvr[r.tipo]?r.tipo:"NOVO";
       nvr[tp].ag++;
       var st=r.status||"";
-      if(st==="FINALIZADO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"){nvr[tp].fin++;nvr[tp].rec+=getRevPagto(r);}
+      if(st==="ATENDIDO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"){nvr[tp].fin++;nvr[tp].rec+=getRevPagto(r);}
     });
   });
   var nvrEl=document.getElementById("rel-nvr");
@@ -2118,7 +2079,7 @@ function rRel(){
       Object.values(S.agenda[chave]).forEach(function(r){
         if(!r||!r.orig) return;
         var st=r.status||"";
-        if(st==="FINALIZADO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"){
+        if(st==="ATENDIDO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"){
           orFin[r.orig]=(orFin[r.orig]||0)+1;
           orRec2[r.orig]=(orRec2[r.orig]||0)+getRevPagto(r);
         }
@@ -2135,19 +2096,6 @@ function rRel(){
     orEl.innerHTML=orRows||'<tr class="er"><td colspan="6">Sem dados de origem</td></tr>';
   }
 
-  // PICO
-  var picoEl=document.getElementById("rel-pico");
-  if(picoEl){
-    var maxP=Math.max.apply(null,FAIXAS_PICO.map(function(f){return fxC[f.lbl]||0;}).concat([1]));
-    picoEl.innerHTML=FAIXAS_PICO.map(function(f){
-      var q=fxC[f.lbl]||0,v=fxV[f.lbl]||0;
-      var isPico=q===maxP&&q>0;
-      return'<tr><td style="font-weight:600">'+f.lbl+'</td><td style="font-weight:700">'+q+'</td>'+
-        '<td style="color:var(--v3)">'+fmt(v)+'</td><td>'+pct(q,atend)+'</td>'+
-        '<td><div class="pico-bar"><div class="pico-bar-f" style="width:'+Math.round(q/maxP*100)+'%"></div></div></td>'+
-        '<td>'+(isPico?'<div class="pico-badge">🔥 PICO</div>':"—")+'</td></tr>';
-    }).join("");
-  }
 
   // PROCEDIMENTOS
   var arEl=document.getElementById("rel-ar");
@@ -2183,7 +2131,7 @@ function rRelCards(mesAno){
       Object.values(S.agenda[ch]).forEach(function(r){
         if(!r||!r.nome) return;
         var st=r.status||"";
-        if(st==="FINALIZADO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"){rec+=getRevPagto(r);atend++;}
+        if(st==="ATENDIDO"||st==="EM ATENDIMENTO"||st==="RECEPÇÃO"){rec+=getRevPagto(r);atend++;}
         if(st==="FALTOU SEM AVISO"||st==="FALTOU COM AVISO") flt++;
       });
     });
@@ -2381,8 +2329,10 @@ function exportLeads(){
 // PRONTUÁRIO
 var _prontNomeAtual = "";
 
-function abrirPront(nome){
+function abrirPront(nome,agKey,agIdx){
   _prontNomeAtual = nome;
+  window._prontAgKey = agKey||null;
+  window._prontAgIdx = agIdx||null;
   var c = S.clientes.find(function(x){ return x.nome === nome; });
   var ov = document.getElementById("modal-pront");
   if(!ov) return;
@@ -2454,6 +2404,9 @@ function abrirPront(nome){
   // Renderizar histórico de atualizações
   renderAtualizacoes(c);
 
+  popularSelProcPront();
+  renderProcsPront();
+  renderImgsPront();
   ov.classList.add("open");
 }
 
@@ -2604,6 +2557,265 @@ function delDent(id){
   rDent();
   popDentSel();
   toast("🗑️ Dentista removido.");
+}
+
+var _usuarioAtual={perfil:'',nome:'',login:''};
+var _caixaPendente=null;
+function calcVal(areas){
+  return (areas||[]).reduce(function(s,a){return s+(AREAS_PRECOS[a]||0);},0);
+}
+function getRevPagto(r){
+  if((r.status||"")==="ATENDIDO") return Number(r.valorPago)||0;
+  return calcVal(r.areas||[]);
+}
+function abrirModalCaixa(mes,h,agObj,valorBase){
+  _caixaPendente={mes:mes,h:h};
+  var slot=agObj||(S.agenda[mes]&&S.agenda[mes][h])||{};
+  var np=document.getElementById("caixa-paciente-nome");
+  if(np)np.textContent="Paciente: "+(slot.nome||"Não identificado")+(slot.dentista?" · "+slot.dentista:"");
+  // Lista de procedimentos realizados
+  var listaEl=document.getElementById("caixa-procs-lista");
+  if(listaEl){
+    var procs=slot.procedimentosRealizados||[];
+    var realizados=procs.filter(function(p){return p.realizado;});
+    if(realizados.length){
+      listaEl.style.display="block";
+      listaEl.innerHTML='<div style="font-size:10px;font-weight:700;color:#888;margin-bottom:.4rem;letter-spacing:.5px">PROCEDIMENTOS REALIZADOS</div>'+
+        realizados.map(function(p){
+          return '<div style="display:flex;justify-content:space-between;padding:.25rem 0;border-bottom:1px solid #eee">'+
+            '<span style="color:#333">'+p.nome+'</span>'+
+            '<span style="font-weight:700;color:var(--v2)">R$ '+Number(p.preco||0).toFixed(2)+'</span></div>';
+        }).join('');
+    } else { listaEl.style.display="none"; }
+  }
+  // Valor e forma pré-preenchidos
+  var el=document.getElementById("caixa-valor");
+  if(el)el.value=(slot.valorPago||valorBase||0).toFixed(2);
+  var sel=document.getElementById("caixa-forma");
+  if(sel)sel.value=slot.formaPagamento||"";
+  document.getElementById("modal-caixa").classList.add("open");
+}
+function fecharModalCaixa(){
+  _caixaPendente=null;
+  var m=document.getElementById("modal-caixa");
+  if(m)m.classList.remove("open");
+}
+function confirmarPagamento(){
+  if(!_caixaPendente)return;
+  var mes=_caixaPendente.mes,h=_caixaPendente.h;
+  var valor=parseFloat(document.getElementById("caixa-valor").value)||0;
+  var forma=document.getElementById("caixa-forma").value;
+  if(!forma){toast("Selecione a forma de pagamento","warning");return;}
+  if(!S.agenda[mes])S.agenda[mes]={};
+  if(!S.agenda[mes][h])S.agenda[mes][h]={};
+  S.agenda[mes][h].status="ATENDIDO";
+  S.agenda[mes][h].valorPago=valor;
+  S.agenda[mes][h].formaPagamento=forma;
+  if(!S.caixaDia)S.caixaDia=[];
+  var existIdx=S.caixaDia.findIndex(function(x){return x.mes===mes&&x.h===h;});
+  var entry={mes:mes,h:h,nome:S.agenda[mes][h].nome||"",dentista:S.agenda[mes][h].dentista||"",valor:valor,forma:forma,areas:S.agenda[mes][h].areas||[],procedimentosRealizados:S.agenda[mes][h].procedimentosRealizados||[],recepcionista:_usuarioAtual.nome||"—",dt:new Date().toISOString()};
+  if(existIdx>=0)S.caixaDia[existIdx]=entry; else S.caixaDia.push(entry);
+  saveS();fecharModalCaixa();rDash();rAg();
+  var pr=document.getElementById("panel-relatorio");
+  if(pr&&pr.classList.contains("active"))rRel();
+  renderCaixa();
+  toast("✔ Pagamento confirmado — "+forma+(valor>0?" — R$ "+valor.toFixed(2).replace(".",","):""),"success");
+}
+function showToast(msg,t){toast(msg,t);}
+function popularSelProcPront(){
+  var sel=document.getElementById("pront-proc-sel");
+  if(!sel)return;
+  sel.innerHTML='<option value="">Selecione...</option>'+AREAS_LIST.map(function(a){return '<option value="'+a+'">'+a+'</option>';}).join('');
+}
+function renderProcsPront(){
+  var key=window._prontAgKey,idx=window._prontAgIdx;
+  var list=document.getElementById("pront-procs-list");
+  if(!list)return;
+  var procs=[];
+  if(key&&idx&&S.agenda[key]&&S.agenda[key][idx])procs=S.agenda[key][idx].procedimentosRealizados||[];
+  if(!procs.length){list.innerHTML='<p style="font-size:12px;color:#999;margin:.3rem 0">Nenhum procedimento adicionado.</p>';return;}
+  list.innerHTML=procs.map(function(p,i){
+    return '<div style="display:flex;align-items:center;gap:.5rem;padding:.35rem 0;border-bottom:1px solid #f0f0f0">'+
+      '<input type="checkbox" '+(p.realizado?'checked':'')+' onchange="toggleProcPront('+i+',this.checked)" style="accent-color:var(--v2)"/>'+
+      '<span style="flex:1;font-size:13px;'+(p.realizado?'text-decoration:line-through;color:#aaa':'')+'">'+(p.nome||p)+'</span>'+
+      '<span style="font-size:12px;color:var(--v2);font-weight:700">R$ '+(p.preco||0).toFixed(2)+'</span>'+
+      '<button onclick="remProcPront('+i+')" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:15px;padding:0 .2rem">✕</button>'+
+    '</div>';
+  }).join('');
+}
+function addProcPront(){
+  var sel=document.getElementById("pront-proc-sel");
+  if(!sel||!sel.value)return;
+  var key=window._prontAgKey,idx=window._prontAgIdx;
+  if(!key||!idx)return;
+  if(!S.agenda[key])S.agenda[key]={};
+  if(!S.agenda[key][idx])S.agenda[key][idx]={};
+  if(!S.agenda[key][idx].procedimentosRealizados)S.agenda[key][idx].procedimentosRealizados=[];
+  S.agenda[key][idx].procedimentosRealizados.push({nome:sel.value,preco:AREAS_PRECOS[sel.value]||0,realizado:false});
+  saveS();renderProcsPront();sel.value="";
+}
+function toggleProcPront(i,checked){
+  var key=window._prontAgKey,idx=window._prontAgIdx;
+  if(!key||!idx)return;
+  var procs=S.agenda[key][idx].procedimentosRealizados||[];
+  if(procs[i])procs[i].realizado=checked;
+  S.agenda[key][idx].procedimentosRealizados=procs;
+  saveS();renderProcsPront();
+}
+function remProcPront(i){
+  var key=window._prontAgKey,idx=window._prontAgIdx;
+  if(!key||!idx)return;
+  var procs=S.agenda[key][idx].procedimentosRealizados||[];
+  procs.splice(i,1);
+  S.agenda[key][idx].procedimentosRealizados=procs;
+  saveS();renderProcsPront();
+}
+function uploadImgPront(evt){
+  var key=window._prontAgKey,idx=window._prontAgIdx;
+  if(!key||!idx)return;
+  var files=Array.from(evt.target.files);
+  if(!S.agenda[key][idx].imagens)S.agenda[key][idx].imagens=[];
+  var done=0;
+  files.forEach(function(f){
+    var rd=new FileReader();
+    rd.onload=function(e){
+      S.agenda[key][idx].imagens.push({name:f.name,data:e.target.result,dt:new Date().toISOString()});
+      done++;if(done===files.length){saveS();renderImgsPront();}
+    };
+    rd.readAsDataURL(f);
+  });
+  evt.target.value="";
+}
+function renderImgsPront(){
+  var key=window._prontAgKey,idx=window._prontAgIdx;
+  var grid=document.getElementById("pront-imgs-grid");
+  if(!grid)return;
+  var imgs=[];
+  if(key&&idx&&S.agenda[key]&&S.agenda[key][idx])imgs=S.agenda[key][idx].imagens||[];
+  if(!imgs.length){grid.innerHTML='<p style="font-size:12px;color:#999">Nenhuma imagem.</p>';return;}
+  grid.innerHTML=imgs.map(function(img,i){
+    return '<div style="position:relative;border-radius:8px;overflow:hidden;cursor:pointer;aspect-ratio:1;background:#f5f5f5">'+
+      '<img src="'+img.data+'" style="width:100%;height:100%;object-fit:cover" onclick="abrirImgModal(\''+i+'\')"/>'+
+      '<button onclick="remImgPront('+i+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>'+
+    '</div>';
+  }).join('');
+}
+function abrirImgModal(i){
+  var key=window._prontAgKey,idx=window._prontAgIdx;
+  if(!key||!idx)return;
+  var imgs=S.agenda[key][idx].imagens||[];
+  if(!imgs[i])return;
+  var m=document.getElementById("modal-img");
+  var im=document.getElementById("modal-img-src");
+  if(m&&im){im.src=imgs[i].data;m.classList.add("open");}
+}
+function remImgPront(i){
+  var key=window._prontAgKey,idx=window._prontAgIdx;
+  if(!key||!idx)return;
+  S.agenda[key][idx].imagens.splice(i,1);
+  saveS();renderImgsPront();
+}
+function renderCaixa(){
+  if(!S.caixaDia)S.caixaDia=[];
+  var tbody=document.getElementById("tbody-caixa");
+  var kpis=document.getElementById("caixa-kpis");
+  if(!tbody)return;
+  var filtroEl=document.getElementById("caixa-data-filtro");
+  var filtroVal=filtroEl?filtroEl.value:"";
+  var entries=filtroVal?S.caixaDia.filter(function(e){
+    if(!e.dt)return true;
+    // Comparar usando data local para evitar problema de fuso horário
+    var d=new Date(e.dt);
+    var dl=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    return dl===filtroVal;
+  }):S.caixaDia;
+  var total=0,pix=0,din=0,deb=0,cred=0,conv=0;
+  entries.forEach(function(e){
+    var v=e.valor||0;total+=v;
+    if(e.forma==="Pix")pix+=v;
+    else if(e.forma==="Dinheiro")din+=v;
+    else if(e.forma==="Cartão Débito")deb+=v;
+    else if(e.forma==="Cartão Crédito")cred+=v;
+    else if(e.forma==="Convênio")conv+=v;
+  });
+  if(kpis)kpis.innerHTML=
+    '<div class="kc"><div class="kv">'+entries.length+'</div><div class="kl">Atendimentos</div></div>'+
+    '<div class="kc"><div class="kv ouro">R$ '+total.toFixed(2)+'</div><div class="kl">Total</div></div>'+
+    '<div class="kc"><div class="kv">R$ '+pix.toFixed(2)+'</div><div class="kl">Pix</div></div>'+
+    '<div class="kc"><div class="kv">R$ '+din.toFixed(2)+'</div><div class="kl">Dinheiro</div></div>'+
+    '<div class="kc"><div class="kv">R$ '+deb.toFixed(2)+'</div><div class="kl">Cartão Déb.</div></div>'+
+    '<div class="kc"><div class="kv">R$ '+cred.toFixed(2)+'</div><div class="kl">Cartão Créd.</div></div>';
+  if(!entries.length){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#aaa;padding:1.5rem">Nenhum atendimento ATENDIDO'+(filtroVal?' nesta data':'')+'.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=entries.map(function(e){
+    var procs=(e.procedimentosRealizados&&e.procedimentosRealizados.length)?e.procedimentosRealizados.map(function(p){return p.nome||p;}).join(', '):(e.areas&&e.areas.length?e.areas.join(', '):'—');
+    return '<tr><td>'+(e.nome||'—')+'</td><td>'+(e.dentista||'—')+'</td><td style="font-size:12px">'+procs+'</td><td>'+e.forma+'</td><td style="font-weight:700;color:var(--v2)">R$ '+(e.valor||0).toFixed(2)+'</td><td style="font-size:12px;color:#888">'+(e.recepcionista||'—')+'</td></tr>';
+  }).join('');
+}
+function fecharCaixaDia(){
+  if(_usuarioAtual.perfil!=="administrador"){toast("Apenas o Administrador pode fechar o caixa.","warning");return;}
+  if(!S.caixaDia||!S.caixaDia.length){toast("Caixa vazio, nada a fechar","warning");return;}
+  if(!confirm("Confirmar fechamento do caixa?\n\nTotal de atendimentos: "+S.caixaDia.length+"\n\nEsta ação encerrará o caixa do dia e moverá os registros para o histórico."))return;
+  if(!S.historicoFechamentos)S.historicoFechamentos=[];
+  var dt=new Date();
+  var total=0,pix=0,din=0,deb=0,cred=0,conv=0;
+  S.caixaDia.forEach(function(e){
+    var v=e.valor||0;total+=v;
+    if(e.forma==="Pix")pix+=v;
+    else if(e.forma==="Dinheiro")din+=v;
+    else if(e.forma==="Cartão Débito")deb+=v;
+    else if(e.forma==="Cartão Crédito")cred+=v;
+    else if(e.forma==="Convênio")conv+=v;
+  });
+  var recepcs=[...new Set(S.caixaDia.map(function(e){return e.recepcionista||"";}).filter(Boolean))];
+  S.historicoFechamentos.unshift({data:dt.toLocaleDateString("pt-BR"),hora:dt.toLocaleTimeString("pt-BR"),atendimentos:S.caixaDia.length,total:total,pix:pix,dinheiro:din,debito:deb,credito:cred,convenio:conv,fechadoPor:_usuarioAtual.nome||"Administrador",recepcionistas:recepcs.join(", ")||"—",itens:JSON.parse(JSON.stringify(S.caixaDia))});
+  S.caixaDia=[];
+  saveS();renderCaixa();renderHistorico();toast("Caixa fechado com sucesso! Gestor: "+(_usuarioAtual.nome||"Administrador"),"success");
+}
+function renderHistorico(){
+  if(!S.historicoFechamentos)S.historicoFechamentos=[];
+  var tbody=document.getElementById("tbody-historico");
+  if(!tbody)return;
+  if(!S.historicoFechamentos.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:#aaa;padding:1.5rem">Nenhum fechamento registrado.</td></tr>';return;}
+  tbody.innerHTML=S.historicoFechamentos.map(function(f,idx){
+    var mainRow='<tr style="cursor:pointer" onclick="toggleHistRow('+idx+')" title="Clique para ver detalhes">'+
+      '<td>'+f.data+'</td><td>'+f.hora+'</td><td style="text-align:center">'+f.atendimentos+'</td>'+
+      '<td>R$ '+(f.pix||0).toFixed(2)+'</td><td>R$ '+(f.dinheiro||0).toFixed(2)+'</td>'+
+      '<td>R$ '+(f.debito||0).toFixed(2)+'</td><td>R$ '+(f.credito||0).toFixed(2)+'</td>'+
+      '<td>R$ '+(f.convenio||0).toFixed(2)+'</td>'+
+      '<td style="font-weight:700;color:var(--v2)">R$ '+(f.total||0).toFixed(2)+'</td>'+
+      '<td style="font-size:12px"><b>'+(f.fechadoPor||'—')+'</b>'+(f.recepcionistas&&f.recepcionistas!=='—'?'<br><span style="color:#aaa;font-size:11px">'+f.recepcionistas+'</span>':'')+'</td></tr>';
+    var itens=f.itens||[];
+    var detalheHtml=itens.length?itens.map(function(e){
+      var procs=(e.procedimentosRealizados&&e.procedimentosRealizados.length)?e.procedimentosRealizados.map(function(p){return p.nome||p;}).join(', '):(e.areas&&e.areas.length?e.areas.join(', '):'—');
+      return '<tr style="background:rgba(0,0,0,.04)">'+
+        '<td>'+(e.nome||'—')+'</td>'+
+        '<td>'+(e.dentista||'—')+'</td>'+
+        '<td style="font-size:11px">'+procs+'</td>'+
+        '<td>'+(e.forma||'—')+'</td>'+
+        '<td style="font-weight:700;color:var(--v2)">R$ '+(e.valor||0).toFixed(2)+'</td>'+
+        '<td>'+(e.recepcionista||'—')+'</td></tr>';
+    }).join(''):'<tr style="background:rgba(0,0,0,.04)"><td colspan="6" style="text-align:center;color:#aaa;font-size:12px;padding:.5rem">Sem itens detalhados</td></tr>';
+    var detalheRow='<tr id="hist-row-'+idx+'" style="display:none"><td colspan="10" style="padding:0">'+
+      '<div style="padding:.5rem 1rem 1rem">'+
+      '<table style="width:100%;font-size:12px;border-collapse:collapse">'+
+      '<thead><tr style="background:rgba(44,109,95,.15)">'+
+      '<th style="padding:.3rem .5rem;text-align:left">Paciente</th>'+
+      '<th style="padding:.3rem .5rem;text-align:left">Dentista</th>'+
+      '<th style="padding:.3rem .5rem;text-align:left">Procedimentos</th>'+
+      '<th style="padding:.3rem .5rem;text-align:left">Forma</th>'+
+      '<th style="padding:.3rem .5rem;text-align:left">Valor</th>'+
+      '<th style="padding:.3rem .5rem;text-align:left">Recepcionista</th>'+
+      '</tr></thead><tbody>'+detalheHtml+'</tbody></table></div></td></tr>';
+    return mainRow+detalheRow;
+  }).join('');
+}
+function toggleHistRow(idx){
+  var row=document.getElementById("hist-row-"+idx);
+  if(!row)return;
+  row.style.display=row.style.display==="none"?"table-row":"none";
 }
 
 loadS();
@@ -2859,41 +3071,41 @@ document.addEventListener('DOMContentLoaded',function(){
 });
 </script>
 
-
-<!-- MODAL PAGAMENTO (FINALIZADO) -->
-<div class="modal-ov" id="modal-caixa" style="z-index:700">
+<div id="modal-caixa" class="modal-ov" style="z-index:700">
   <div class="mbox" style="max-width:460px">
     <button class="mclose" onclick="fecharModalCaixa()">✕</button>
-    <h3 style="color:var(--v2);margin:0 0 .3rem;font-size:1.1rem">💳 Confirmar Pagamento</h3>
-    <p style="font-size:12px;color:var(--cinza);margin-bottom:.8rem">Revise o valor e selecione a forma de pagamento</p>
-    <div id="caixa-nome" style="font-size:13px;font-weight:700;color:var(--v2);background:var(--fundo);border:1px solid var(--borda);border-radius:var(--r);padding:.45rem .8rem;margin-bottom:1.1rem"></div>
-
-    <label style="font-size:11px;font-weight:700;color:var(--cinza);display:block;margin-bottom:.35rem;letter-spacing:.5px">VALOR TOTAL (R$)</label>
-    <input type="number" id="caixa-valor" step="0.01" min="0" placeholder="0,00"
-      style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--borda);border-radius:var(--r);font-size:1rem;font-family:inherit;color:var(--preto);background:#fff;margin-bottom:1rem;outline:none">
-
-    <label style="font-size:11px;font-weight:700;color:var(--cinza);display:block;margin-bottom:.35rem;letter-spacing:.5px">FORMA DE PAGAMENTO</label>
-    <select id="caixa-forma"
-      style="width:100%;padding:.65rem .9rem;border:1.5px solid var(--borda);border-radius:var(--r);font-size:.9rem;font-family:inherit;color:var(--preto);background:#fff;margin-bottom:1.5rem;outline:none">
-      <option value="">— Selecione —</option>
-      <option value="Dinheiro">Dinheiro</option>
-      <option value="PIX">PIX</option>
-      <option value="Cartão Débito">Cartão Débito</option>
-      <option value="Cartão Crédito">Cartão Crédito</option>
-      <option value="Convênio">Convênio</option>
-      <option value="Outros">Outros</option>
-    </select>
-
-    <button onclick="confirmarPagamento()"
-      style="width:100%;padding:.8rem;background:var(--v2);border:none;border-radius:var(--r);font-size:.95rem;font-weight:700;color:#fff;cursor:pointer;margin-bottom:.5rem">
-      ✔ Confirmar Pagamento
-    </button>
-    <button onclick="fecharModalCaixa()"
-      style="width:100%;padding:.7rem;background:var(--fundo);border:1.5px solid var(--borda);border-radius:var(--r);font-size:.9rem;color:var(--cinza);cursor:pointer">
-      Cancelar
-    </button>
+    <h3 style="color:var(--v2);margin-bottom:.3rem"><i class="ti ti-currency-dollar"></i> Confirmar Pagamento</h3>
+    <p id="caixa-paciente-nome" style="font-weight:600;color:var(--v1);font-size:15px;margin:.2rem 0 .4rem"></p>
+    <div id="caixa-procs-lista" style="display:none;margin-bottom:.8rem;background:#f8f9fa;border-radius:8px;padding:.6rem .8rem;font-size:12px;max-height:140px;overflow-y:auto"></div>
+    <p class="mdesc">Revise o valor e selecione a forma de pagamento</p>
+    <div class="fgg"><label>Valor Total (R$)</label><input type="number" id="caixa-valor" class="minp" step="0.01" min="0" placeholder="0,00"/></div>
+    <div class="fgg"><label>Forma de Pagamento</label>
+      <select id="caixa-forma" class="minp">
+        <option value="">Selecione...</option>
+        <option value="Pix">Pix</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão Débito">Cartão Débito</option>
+        <option value="Cartão Crédito">Cartão Crédito</option>
+        <option value="Convênio">Convênio</option>
+      </select>
+    </div>
+    <button class="mbtn" onclick="confirmarPagamento()">Confirmar Pagamento</button>
+    <button class="mbtn" style="background:#f5f5f5;color:#666;margin-top:.5rem" onclick="fecharModalCaixa()">Cancelar</button>
   </div>
 </div>
-
+<div id="modal-img" class="modal-ov" style="z-index:800" onclick="if(event.target===this)document.getElementById('modal-img').classList.remove('open')">
+  <div style="position:relative;max-width:90vw;max-height:90vh">
+    <img id="modal-img-src" src="" style="max-width:90vw;max-height:85vh;border-radius:12px;display:block"/>
+    <button onclick="document.getElementById('modal-img').classList.remove('open')" style="position:absolute;top:-14px;right:-14px;background:#fff;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.3)">✕</button>
+  </div>
+</div>
 </body>
 </html>
+
+
+
+
+
+
+
+
