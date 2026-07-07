@@ -4,6 +4,7 @@ import Navbar from '../components/landing/Navbar';
 import BrandReveal from '../components/landing/BrandReveal';
 import Hero from '../components/landing/Hero';
 import Recursos from '../components/landing/Recursos';
+import Demonstracao from '../components/landing/Demonstracao';
 import Planos from '../components/landing/Planos';
 import Depoimentos from '../components/landing/Depoimentos';
 import Contato from '../components/landing/Contato';
@@ -118,6 +119,7 @@ export default function Landing() {
         <Hero />
         <BrandReveal />
         <Recursos />
+        <Demonstracao />
         <Planos />
         <Depoimentos />
         <Contato />

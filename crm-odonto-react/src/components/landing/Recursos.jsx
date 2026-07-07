@@ -5,13 +5,51 @@ const dores = [
   'Zero visão de quanto cada dentista produz',
 ];
 
-const recursos = [
-  { icon: '📅', nome: 'Agenda Inteligente', desc: 'Agenda por dentista com status coloridos: confirmado, atendido, falta, reagendou. A recepção enxerga o dia inteiro em segundos.' },
-  { icon: '🧑‍⚕️', nome: 'Gestão de Pacientes', desc: 'Cadastro completo, histórico e prontuário digital de cada paciente. Chega de fichas de papel perdidas.' },
-  { icon: '💰', nome: 'Caixa Diário', desc: 'Entradas por procedimento e por dentista, fechamento de caixa com histórico. Você sabe exatamente quanto entrou e de onde.' },
-  { icon: '📊', nome: 'Relatórios Sob Medida', desc: 'Produção por dentista, origem dos pacientes, faturamento mensal — e personalizamos os relatórios de acordo com a SUA necessidade.' },
-  { icon: '👥', nome: 'Multiusuário com Permissões', desc: 'Dono, recepção e dentistas: cada um vê só o que precisa. Controle total nas suas mãos.' },
-  { icon: '☁️', nome: '100% na Nuvem + Backup Diário', desc: 'Acesse do consultório, de casa ou do celular. Backup automático todos os dias — seus dados nunca se perdem.' },
+const menus = [
+  {
+    grupo: 'Principal',
+    itens: [
+      { icon: '📊', nome: 'Dashboard Diária', desc: 'O dia inteiro em uma tela: agendados, atendidos, fila de espera, faltas, receita e taxa de comparecimento em tempo real.' },
+      { icon: '📅', nome: 'Agenda', desc: 'Agenda por dentista com status coloridos, botão de encaixe em cada horário e busca rápida de paciente e procedimento.' },
+    ],
+  },
+  {
+    grupo: 'Gestão',
+    itens: [
+      { icon: '🧑‍⚕️', nome: 'Pacientes', desc: 'Cadastro completo, histórico e prontuário digital com fotos e arquivos. Fim das fichas de papel.' },
+      { icon: '🦷', nome: 'Dentistas', desc: 'Cadastro da equipe e acompanhamento da produção de cada profissional.' },
+      { icon: '📍', nome: 'Origens', desc: 'Saiba de onde vêm seus pacientes — Google, indicação, redes sociais, panfleto — e o que dá mais retorno.' },
+      { icon: '💊', nome: 'Procedimentos', desc: 'Tabela de preços com cor por convênio e importação da tabela do convênio por planilha (XLS).' },
+    ],
+  },
+  {
+    grupo: 'Análise',
+    itens: [
+      { icon: '📈', nome: 'Relatórios', desc: 'Faturamento, ticket médio, ocupação da agenda, receita por dentista e comparação de meses. Exporta em Excel e PDF.' },
+      { icon: '🔎', nome: 'Auditoria', desc: 'Registro de quem alterou o quê e quando — transparência total sobre tudo que acontece no sistema.' },
+    ],
+  },
+  {
+    grupo: 'Caixa',
+    itens: [
+      { icon: '💰', nome: 'Fechamento de Caixa', desc: 'Entradas por procedimento e por dentista, com senha de fechamento. Você sabe exatamente quanto entrou.' },
+      { icon: '🧾', nome: 'Histórico de Caixa', desc: 'Todos os fechamentos anteriores guardados e disponíveis para consulta a qualquer momento.' },
+    ],
+  },
+  {
+    grupo: 'Automação',
+    itens: [
+      { icon: '💬', nome: 'WhatsApp & IA', desc: 'Atendimento e confirmação de consultas automáticos pelo WhatsApp, com inteligência artificial.' },
+      { icon: '🗂️', nome: 'Vendas / Pipeline', desc: 'Funil de leads e negociações para acompanhar e converter novos pacientes.' },
+    ],
+  },
+  {
+    grupo: 'Segurança',
+    itens: [
+      { icon: '🔐', nome: 'Verificação em 2 etapas (2FA)', desc: 'Camada extra de proteção no login do administrador, com código do app autenticador.' },
+      { icon: '☁️', nome: 'Nuvem + Backup Diário', desc: 'Acesse do consultório, de casa ou do celular. Backup automático todos os dias.' },
+    ],
+  },
 ];
 
 export default function Recursos() {
@@ -32,20 +70,27 @@ export default function Recursos() {
           </p>
         </div>
 
-        {/* OS RECURSOS */}
-        <span className="av-tag" style={{ marginTop: '4rem', display: 'block' }}>O que você leva</span>
-        <h2 className="av-h2">Tudo que sua clínica precisa. Nada do que ela não usa.</h2>
-        <div className="av-rec-grid">
-          {recursos.map((r, i) => {
-            const anims = ['av-a-zoom', 'av-a-up', 'av-a-flip'];
-            return (
-              <div className={`av-rec-card av-anim ${anims[i % 3]}`} style={{ '--d': `${(i % 3) * 0.1}s` }} key={i}>
-                <div className="av-rec-icon">{r.icon}</div>
-                <h3>{r.nome}</h3>
-                <p>{r.desc}</p>
+        {/* TODAS AS FUNCIONALIDADES DO MENU */}
+        <span className="av-tag" style={{ marginTop: '4rem', display: 'block' }}>Tudo em um só sistema</span>
+        <h2 className="av-h2">Todas as funcionalidades do AvancerCRM</h2>
+        <p className="av-func-sub">Cada item abaixo é um menu dentro do sistema — do dia a dia da recepção à visão gerencial do dono.</p>
+        <div className="av-func-groups">
+          {menus.map((m, gi) => (
+            <div className="av-func-group av-anim av-a-up" style={{ '--d': `${gi * 0.06}s` }} key={gi}>
+              <div className="av-func-grouphead">{m.grupo}</div>
+              <div className="av-func-items">
+                {m.itens.map((r, i) => (
+                  <div className="av-func-item" key={i}>
+                    <span className="av-func-icon">{r.icon}</span>
+                    <div>
+                      <strong>{r.nome}</strong>
+                      <span>{r.desc}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     </section>
