@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { STATUS_LIST, AREAS_LIST, AREAS_PRECOS, NEG_LIST, isAtendido } from '../../constants';
+import { STATUS_LIST, isAtendido } from '../../constants';
 
 function fmtR(v) { return 'R$ ' + (v||0).toFixed(2).replace('.', ','); }
 function ticket(receita, count) { return count > 0 ? fmtR(receita / count) : '—'; }
 
 export default function Relatorio() {
-  const { state } = useCRM();
+  const { state, procPrecos } = useCRM();
   const now = new Date();
   const [mes, setMes] = useState(String(now.getMonth() + 1).padStart(2, '0'));
   const [ano, setAno] = useState(String(now.getFullYear()));
@@ -90,22 +90,10 @@ export default function Relatorio() {
       (e.areas || []).forEach(a => {
         if (!map[a]) map[a] = { count: 0, receita: 0 };
         map[a].count++;
-        if (isAtendido(e.status)) map[a].receita += AREAS_PRECOS[a] || 0;
+        if (isAtendido(e.status)) map[a].receita += procPrecos[a] || 0;
       });
     });
     return Object.entries(map).sort((a, b) => b[1].count - a[1].count).slice(0, 15);
-  }, [entries]);
-
-  // Negociações
-  const byNeg = useMemo(() => {
-    const map = {};
-    entries.forEach(e => {
-      const n = e.neg || 'SEM DESCONTO';
-      if (!map[n]) map[n] = { count: 0, receita: 0 };
-      map[n].count++;
-      map[n].receita += parseFloat(e.valor || 0);
-    });
-    return Object.entries(map).sort((a, b) => b[1].count - a[1].count);
   }, [entries]);
 
   const MESES_NOME = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -251,24 +239,6 @@ export default function Relatorio() {
         </table>
       </div>
 
-      {/* Negociações */}
-      <div className="tc">
-        <div className="th"><h3>Análise de Negociações</h3></div>
-        <table className="tbl">
-          <thead><tr><th>TIPO NEGOCIAÇÃO</th><th>QTD</th><th>VALOR ENVOLVIDO</th><th>% DOS ATEND.</th><th>TICKET MÉDIO</th></tr></thead>
-          <tbody>
-            {byNeg.map(([n, v]) => (
-              <tr key={n}>
-                <td>{n}</td><td>{v.count}</td>
-                <td style={{fontWeight:700,color:'var(--v2)'}}>{fmtR(v.receita)}</td>
-                <td>{totalGeral>0?((v.count/totalGeral)*100).toFixed(1):0}%</td>
-                <td>{ticket(v.receita, v.count)}</td>
-              </tr>
-            ))}
-            {byNeg.length === 0 && <tr className="er"><td colSpan={5}>Sem dados</td></tr>}
-          </tbody>
-        </table>
-      </div>
     </div>
   );
 }

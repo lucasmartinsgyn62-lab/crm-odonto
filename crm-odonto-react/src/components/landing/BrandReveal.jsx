@@ -1,13 +1,13 @@
 export default function BrandReveal() {
   return (
-    <section className="brand-reveal">
-      <div className="brand-reveal__glow" />
+    <section className="av-brand">
+      <div className="av-brand-glow" />
       <img
-        src="/logo-avancer.svg"
+        src="/logo-avancer-branca.png"
         alt="AvancerCRM"
-        className="brand-reveal__logo"
+        className="av-brand-logo"
       />
-      <p className="brand-reveal__tagline">Soluções Digitais para Clínicas</p>
+      <p className="av-brand-tagline">A tecnologia que faz sua clínica avançar</p>
     </section>
   );
 }

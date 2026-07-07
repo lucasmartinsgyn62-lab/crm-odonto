@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 
+const WPP = '5562981949053';
+
 export default function Navbar({ onLoginClick }) {
   const [scrolled, setScrolled] = useState(false);
 
@@ -13,10 +15,15 @@ export default function Navbar({ onLoginClick }) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   }
 
+  function abrirDemo() {
+    const texto = 'Olá! Quero uma demonstração gratuita do AvancerCRM.';
+    window.open(`https://wa.me/${WPP}?text=${encodeURIComponent(texto)}`, '_blank');
+  }
+
   return (
     <nav
       id="main-nav"
-      className={scrolled ? 'scrolled' : ''}
+      className={`av-nav ${scrolled ? 'scrolled' : ''}`}
       style={{
         position: 'fixed', top: 40, left: 0, right: 0, zIndex: 300,
         transition: 'all .4s', height: 68,
@@ -29,21 +36,18 @@ export default function Navbar({ onLoginClick }) {
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         style={{ cursor: 'pointer', lineHeight: 1 }}
       >
-        <img src="/logo-avancer.svg" alt="AvancerCRM" style={{ height: 44, width: 'auto', display: 'block' }} />
+        <img src="/logo-avancer-branca.png" alt="AvancerCRM" style={{ height: 60, width: 'auto', display: 'block', filter: 'drop-shadow(0 0 10px rgba(124,58,237,.5))' }} />
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-        <a onClick={() => sid('sec-sobre')} style={{ cursor: 'pointer', color: 'rgba(255,255,255,.82)', textDecoration: 'none', fontSize: 13, fontWeight: 500 }}>
-          Sobre
-        </a>
-        <a onClick={() => sid('sec-cont')} style={{ cursor: 'pointer', color: 'rgba(255,255,255,.82)', textDecoration: 'none', fontSize: 13, fontWeight: 500 }}>
-          Contato
-        </a>
-        <button className="btn-nav-promo" onClick={() => sid('sec-cont')}>
-          🦷 Avaliação Grátis
+        <a onClick={() => sid('sec-recursos')} className="av-nav-link">Recursos</a>
+        <a onClick={() => sid('sec-planos')} className="av-nav-link">Planos</a>
+        <a onClick={() => sid('sec-cont')} className="av-nav-link">Contato</a>
+        <button className="av-btn-cta av-btn-sm" onClick={abrirDemo}>
+          Demonstração Grátis
         </button>
-        <button className="btn-nav" onClick={onLoginClick}>
-          🔐 Login Admin
+        <button className="av-btn-ghost av-btn-sm" onClick={onLoginClick}>
+          🔐 Login
         </button>
       </div>
     </nav>

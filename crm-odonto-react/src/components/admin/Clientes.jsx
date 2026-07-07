@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { AREAS_LIST, NEG_LIST, TIPO_LIST } from '../../constants';
+import { NEG_LIST, TIPO_LIST } from '../../constants';
 
 const EMPTY_PRONT = {
   alergias:'',doencas:'',medicamentos:'',gestante:'',
@@ -11,10 +11,11 @@ const EMPTY_PRONT = {
 const EMPTY_CLI = {nome:'',wpp:'',orig:'',tipo:'NOVO',areas:[],neg:'',obs:'',prontuario:{...EMPTY_PRONT}};
 
 export default function Clientes() {
-  const { state, dispatch, showToast, setProntuarioModal } = useCRM();
+  const { state, dispatch, showToast, setProntuarioModal, procNames } = useCRM();
   const [form, setForm] = useState({...EMPTY_CLI, prontuario:{...EMPTY_PRONT}});
   const [editId, setEditId] = useState(null);
   const [busca, setBusca] = useState('');
+  const [prontAberto, setProntAberto] = useState(false);
 
   function setField(f, v) { setForm(prev => ({...prev, [f]: v})); }
   function setPront(f, v) { setForm(prev => ({...prev, prontuario:{...prev.prontuario, [f]:v}})); }
@@ -23,11 +24,11 @@ export default function Clientes() {
     if (!form.nome.trim()) { showToast('Nome é obrigatório', 'warning'); return; }
     if (editId !== null) {
       dispatch({ type: 'UPDATE_CLIENTE', payload: { ...form, id: editId } });
-      showToast('✔ Cliente atualizado!', 'success');
+      showToast('✔ Paciente atualizado!', 'success');
       setEditId(null);
     } else {
       dispatch({ type: 'ADD_CLIENTE', payload: form });
-      showToast('✔ Cliente cadastrado!', 'success');
+      showToast('✔ Paciente cadastrado!', 'success');
     }
     setForm({...EMPTY_CLI, prontuario:{...EMPTY_PRONT}});
   }
@@ -39,9 +40,9 @@ export default function Clientes() {
   }
 
   function deletar(id) {
-    if (!confirm('Excluir este cliente?')) return;
+    if (!confirm('Excluir este paciente?')) return;
     dispatch({ type: 'DELETE_CLIENTE', payload: id });
-    showToast('Cliente excluído', 'warning');
+    showToast('Paciente excluído', 'warning');
   }
 
   function cancelar() {
@@ -56,7 +57,7 @@ export default function Clientes() {
   return (
     <div>
       <div className="fp">
-        <h3>{editId !== null ? 'Editar cliente' : 'Cadastrar novo cliente'}</h3>
+        <h3>{editId !== null ? 'Editar paciente' : 'Cadastrar novo paciente'}</h3>
         <div className="gg2">
           <div className="fgg"><label>Nome completo *</label>
             <input className="inf" placeholder="Nome..." value={form.nome} onChange={e => setField('nome', e.target.value)}/>
@@ -70,25 +71,13 @@ export default function Clientes() {
               {state.origens.map(o => <option key={o}>{o}</option>)}
             </select>
           </div>
-          <div className="fgg"><label>Tipo cliente</label>
+          <div className="fgg"><label>Tipo paciente</label>
             <select className="inf" value={form.tipo} onChange={e => setField('tipo', e.target.value)}>
               {TIPO_LIST.map(t => <option key={t}>{t}</option>)}
             </select>
           </div>
         </div>
         <div className="gg3">
-          {[1,2,3,4,5].map(n => (
-            <div key={n} className="fgg"><label>Procedimento {n}</label>
-              <select className="inf" value={form.areas?.[n-1] || ''} onChange={e => {
-                const a = [...(form.areas||[])];
-                if (e.target.value) a[n-1] = e.target.value; else a.splice(n-1,1);
-                setField('areas', a.filter(Boolean));
-              }}>
-                <option value="">—</option>
-                {AREAS_LIST.map(a => <option key={a}>{a}</option>)}
-              </select>
-            </div>
-          ))}
           <div className="fgg"><label>Negociação padrão</label>
             <select className="inf" value={form.neg} onChange={e => setField('neg', e.target.value)}>
               <option value="">—</option>
@@ -97,12 +86,24 @@ export default function Clientes() {
           </div>
         </div>
         <div className="fgg"><label>Observações gerais</label>
-          <input className="inf" placeholder="Notas sobre o cliente..." value={form.obs} onChange={e => setField('obs', e.target.value)}/>
+          <input className="inf" placeholder="Notas sobre o paciente..." value={form.obs} onChange={e => setField('obs', e.target.value)}/>
         </div>
 
-        {/* PRONTUÁRIO */}
+        {/* PRONTUÁRIO — botão de abertura (apresentado como obrigatório) */}
+        <div style={{marginTop:'.6rem'}}>
+          <button
+            type="button"
+            className="btsv"
+            style={{background:prontAberto?'var(--v1)':'var(--v2)',display:'inline-flex',alignItems:'center',gap:8}}
+            onClick={() => setProntAberto(o => !o)}
+          >
+            🦷 Prontuário Odontológico <span style={{color:'#FFD54F',fontWeight:900}}>*</span>
+            <span style={{fontSize:10,opacity:.85}}>{prontAberto ? '(fechar)' : 'obrigatório — clique para preencher'}</span>
+          </button>
+        </div>
+        {prontAberto && (
         <div style={{border:'1.5px solid var(--borda)',borderRadius:'var(--r)',overflow:'hidden',marginTop:'.6rem'}}>
-          <div style={{background:'var(--vc)',padding:'.55rem 1rem',fontSize:10,fontWeight:700,color:'var(--v2)',letterSpacing:'1.5px',textTransform:'uppercase',borderBottom:'1px solid var(--borda)'}}>🦷 Prontuário Odontológico</div>
+          <div style={{background:'var(--vc)',padding:'.55rem 1rem',fontSize:10,fontWeight:700,color:'var(--v2)',letterSpacing:'1.5px',textTransform:'uppercase',borderBottom:'1px solid var(--borda)'}}>🦷 Prontuário Odontológico <span style={{color:'#E65100'}}>— preenchimento obrigatório</span></div>
           <div style={{padding:'.9rem 1rem',display:'flex',flexDirection:'column',gap:'.7rem'}}>
 
             <div style={{fontSize:10,fontWeight:700,color:'var(--cinza)',letterSpacing:1,textTransform:'uppercase',paddingBottom:'.3rem',borderBottom:'1px solid #f0f0f0'}}>🩺 Saúde Geral</div>
@@ -169,19 +170,20 @@ export default function Clientes() {
             </div>
           </div>
         </div>
+        )}
 
         <div style={{display:'flex',gap:'.7rem',alignItems:'center',marginTop:'.7rem'}}>
-          <button className="btsv" onClick={salvar}>{editId !== null ? 'Atualizar cliente' : 'Salvar cliente'}</button>
+          <button className="btsv" onClick={salvar}>{editId !== null ? 'Atualizar paciente' : 'Salvar paciente'}</button>
           {editId !== null && <button className="btsv" style={{background:'#e0e0e0',color:'#333'}} onClick={cancelar}>Cancelar edição</button>}
           <span style={{fontSize:11,color:'var(--cinza-cl)'}}>
-            {editId !== null ? 'Editando cliente' : 'Dados migram para a agenda ao selecionar o nome'}
+            {editId !== null ? 'Editando paciente' : 'Dados migram para a agenda ao selecionar o nome'}
           </span>
         </div>
       </div>
 
       <div className="tc">
         <div className="th">
-          <h3>Clientes ({clientes.length})</h3>
+          <h3>Pacientes ({clientes.length})</h3>
           <input className="isrch" placeholder="Buscar..." value={busca} onChange={e => setBusca(e.target.value)}/>
         </div>
         <table className="tbl">
@@ -190,7 +192,7 @@ export default function Clientes() {
             <th>TIPO</th><th>NEGOCIAÇÃO</th><th>PRONTUÁRIO</th><th>AÇÕES</th>
           </tr></thead>
           <tbody>
-            {clientes.length === 0 && <tr className="er"><td colSpan={8}>Nenhum cliente encontrado.</td></tr>}
+            {clientes.length === 0 && <tr className="er"><td colSpan={8}>Nenhum paciente encontrado.</td></tr>}
             {clientes.map(c => (
               <tr key={c.id}>
                 <td>{c.nome}</td>
@@ -215,7 +217,7 @@ export default function Clientes() {
                       });
                     });
                     if (found) setProntuarioModal(found);
-                    else showToast('Este cliente não está na agenda ainda', 'warning');
+                    else showToast('Este paciente não está na agenda ainda', 'warning');
                   }}>
                     <i className="ti ti-file-text"></i> Ver
                   </button>

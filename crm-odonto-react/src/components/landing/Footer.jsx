@@ -2,31 +2,34 @@ export default function Footer() {
   function sid(id) { document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }); }
 
   return (
-    <footer>
+    <footer className="av-footer">
       <div className="fi">
         <div className="fb">
-          <h2>Seu Consultório</h2>
-          <span className="fsub">ODONTOLOGIA DE EXCELÊNCIA</span>
-          <p>Cuidando do seu sorriso com tecnologia e humanidade. Agende sua avaliação gratuita e transforme sua vida.</p>
+          <img src="/logo-avancer-branca.png" alt="AvancerCRM" style={{ height: 90, width: 'auto', marginBottom: '.8rem' }} />
+          <span className="fsub">SOLUÇÕES DIGITAIS PARA CLÍNICAS</span>
+          <p>
+            O CRM odontológico com suporte presencial em Brasília e Goiânia.
+            Agenda, pacientes, caixa e relatórios personalizados — tudo em um só sistema.
+          </p>
         </div>
         <div className="fc">
           <h4>Navegação</h4>
           <a onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Início</a>
-          <a onClick={() => sid('sec-sobre')}>Sobre</a>
-          <a onClick={() => sid('sec-serv')}>Serviços</a>
+          <a onClick={() => sid('sec-recursos')}>Recursos</a>
+          <a onClick={() => sid('sec-planos')}>Planos</a>
           <a onClick={() => sid('sec-cont')}>Contato</a>
         </div>
         <div className="fc">
           <h4>Contato</h4>
-          <a>(62) 9 0000-0000</a>
-          <a>@seuconsultorio</a>
-          <a>contato@seuconsultorio.com.br</a>
-          <a>Rua Exemplo, 123 — Goiânia/GO</a>
+          <a href="https://wa.me/5562981949053" target="_blank" rel="noreferrer">(62) 98194-9053</a>
+          <a>@avancercrm</a>
+          <a>contato@avancercrm.com.br</a>
+          <a>Brasília — DF | Goiânia — GO</a>
         </div>
       </div>
       <div className="fbot">
-        <p>© {new Date().getFullYear()} Seu Consultório Odontológico. Todos os direitos reservados.</p>
-        <p>CRM Odontológico v19 — Sistema de Gestão</p>
+        <p>© {new Date().getFullYear()} AvancerCRM Soluções Digitais. Todos os direitos reservados.</p>
+        <p>AvancerCRM — Sistema de Gestão para Clínicas Odontológicas</p>
       </div>
     </footer>
   );

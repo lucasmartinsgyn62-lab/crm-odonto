@@ -36,7 +36,7 @@ function FormaCell({ e }) {
   return <td>{e.forma || '—'}</td>;
 }
 
-const SENHA_FECHAMENTO = '1234';
+const SENHA_FECHAMENTO = '123';
 
 export default function Caixa() {
   const { state, dispatch, showToast, usuario } = useCRM();

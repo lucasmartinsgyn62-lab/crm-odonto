@@ -6,9 +6,10 @@ const MENU = [
   { id: 'dashboard',      label: 'Dashboard Diária',    icon: 'ti-layout-dashboard', perm: 'dashboard' },
   { id: 'agenda',         label: 'Agenda',              icon: 'ti-calendar',         perm: 'agenda' },
   { section: 'GESTÃO' },
-  { id: 'clientes',       label: 'Clientes',            icon: 'ti-users',            perm: 'clientes' },
+  { id: 'clientes',       label: 'Pacientes',            icon: 'ti-users',            perm: 'clientes' },
   { id: 'dentistas',      label: 'Dentistas',           icon: 'ti-stethoscope',      perm: 'dentistas' },
   { id: 'origens',        label: 'Origens',             icon: 'ti-map-pin',          perm: 'origens' },
+  { id: 'procedimentos',  label: 'Procedimentos',       icon: 'ti-dental',           perm: 'procedimentos' },
   { section: 'ANÁLISE' },
   { id: 'relatorio',      label: 'Relatórios',          icon: 'ti-chart-bar',        perm: 'relatorio' },
   { section: 'CAIXA' },
@@ -17,8 +18,6 @@ const MENU = [
   { section: 'AUTOMAÇÃO' },
   { id: 'whatsapp',       label: 'WhatsApp & IA',       icon: 'ti-brand-whatsapp',   perm: 'whatsapp' },
   { id: 'pipeline',       label: 'Vendas Pipeline',     icon: 'ti-layout-kanban',    perm: 'pipeline' },
-  { id: 'automacao',      label: 'Automação',           icon: 'ti-robot',            perm: 'automacao',
-    href: import.meta.env.VITE_AUTOMACAO_URL || 'http://localhost:3006' },
 ];
 
 export default function Sidebar() {

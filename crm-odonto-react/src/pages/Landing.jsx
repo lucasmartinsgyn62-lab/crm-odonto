@@ -3,7 +3,8 @@ import Ticker from '../components/landing/Ticker';
 import Navbar from '../components/landing/Navbar';
 import BrandReveal from '../components/landing/BrandReveal';
 import Hero from '../components/landing/Hero';
-import Sobre from '../components/landing/Sobre';
+import Recursos from '../components/landing/Recursos';
+import Planos from '../components/landing/Planos';
 import Depoimentos from '../components/landing/Depoimentos';
 import Contato from '../components/landing/Contato';
 import Footer from '../components/landing/Footer';
@@ -12,6 +13,24 @@ import LoginModal from '../components/modals/LoginModal';
 export default function Landing() {
   const [showLogin, setShowLogin] = useState(false);
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    document.body.classList.add('av-dark');
+    return () => document.body.classList.remove('av-dark');
+  }, []);
+
+  // Animações de entrada + neon no scroll (mobile): re-dispara toda vez que o card entra na tela
+  useEffect(() => {
+    const els = document.querySelectorAll('.av-anim');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('in');
+        else e.target.classList.remove('in');
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(el => obs.observe(el));
+    return () => obs.disconnect();
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -59,7 +78,7 @@ export default function Landing() {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(100,160,255,${(1 - d / 120) * .15})`;
+            ctx.strokeStyle = `rgba(167,139,250,${(1 - d / 120) * .14})`;
             ctx.lineWidth = .6;
             ctx.stroke();
           }
@@ -69,12 +88,12 @@ export default function Landing() {
         p.update();
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(144,202,249,${p.alpha})`;
+        ctx.fillStyle = `rgba(196,181,253,${p.alpha})`;
         ctx.fill();
       });
       animId = requestAnimationFrame(draw);
     }
-    canvas.style.opacity = '.6';
+    canvas.style.opacity = '.5';
     draw();
 
     return () => {
@@ -83,10 +102,6 @@ export default function Landing() {
       cancelAnimationFrame(animId);
     };
   }, []);
-
-  function scrollToContato() {
-    document.getElementById('sec-cont')?.scrollIntoView({ behavior: 'smooth' });
-  }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -100,17 +115,10 @@ export default function Landing() {
       <div style={{ position: 'relative', zIndex: 1 }}>
         <Ticker />
         <Navbar onLoginClick={() => setShowLogin(true)} />
-        <Hero onAgendarClick={scrollToContato} />
+        <Hero />
         <BrandReveal />
-
-        {/* Wave connector */}
-        <div style={{ marginTop: -2, lineHeight: 0, background: 'transparent' }}>
-          <svg viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 80 }}>
-            <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="#f8faff" />
-          </svg>
-        </div>
-
-        <Sobre />
+        <Recursos />
+        <Planos />
         <Depoimentos />
         <Contato />
         <Footer />

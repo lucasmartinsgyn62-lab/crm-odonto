@@ -1,6 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { AREAS_LIST, AREAS_PRECOS } from '../../constants';
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 function nowStr() {
@@ -8,26 +7,58 @@ function nowStr() {
   return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-function PVal({ val, destaque }) {
-  const vazio = !val || val === '—';
+const EMPTY_PRONT = {
+  alergias:'',doencas:'',medicamentos:'',gestante:'',
+  ulttrat:'',medo:'',extracao:'',implante:'',
+  queixa:'',perio:'',higiene:'',bruxismo:'',
+  tratamento:'',proximo:'',sessoes:'',obscli:''
+};
+
+function PInput({ label, value, onChange, placeholder }) {
   return (
-    <div className={`pval${vazio ? ' vazio' : ''}${destaque ? ' destaque' : ''}`}>
-      {vazio ? '—' : val}
+    <div className="mpront-item">
+      <label>{label}</label>
+      <input className="inf" style={{width:'100%'}} placeholder={placeholder||'—'} value={value||''} onChange={e => onChange(e.target.value)} />
+    </div>
+  );
+}
+
+function PSelect({ label, value, onChange, options, span }) {
+  return (
+    <div className="mpront-item" style={span ? {gridColumn:`span ${span}`} : undefined}>
+      <label>{label}</label>
+      <select className="inf" style={{width:'100%'}} value={value||''} onChange={e => onChange(e.target.value)}>
+        <option value="">—</option>
+        {options.map(o => <option key={o}>{o}</option>)}
+      </select>
     </div>
   );
 }
 
 export default function ProntuarioModal() {
-  const { prontuarioModal, setProntuarioModal, state, dispatch, showToast } = useCRM();
+  const { prontuarioModal, setProntuarioModal, state, dispatch, showToast, procNames } = useCRM();
   const [novaAtualiz, setNovaAtualiz] = useState('');
   const [imgPreview, setImgPreview] = useState(null);
+  const [pront, setPront] = useState({ ...EMPTY_PRONT });
+  const [dirty, setDirty] = useState(false);
   const fileRef = useRef(null);
 
-  if (!prontuarioModal) return null;
-  const { agKey, horario } = prontuarioModal;
-
-  const slot = state.agenda[agKey]?.[horario] || {};
+  const agKey   = prontuarioModal?.agKey;
+  const horario = prontuarioModal?.horario;
+  const slot = (agKey && state.agenda[agKey]?.[horario]) || {};
   const nome = slot.nome || '';
+  const cliente = state.clientes.find(c => c.nome === nome) || {};
+
+  useEffect(() => {
+    if (prontuarioModal) {
+      setPront({ ...EMPTY_PRONT, ...(cliente.prontuario || {}) });
+      setDirty(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prontuarioModal, cliente.id]);
+
+  if (!prontuarioModal) return null;
+
   const wpp = slot.wpp || '';
   const tipo = slot.tipo || '';
   const orig = slot.orig || '';
@@ -35,11 +66,17 @@ export default function ProntuarioModal() {
   const procs = slot.procedimentosRealizados || [];
   const imagens = slot.imagens || [];
 
-  // Find client prontuario
-  const cliente = state.clientes.find(c => c.nome === nome) || {};
-  const p = cliente.prontuario || {};
+  function setP(f, v) { setPront(prev => ({ ...prev, [f]: v })); setDirty(true); }
+
+  function salvarProntuario() {
+    if (!cliente.id) { showToast('Paciente não cadastrado — cadastre-o em Pacientes para salvar o prontuário', 'warning'); return; }
+    dispatch({ type: 'UPDATE_CLIENTE', payload: { id: cliente.id, prontuario: pront } });
+    setDirty(false);
+    showToast('✔ Prontuário salvo!', 'success');
+  }
 
   function fechar() {
+    if (dirty && !window.confirm('Há alterações não salvas no prontuário. Fechar mesmo assim?')) return;
     setProntuarioModal(null);
     setNovaAtualiz('');
   }
@@ -61,7 +98,7 @@ export default function ProntuarioModal() {
   function addProc(e) {
     const val = e.target.value;
     if (!val) return;
-    const newProcs = [...procs, { nome: val, preco: AREAS_PRECOS[val] || 0, realizado: false }];
+    const newProcs = [...procs, { nome: val, realizado: false }];
     dispatch({ type: 'UPDATE_PROCS_SLOT', payload: { agKey, horario, procedimentosRealizados: newProcs } });
     e.target.value = '';
   }
@@ -118,14 +155,23 @@ export default function ProntuarioModal() {
         </div>
 
         <div className="mpront-body">
+          {/* BARRA DE SALVAR */}
+          <div style={{display:'flex',alignItems:'center',gap:'.8rem',padding:'.2rem 0 .6rem'}}>
+            <button className="btsv" onClick={salvarProntuario} style={{opacity:cliente.id?1:.55}}>
+              💾 Salvar prontuário
+            </button>
+            {dirty && <span style={{fontSize:11,color:'#E65100',fontWeight:700}}>alterações não salvas</span>}
+            {!cliente.id && <span style={{fontSize:11,color:'var(--cinza-cl)'}}>paciente não cadastrado — salve-o em Pacientes primeiro</span>}
+          </div>
+
           {/* SAÚDE GERAL */}
           <div className="mpront-sec">
             <div className="mpront-sec-title">🩺 Saúde Geral</div>
             <div className="mpront-sec-body mpront-g2">
-              <div className="mpront-item"><label>Alergias</label><PVal val={p.alergias}/></div>
-              <div className="mpront-item"><label>Doenças sistêmicas</label><PVal val={p.doencas}/></div>
-              <div className="mpront-item"><label>Medicamentos em uso</label><PVal val={p.medicamentos}/></div>
-              <div className="mpront-item"><label>Gestante / Amamentando</label><PVal val={p.gestante}/></div>
+              <PInput label="Alergias" value={pront.alergias} onChange={v => setP('alergias', v)} placeholder="Ex: Penicilina..." />
+              <PInput label="Doenças sistêmicas" value={pront.doencas} onChange={v => setP('doencas', v)} placeholder="Ex: Diabetes..." />
+              <PInput label="Medicamentos em uso" value={pront.medicamentos} onChange={v => setP('medicamentos', v)} placeholder="Ex: Metformina..." />
+              <PSelect label="Gestante / Amamentando" value={pront.gestante} onChange={v => setP('gestante', v)} options={['Não','Gestante','Amamentando']} />
             </div>
           </div>
 
@@ -133,10 +179,10 @@ export default function ProntuarioModal() {
           <div className="mpront-sec">
             <div className="mpront-sec-title">📋 Histórico Odontológico</div>
             <div className="mpront-sec-body mpront-g2">
-              <div className="mpront-item"><label>Último tratamento</label><PVal val={p.ulttrat}/></div>
-              <div className="mpront-item"><label>Medo / Ansiedade</label><PVal val={p.medo}/></div>
-              <div className="mpront-item"><label>Já fez extração?</label><PVal val={p.extracao}/></div>
-              <div className="mpront-item"><label>Implante / Ortodontia anterior</label><PVal val={p.implante}/></div>
+              <PInput label="Último tratamento" value={pront.ulttrat} onChange={v => setP('ulttrat', v)} placeholder="Ex: Canal — há 2 anos..." />
+              <PSelect label="Medo / Ansiedade" value={pront.medo} onChange={v => setP('medo', v)} options={['Nenhum','Leve','Moderado','Intenso']} />
+              <PSelect label="Já fez extração?" value={pront.extracao} onChange={v => setP('extracao', v)} options={['Não','Sim']} />
+              <PSelect label="Implante / Ortodontia anterior" value={pront.implante} onChange={v => setP('implante', v)} options={['Nenhum','Implante','Ortodontia','Ambos']} />
             </div>
           </div>
 
@@ -144,10 +190,10 @@ export default function ProntuarioModal() {
           <div className="mpront-sec">
             <div className="mpront-sec-title">🦷 Avaliação Clínica</div>
             <div className="mpront-sec-body mpront-g3">
-              <div className="mpront-item"><label>Queixa principal</label><PVal val={p.queixa}/></div>
-              <div className="mpront-item"><label>Condição periodontal</label><PVal val={p.perio}/></div>
-              <div className="mpront-item"><label>Higiene bucal</label><PVal val={p.higiene}/></div>
-              <div className="mpront-item" style={{gridColumn:'span 3'}}><label>Bruxismo / Apertamento</label><PVal val={p.bruxismo}/></div>
+              <PInput label="Queixa principal" value={pront.queixa} onChange={v => setP('queixa', v)} placeholder="Ex: Dor no molar..." />
+              <PSelect label="Condição periodontal" value={pront.perio} onChange={v => setP('perio', v)} options={['Saudável','Gengivite','Periodontite leve','Periodontite severa']} />
+              <PSelect label="Higiene bucal" value={pront.higiene} onChange={v => setP('higiene', v)} options={['Boa','Regular','Ruim']} />
+              <PSelect label="Bruxismo / Apertamento" value={pront.bruxismo} onChange={v => setP('bruxismo', v)} options={['Não','Bruxismo noturno','Apertamento diurno','Ambos']} span={3} />
             </div>
           </div>
 
@@ -155,34 +201,38 @@ export default function ProntuarioModal() {
           <div className="mpront-sec">
             <div className="mpront-sec-title">📅 Plano de Tratamento</div>
             <div className="mpront-sec-body mpront-g3">
-              <div className="mpront-item"><label>Tratamento em andamento</label><PVal val={p.tratamento}/></div>
-              <div className="mpront-item"><label>Próximo procedimento</label><PVal val={p.proximo}/></div>
-              <div className="mpront-item"><label>Nº de sessões previstas</label><PVal val={p.sessoes}/></div>
+              <PInput label="Tratamento em andamento" value={pront.tratamento} onChange={v => setP('tratamento', v)} placeholder="Ex: Clareamento..." />
+              <PInput label="Próximo procedimento" value={pront.proximo} onChange={v => setP('proximo', v)} placeholder="Ex: Restauração..." />
+              <PInput label="Nº de sessões previstas" value={pront.sessoes} onChange={v => setP('sessoes', v)} placeholder="Ex: 4" />
             </div>
           </div>
 
           {/* OBS CLÍNICAS */}
-          {p.obscli && (
-            <div className="mpront-sec">
-              <div className="mpront-sec-title">📝 Observações Clínicas</div>
-              <div className="mpront-sec-body">
-                <div className="mpront-item">
-                  <div className="pval" style={{whiteSpace:'pre-wrap',lineHeight:1.7,minHeight:36}}>{p.obscli}</div>
-                </div>
+          <div className="mpront-sec">
+            <div className="mpront-sec-title">📝 Observações Clínicas</div>
+            <div className="mpront-sec-body">
+              <div className="mpront-item">
+                <textarea
+                  className="inf"
+                  rows="3"
+                  style={{width:'100%',height:70,resize:'vertical'}}
+                  placeholder="Anotações livres do dentista..."
+                  value={pront.obscli || ''}
+                  onChange={e => setP('obscli', e.target.value)}
+                />
               </div>
             </div>
-          )}
+          </div>
 
-          {/* PROCEDIMENTOS DO DIA */}
+          {/* PROCEDIMENTOS NECESSÁRIOS */}
           <div className="mpront-sec">
-            <div className="mpront-sec-title"><i className="ti ti-clipboard-list"></i> PROCEDIMENTOS DO DIA</div>
+            <div className="mpront-sec-title"><i className="ti ti-clipboard-list"></i> Procedimentos necessários</div>
             <div style={{padding:'1rem 1.1rem'}}>
               {procs.length === 0 && <p style={{fontSize:12,color:'#999',margin:'.3rem 0'}}>Nenhum procedimento adicionado.</p>}
               {procs.map((pr, i) => (
                 <div key={i} style={{display:'flex',alignItems:'center',gap:'.5rem',padding:'.35rem 0',borderBottom:'1px solid #f0f0f0'}}>
                   <input type="checkbox" checked={pr.realizado || false} onChange={e => toggleProc(i, e.target.checked)} style={{accentColor:'var(--v2)'}}/>
                   <span style={{flex:1,fontSize:13,textDecoration:pr.realizado?'line-through':'none',color:pr.realizado?'#aaa':'inherit'}}>{pr.nome}</span>
-                  <span style={{fontSize:12,color:'var(--v2)',fontWeight:700}}>R$ {(pr.preco||0).toFixed(2)}</span>
                   <button onClick={() => remProc(i)} style={{background:'none',border:'none',color:'#e57373',cursor:'pointer',fontSize:15}}>✕</button>
                 </div>
               ))}
@@ -190,7 +240,7 @@ export default function ProntuarioModal() {
                 <label>Adicionar Procedimento</label>
                 <select className="inf" onChange={addProc} defaultValue="">
                   <option value="">Selecione...</option>
-                  {AREAS_LIST.map(a => <option key={a} value={a}>{a}</option>)}
+                  {procNames.map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
               </div>
             </div>

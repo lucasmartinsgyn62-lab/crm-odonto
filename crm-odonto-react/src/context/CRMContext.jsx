@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { supabase, supabaseSignup } from '../lib/supabase';
-import { ORIGENS_DEF, DEFAULT_DENTISTAS } from '../constants';
+import { ORIGENS_DEF, DEFAULT_DENTISTAS, AREAS_LIST, AREAS_PRECOS } from '../constants';
 
 export const CRMContext = createContext(null);
 
@@ -12,11 +12,11 @@ function todayStr() {
 
 const ADMIN_PERMS = {
   dashboard:true, agenda:true, clientes:true, dentistas:true,
-  origens:true, relatorio:true, caixa:true, historico_caixa:true
+  origens:true, procedimentos:true, relatorio:true, caixa:true, historico_caixa:true
 };
 const RECEPCAO_PERMS = {
   dashboard:false, agenda:true, clientes:true, dentistas:false,
-  origens:false, relatorio:false, caixa:false, historico_caixa:false
+  origens:false, procedimentos:false, relatorio:false, caixa:false, historico_caixa:false
 };
 
 export function CRMProvider({ children }) {
@@ -29,6 +29,7 @@ export function CRMProvider({ children }) {
   const [dentistas,             setDentistas]            = useState([]);
   const [caixaDia,              setCaixaDia]             = useState([]);
   const [historicoFechamentos,  setHistoricoFechamentos] = useState([]);
+  const [procedimentos,         setProcedimentos]        = useState([]);
   const [dataLoading,           setDataLoading]          = useState(false);
 
   const [toast,             setToast]           = useState(null);
@@ -80,6 +81,29 @@ export function CRMProvider({ children }) {
   function clearData() {
     setClientes([]); setAgenda({}); setOrigens([]);
     setDentistas([]); setCaixaDia([]); setHistoricoFechamentos([]);
+    setProcedimentos([]);
+  }
+
+  // Carrega procedimentos; semeia a partir das constantes na primeira vez.
+  // Se a tabela ainda não existir no Supabase, usa as constantes em memória.
+  async function loadProcedimentos(tid) {
+    const { data, error } = await supabase.from('procedimentos')
+      .select('*').eq('tenant_id', tid).order('nome');
+    if (error) {
+      setProcedimentos(AREAS_LIST.map(nome => ({
+        id: nome, nome, valor: AREAS_PRECOS[nome] || 0, cor: null, convenio: null, _local: true,
+      })));
+      return;
+    }
+    if (data.length === 0) {
+      const seed = AREAS_LIST.map(nome => ({
+        tenant_id: tid, nome, valor: AREAS_PRECOS[nome] || 0, cor: null, convenio: null,
+      }));
+      const { data: inserted } = await supabase.from('procedimentos').insert(seed).select();
+      setProcedimentos(inserted || []);
+      return;
+    }
+    setProcedimentos(data);
   }
 
   async function loadAllData(tid) {
@@ -105,6 +129,7 @@ export function CRMProvider({ children }) {
     }
     if (cx.data) setCaixaDia(cx.data.map(r => r.data));
     if (hx.data) setHistoricoFechamentos(hx.data.map(r => r.fechamento));
+    await loadProcedimentos(tid);
     setDataLoading(false);
   }
 
@@ -216,6 +241,42 @@ export function CRMProvider({ children }) {
           .eq('tenant_id', tid).eq('nome', action.payload);
         setOrigens(prev => prev.filter(o => o !== action.payload));
         break;
+      }
+
+      case 'ADD_PROCEDIMENTO': {
+        const { data, error } = await supabase.from('procedimentos')
+          .insert({ ...action.payload, tenant_id: tid })
+          .select().single();
+        if (!error && data) {
+          setProcedimentos(prev => [...prev, data].sort((a, b) => a.nome.localeCompare(b.nome)));
+        }
+        return { data, error };
+      }
+      case 'UPDATE_PROCEDIMENTO': {
+        const { id, ...rest } = action.payload;
+        await supabase.from('procedimentos').update(rest).eq('id', id);
+        setProcedimentos(prev => prev.map(p => p.id === id ? { ...p, ...rest } : p));
+        break;
+      }
+      case 'DELETE_PROCEDIMENTO': {
+        await supabase.from('procedimentos').delete().eq('id', action.payload);
+        setProcedimentos(prev => prev.filter(p => p.id !== action.payload));
+        break;
+      }
+      case 'IMPORT_PROCEDIMENTOS': {
+        // payload: array de { nome, valor, cor, convenio }
+        const rows = action.payload.map(p => ({ ...p, tenant_id: tid }));
+        const { data, error } = await supabase.from('procedimentos')
+          .upsert(rows, { onConflict: 'tenant_id,nome' })
+          .select();
+        if (!error && data) {
+          setProcedimentos(prev => {
+            const byNome = new Map(prev.map(p => [p.nome, p]));
+            data.forEach(p => byNome.set(p.nome, p));
+            return [...byNome.values()].sort((a, b) => a.nome.localeCompare(b.nome));
+          });
+        }
+        return { data, error };
       }
 
       case 'ADD_CAIXA_ENTRY': {
@@ -337,7 +398,12 @@ export function CRMProvider({ children }) {
     },
   };
 
-  const state = { clientes, agenda, origens, dentistas, caixaDia, historicoFechamentos };
+  const state = { clientes, agenda, origens, dentistas, caixaDia, historicoFechamentos, procedimentos };
+
+  // Derivados de procedimentos (nomes e mapa de preços) para os componentes
+  const procNames  = procedimentos.map(p => p.nome);
+  const procPrecos = Object.fromEntries(procedimentos.map(p => [p.nome, parseFloat(p.valor) || 0]));
+  const procCores  = Object.fromEntries(procedimentos.filter(p => p.cor).map(p => [p.nome, p.cor]));
 
   return (
     <CRMContext.Provider value={{
@@ -354,6 +420,7 @@ export function CRMProvider({ children }) {
       getAgKey, getDateStr,
       todayStr, pad,
       superAdmin,
+      procNames, procPrecos, procCores,
     }}>
       {children}
     </CRMContext.Provider>

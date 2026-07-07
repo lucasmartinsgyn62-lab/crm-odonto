@@ -5,6 +5,7 @@ import Agenda from '../components/admin/Agenda';
 import Clientes from '../components/admin/Clientes';
 import Dentistas from '../components/admin/Dentistas';
 import Origens from '../components/admin/Origens';
+import Procedimentos from '../components/admin/Procedimentos';
 import Relatorio from '../components/admin/Relatorio';
 import Caixa from '../components/admin/Caixa';
 import HistoricoCaixa from '../components/admin/HistoricoCaixa';
@@ -20,6 +21,7 @@ const PANELS = {
   clientes: Clientes,
   dentistas: Dentistas,
   origens: Origens,
+  procedimentos: Procedimentos,
   relatorio: Relatorio,
   caixa: Caixa,
   'historico-caixa': HistoricoCaixa,
@@ -30,9 +32,10 @@ const PANELS = {
 const PANEL_TITLES = {
   dashboard: 'Dashboard Diária',
   agenda: 'Agenda',
-  clientes: 'Clientes',
+  clientes: 'Pacientes',
   dentistas: 'Dentistas',
   origens: 'Origens',
+  procedimentos: 'Procedimentos',
   relatorio: 'Relatórios',
   caixa: 'Fechamento de Caixa',
   'historico-caixa': 'Histórico de Caixa',

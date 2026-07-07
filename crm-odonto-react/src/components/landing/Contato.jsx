@@ -1,63 +1,75 @@
 import { useState } from 'react';
 
+const WPP = '5562981949053';
+
 export default function Contato() {
-  const [form, setForm] = useState({ nome: '', wpp: '', servico: '', msg: '' });
+  const [form, setForm] = useState({ nome: '', wpp: '', clinica: '', plano: '', msg: '' });
 
   function handleSubmit(e) {
     e.preventDefault();
-    const wpp = '5562900000000';
-    const texto = `Olá! Me chamo ${form.nome}. Tenho interesse em: ${form.servico || 'avaliação'}. ${form.msg}`;
-    window.open(`https://wa.me/${wpp}?text=${encodeURIComponent(texto)}`, '_blank');
+    const linhas = [
+      'Olá! Quero agendar uma *demonstração gratuita* do AvancerCRM.',
+      '',
+      `*Nome:* ${form.nome}`,
+      form.clinica ? `*Clínica:* ${form.clinica}` : null,
+      form.wpp ? `*WhatsApp:* ${form.wpp}` : null,
+      `*Plano de interesse:* ${form.plano || 'Ainda não sei — quero ver a demonstração'}`,
+      form.msg ? `*Mensagem:* ${form.msg}` : null,
+    ].filter(l => l !== null);
+    window.open(`https://wa.me/${WPP}?text=${encodeURIComponent(linhas.join('\n'))}`, '_blank');
   }
 
   return (
-    <section className="sec-cont" id="sec-cont">
-      <div className="container">
-        <div className="cont-grid">
-          <div className="cont-info">
-            <span className="stag">Contato</span>
-            <h2 className="stitle">Agende sua consulta<br />hoje mesmo</h2>
-            <p>Entre em contato conosco e agende sua avaliação gratuita. Estamos prontos para transformar o seu sorriso!</p>
-            <div className="cont-itens">
-              <div className="ci">
-                <div className="ci-ic"><i className="ti ti-map-pin"></i></div>
-                <div className="ci-t">
-                  <strong>Endereço</strong>
-                  <span>Rua Exemplo, 123 — Sua Cidade</span>
+    <section className="av-sec av-sec-cont" id="sec-cont">
+      <div className="av-container">
+        <div className="av-cont-grid">
+          <div className="av-cont-info">
+            <span className="av-tag">Fale com a gente</span>
+            <h2 className="av-h2">Veja o AvancerCRM rodando<br />antes de pagar qualquer coisa</h2>
+            <p className="av-cont-sub">
+              Demonstração gratuita, sem compromisso. Se fizer sentido, sua clínica
+              está rodando no sistema em até 48 horas.
+            </p>
+            <div className="av-cont-itens">
+              <div className="av-ci av-anim av-a-left">
+                <div className="av-ci-ic"><i className="ti ti-map-pin"></i></div>
+                <div className="av-ci-t">
+                  <strong>Atendimento presencial</strong>
+                  <span>Brasília — DF e Goiânia — GO</span>
                 </div>
               </div>
-              <div className="ci">
-                <div className="ci-ic"><i className="ti ti-brand-whatsapp"></i></div>
-                <div className="ci-t">
+              <div className="av-ci av-anim av-a-left" style={{ '--d': '0.08s' }}>
+                <div className="av-ci-ic"><i className="ti ti-brand-whatsapp"></i></div>
+                <div className="av-ci-t">
                   <strong>WhatsApp</strong>
-                  <span>(62) 9 0000-0000</span>
+                  <span>(62) 98194-9053</span>
                 </div>
               </div>
-              <div className="ci">
-                <div className="ci-ic"><i className="ti ti-clock"></i></div>
-                <div className="ci-t">
-                  <strong>Horário de Atendimento</strong>
-                  <span>Seg–Sex: 08h às 18h | Sáb: 08h às 12h</span>
+              <div className="av-ci av-anim av-a-left" style={{ '--d': '0.16s' }}>
+                <div className="av-ci-ic"><i className="ti ti-clock"></i></div>
+                <div className="av-ci-t">
+                  <strong>Horário comercial</strong>
+                  <span>Seg–Sex: 08h às 18h</span>
                 </div>
               </div>
-              <div className="ci">
-                <div className="ci-ic"><i className="ti ti-brand-instagram"></i></div>
-                <div className="ci-t">
+              <div className="av-ci av-anim av-a-left" style={{ '--d': '0.24s' }}>
+                <div className="av-ci-ic"><i className="ti ti-brand-instagram"></i></div>
+                <div className="av-ci-t">
                   <strong>Instagram</strong>
-                  <span>@seuconsultorio</span>
+                  <span>@avancercrm</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="cont-form">
-            <h3>Solicitar Avaliação Gratuita</h3>
+          <div className="av-cont-form av-anim av-a-right">
+            <h3>Agendar demonstração gratuita</h3>
             <form onSubmit={handleSubmit}>
               <div className="fg">
-                <label>Nome completo</label>
+                <label>Seu nome</label>
                 <input
                   className="inf"
-                  placeholder="Seu nome..."
+                  placeholder="Nome completo..."
                   value={form.nome}
                   onChange={e => setForm(f => ({ ...f, nome: e.target.value }))}
                   required
@@ -67,40 +79,44 @@ export default function Contato() {
                 <label>WhatsApp</label>
                 <input
                   className="inf"
-                  placeholder="(62) 9 0000-0000"
+                  placeholder="(62) 90000-0000"
                   value={form.wpp}
                   onChange={e => setForm(f => ({ ...f, wpp: e.target.value }))}
                 />
               </div>
               <div className="fg">
-                <label>Serviço de interesse</label>
+                <label>Nome da clínica</label>
+                <input
+                  className="inf"
+                  placeholder="Clínica..."
+                  value={form.clinica}
+                  onChange={e => setForm(f => ({ ...f, clinica: e.target.value }))}
+                />
+              </div>
+              <div className="fg">
+                <label>Plano de interesse</label>
                 <select
                   className="inf"
-                  value={form.servico}
-                  onChange={e => setForm(f => ({ ...f, servico: e.target.value }))}
+                  value={form.plano}
+                  onChange={e => setForm(f => ({ ...f, plano: e.target.value }))}
                 >
-                  <option value="">Selecione...</option>
-                  <option>Avaliação Gratuita</option>
-                  <option>Clareamento Dental</option>
-                  <option>Implante Dentário</option>
-                  <option>Ortodontia / Aparelho</option>
-                  <option>Facetas / Lentes</option>
-                  <option>Harmonização Facial</option>
-                  <option>Outros</option>
+                  <option value="">Ainda não sei — quero ver a demonstração</option>
+                  <option>Essencial — R$ 300/mês</option>
+                  <option>Expert — R$ 450/mês</option>
                 </select>
               </div>
               <div className="fg">
                 <label>Mensagem (opcional)</label>
                 <textarea
                   className="inf"
-                  placeholder="Conte um pouco sobre o que você precisa..."
+                  placeholder="Conte um pouco sobre a sua clínica..."
                   value={form.msg}
                   onChange={e => setForm(f => ({ ...f, msg: e.target.value }))}
-                  style={{ height: 80, resize: 'none' }}
+                  style={{ height: 70, resize: 'none' }}
                 />
               </div>
-              <button type="submit" className="btn-form">
-                <i className="ti ti-brand-whatsapp"></i> Enviar pelo WhatsApp
+              <button type="submit" className="av-btn-cta av-btn-full">
+                <i className="ti ti-brand-whatsapp"></i> Chamar no WhatsApp agora
               </button>
             </form>
           </div>

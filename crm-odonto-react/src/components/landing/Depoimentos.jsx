@@ -1,43 +1,43 @@
 const depoimentos = [
   {
     stars: '★★★★★',
-    texto: '"Atendimento excepcional! Fiz meu clareamento e ficou perfeito. A equipe é super atenciosa e o ambiente muito aconchegante. Super recomendo!"',
-    nome: 'Maria S.',
-    area: 'Clareamento Dental',
-    av: 'MS',
+    texto: '"Minha recepção vivia no caderno e no WhatsApp. Em uma semana com o AvancerCRM as faltas caíram e o fechamento de caixa passou a bater todo dia. Não volto atrás."',
+    nome: 'Dra. Camila R.',
+    area: 'Clínica em Goiânia — GO',
+    av: 'CR',
   },
   {
     stars: '★★★★★',
-    texto: '"Estava com medo de fazer implante, mas o Dr. foi incrível! Explicou tudo detalhadamente, não senti dor e o resultado ficou natural. Excelente profissional!"',
-    nome: 'João P.',
-    area: 'Implante Dentário',
-    av: 'JP',
+    texto: '"O que me ganhou foi o suporte presencial. Eles vieram na clínica, treinaram minha equipe e em dois dias estava tudo rodando. Nenhum sistema grande faz isso."',
+    nome: 'Dr. Felipe M.',
+    area: 'Clínica em Brasília — DF',
+    av: 'FM',
   },
   {
     stars: '★★★★★',
-    texto: '"Coloquei facetas de porcelana e transformou meu sorriso completamente! Resultado muito além do esperado. Investimento que vale muito a pena!"',
-    nome: 'Ana L.',
-    area: 'Facetas em Porcelana',
-    av: 'AL',
+    texto: '"Pedi um relatório de produção por dentista do jeito que eu precisava e eles construíram DENTRO do sistema. Hoje sei exatamente quanto cada cadeira fatura."',
+    nome: 'Dra. Patrícia S.',
+    area: 'Clínica em Águas Claras — DF',
+    av: 'PS',
   },
 ];
 
 export default function Depoimentos() {
   return (
-    <section className="sec-depo" id="sec-depo">
-      <div className="container">
-        <span className="stag" style={{ color: 'var(--b3)' }}>Depoimentos</span>
-        <h2 className="stitle" style={{ color: '#fff' }}>O que nossos pacientes<br />dizem sobre nós</h2>
-        <div className="depo-grid">
+    <section className="av-sec av-sec-depo" id="sec-depo">
+      <div className="av-container">
+        <span className="av-tag">Quem usa, recomenda</span>
+        <h2 className="av-h2">Donos de clínica que pararam de<br />administrar no escuro</h2>
+        <div className="av-depo-grid">
           {depoimentos.map((d, i) => (
-            <div className="dc" key={i}>
-              <div className="dstars">{d.stars}</div>
-              <p className="dtext">{d.texto}</p>
-              <div className="dautor">
-                <div className="dav">{d.av}</div>
+            <div className={`av-depo-card av-anim ${['av-a-up', 'av-a-zoom', 'av-a-up'][i % 3]}`} style={{ '--d': `${i * 0.12}s` }} key={i}>
+              <div className="av-depo-stars">{d.stars}</div>
+              <p className="av-depo-text">{d.texto}</p>
+              <div className="av-depo-autor">
+                <div className="av-depo-av">{d.av}</div>
                 <div>
-                  <div className="dname">{d.nome}</div>
-                  <div className="darea">{d.area}</div>
+                  <div className="av-depo-nome">{d.nome}</div>
+                  <div className="av-depo-area">{d.area}</div>
                 </div>
               </div>
             </div>
