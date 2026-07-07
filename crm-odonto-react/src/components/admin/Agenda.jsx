@@ -254,6 +254,25 @@ export default function Agenda() {
     updateSlot(h, 'status', novoStatus);
   }
 
+  function mudarDuracao(h, novaDuracao) {
+    const idx = HORARIOS.indexOf(h);
+    const extraSlots = novaDuracao / 30 - 1;
+    // horários que seriam cobertos/bloqueados pela nova duração
+    const conflitos = [];
+    for (let i = 1; i <= extraSlots; i++) {
+      const hb = HORARIOS[idx + i];
+      if (hb && ag[hb]?.nome) conflitos.push({ hora: hb, nome: ag[hb].nome });
+    }
+    if (conflitos.length > 0) {
+      const lista = conflitos.map(c => `• ${c.hora} — ${c.nome}`).join('\n');
+      const ok = window.confirm(
+        `Aumentar a duração para ${novaDuracao / 60 >= 1 ? (novaDuracao / 60) + 'h' : novaDuracao + 'min'} vai ocupar os horários seguintes, que JÁ têm agendamento:\n\n${lista}\n\nSe continuar, esses agendamentos ficarão ocultos sob o bloqueio (não serão apagados, mas some da grade). Recomendado: reagende-os antes.\n\nContinuar mesmo assim?`
+      );
+      if (!ok) return; // cancela — o select volta ao valor anterior por causa do estado controlado
+    }
+    updateSlot(h, 'duracao', novaDuracao);
+  }
+
   function updateAreas(h, area) {
     const slot = ag[h] || {};
     const areas = slot.areas || [];
@@ -360,7 +379,7 @@ export default function Agenda() {
                 className="ssel"
                 style={{ marginTop: 4, fontSize: 10, padding: '2px 4px' }}
                 value={duracao}
-                onChange={e => updateSlot(h, 'duracao', parseInt(e.target.value))}
+                onChange={e => mudarDuracao(h, parseInt(e.target.value))}
                 title="Duração do atendimento"
               >
                 {DURACOES.map(d => (
@@ -573,32 +592,46 @@ export default function Agenda() {
                 // ── LINHA BLOQUEADA (continuação) ──
                 if (paiH) {
                   const paiSlot = ag[paiH] || {};
+                  const ocultoSlot = ag[h] || {};
+                  const temOculto = !!ocultoSlot.nome; // havia agendamento neste horário coberto
                   return (
-                    <tr key={h} style={{ background: '#f4f4f4', opacity: 0.7 }}>
+                    <tr key={h} style={{ background: temOculto ? '#FFF3E0' : '#f4f4f4', opacity: temOculto ? 1 : 0.7 }}>
                       <td style={{
-                        fontWeight: 600, color: '#aaa', whiteSpace: 'nowrap',
+                        fontWeight: 600, color: temOculto ? '#E65100' : '#aaa', whiteSpace: 'nowrap',
                         fontSize: 13, borderRight: '2px solid #e0e0e0',
                       }}>
                         {h}
                       </td>
                       <td colSpan={8} style={{
-                        background: '#f0f0f0', color: '#999', fontSize: 12,
-                        fontStyle: 'italic', paddingLeft: '1rem', borderLeft: '3px solid #d0d0d0',
+                        background: temOculto ? '#FFF3E0' : '#f0f0f0', color: temOculto ? '#5D4037' : '#999', fontSize: 12,
+                        fontStyle: 'italic', paddingLeft: '1rem', borderLeft: `3px solid ${temOculto ? '#FB8C00' : '#d0d0d0'}`,
                       }}>
-                        <span style={{ marginRight: 8, fontSize: 14 }}>⏳</span>
-                        continuação —{' '}
-                        <strong style={{ color: '#777' }}>{paiSlot.nome || '—'}</strong>
-                        {paiSlot.areas?.length > 0 && (
-                          <span style={{ marginLeft: 8, color: '#bbb' }}>
-                            ({paiSlot.areas.join(', ')})
+                        <span style={{ marginRight: 8, fontSize: 14 }}>{temOculto ? '⚠️' : '⏳'}</span>
+                        continuação de{' '}
+                        <strong style={{ color: temOculto ? '#5D4037' : '#777' }}>{paiSlot.nome || '—'}</strong>
+                        {temOculto ? (
+                          <>
+                            <span style={{ marginLeft: 12, fontStyle: 'normal', fontWeight: 700, color: '#E65100' }}>
+                              CONFLITO: este horário tinha <strong>{ocultoSlot.nome}</strong>
+                              {ocultoSlot.areas?.length > 0 && <> ({ocultoSlot.areas.join(', ')})</>}
+                            </span>
+                            <button
+                              className="btn-pront"
+                              style={{ marginLeft: 12, background: '#E65100', color: '#fff', borderColor: '#E65100' }}
+                              title="Reduzir o horário de cima para 30min e liberar este agendamento"
+                              onClick={() => updateSlot(paiH, 'duracao', 30)}
+                            >
+                              ↩ Liberar (voltar de cima p/ 30min)
+                            </button>
+                          </>
+                        ) : (
+                          <span style={{
+                            marginLeft: 16, fontSize: 10, background: '#e0e0e0',
+                            color: '#888', borderRadius: 4, padding: '2px 6px', letterSpacing: 1,
+                          }}>
+                            BLOQUEADO
                           </span>
                         )}
-                        <span style={{
-                          marginLeft: 16, fontSize: 10, background: '#e0e0e0',
-                          color: '#888', borderRadius: 4, padding: '2px 6px', letterSpacing: 1,
-                        }}>
-                          BLOQUEADO
-                        </span>
                       </td>
                     </tr>
                   );
