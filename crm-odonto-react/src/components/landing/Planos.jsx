@@ -49,7 +49,7 @@ export default function Planos() {
         <h2 className="av-h2">Menos que uma restauração por mês.<br />Pela gestão da clínica inteira.</h2>
         <p className="av-planos-sub">
           <strong style={{ color: '#A78BFA' }}>7 dias de teste grátis</strong> em qualquer plano.
-          Sem taxa de adesão. Sem fidelidade. Cancele quando quiser.
+          Taxa de adesão. Sem fidelidade. Cancele quando quiser.
         </p>
 
         <div className="av-planos-grid">
