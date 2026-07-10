@@ -17,8 +17,10 @@ const MENU = [
   { id: 'caixa',          label: 'Fechamento de Caixa', icon: 'ti-cash-register',    perm: 'caixa' },
   { id: 'historico-caixa',label: 'Histórico de Caixa', icon: 'ti-history',          perm: 'historico_caixa' },
   { section: 'AUTOMAÇÃO' },
+  { id: 'central',        label: 'Central WhatsApp',    icon: 'ti-messages',         perm: 'central' },
   { id: 'whatsapp',       label: 'WhatsApp & IA',       icon: 'ti-brand-whatsapp',   perm: 'whatsapp' },
   { id: 'pipeline',       label: 'Vendas Pipeline',     icon: 'ti-layout-kanban',    perm: 'pipeline' },
+  { id: 'api',            label: 'API & Integrações',   icon: 'ti-plug-connected',   perm: 'api', adminOnly: true },
 ];
 
 export default function Sidebar() {
@@ -34,6 +36,7 @@ export default function Sidebar() {
   // Filtra seções — mostra seção só se tiver ao menos 1 item visível após ela
   function isVisible(item) {
     if (item.section !== undefined) return true;
+    if (item.adminOnly && !isAdmin) return false;
     return permissions?.[item.perm] !== false;
   }
 

@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { processarWebhooks } from './_lib/webhook-dispatch.js';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -27,6 +28,10 @@ async function sendWhatsapp(wp, telefone, texto) {
 // Cron diário: lembra os pacientes agendados para AMANHÃ e processa follow-ups vencidos.
 // Só age nos tenants que já configuraram o WhatsApp Cloud API (aba WhatsApp & IA → Conexão).
 export default async function handler(req, res) {
+  // Vercel envia "Authorization: Bearer <CRON_SECRET>" nos crons quando a env existe
+  if (process.env.CRON_SECRET && req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
+    return res.status(401).json({ error: 'unauthorized' });
+  }
   const resultado = { lembretes: 0, followups: 0, pulados: 0, erros: [] };
   try {
     const { data: configs } = await supabase
@@ -85,6 +90,13 @@ export default async function handler(req, res) {
         if (r.ok) resultado.followups++;
         else resultado.erros.push(`followup ${env.contato}: ${r.error}`);
       }
+    }
+
+    // 3) Varredura de webhooks pendentes (retries que o dispatcher em tempo real não pegou)
+    try {
+      resultado.webhooks = await processarWebhooks(supabase, 100);
+    } catch (e) {
+      resultado.erros.push(`webhooks: ${e.message}`);
     }
 
     return res.status(200).json(resultado);

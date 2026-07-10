@@ -3,6 +3,7 @@ import { CRMProvider, useCRM } from './context/CRMContext';
 import Landing from './pages/Landing';
 import Admin from './pages/Admin';
 import SuperAdmin from './pages/SuperAdmin';
+import ApiDocs from './pages/ApiDocs';
 import Toast from './components/shared/Toast';
 
 function AuthGate({ children, allowRoles }) {
@@ -26,6 +27,7 @@ function AppRoutes() {
       <Toast />
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/api-docs" element={<ApiDocs />} />
         <Route path="/admin" element={
           <AuthGate allowRoles={['admin','recepcao']}>
             <Admin />

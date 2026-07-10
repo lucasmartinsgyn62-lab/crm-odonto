@@ -40,16 +40,50 @@ async function handleIncoming(req, res) {
     const entry = req.body?.entry?.[0];
     const change = entry?.changes?.[0]?.value;
     const phoneNumberId = change?.metadata?.phone_number_id;
-    const message = change?.messages?.[0];
-    if (!phoneNumberId || !message) return;
+    if (!phoneNumberId) return;
 
     const tenant = await findTenantByPhoneNumberId(phoneNumberId);
     if (!tenant) return;
 
+    // Atualizações de status de mensagens enviadas (entregue/lido/erro)
+    for (const st of change.statuses || []) {
+      await atualizarStatus(tenant.tenant_id, st);
+    }
+
+    const message = change.messages?.[0];
+    if (!message) return;
+
     const contato = change.contacts?.[0]?.profile?.name || message.from;
     const telefone = message.from;
-    const texto = message.text?.body || '';
+    const { tipo, texto } = extrairConteudo(message);
 
+    // ── Central WhatsApp: conexão → conversa → mensagem ──
+    const conexao = await garantirConexao(tenant.tenant_id, phoneNumberId, change.metadata?.display_phone_number);
+    const conversa = await garantirConversa(tenant.tenant_id, conexao.id, telefone, contato);
+
+    // insert simples: o índice único (tenant_id, wa_msg_id) barra reentregas da Meta (23505)
+    const { error: msgErr } = await supabase.from('mensagens').insert({
+      tenant_id: tenant.tenant_id,
+      conversa_id: conversa.id,
+      direcao: 'recebida',
+      tipo,
+      conteudo: texto,
+      wa_msg_id: message.id,
+    });
+    if (msgErr) {
+      if (msgErr.code !== '23505') console.error('mensagens insert:', msgErr.message);
+      return; // duplicata reentregue pela Meta: não conta não-lida nem atualiza preview de novo
+    }
+
+    await supabase.from('conversas').update({
+      contato_nome: contato,
+      ultima_msg: texto,
+      ultima_msg_at: new Date().toISOString(),
+      nao_lidas: (conversa.nao_lidas || 0) + 1,
+      ...(conversa.status === 'resolvida' ? { status: 'aberta' } : {}),
+    }).eq('id', conversa.id);
+
+    // Log legado (relatórios da aba WhatsApp & IA continuam funcionando)
     await supabase.from('whatsapp_logs').insert({
       tenant_id: tenant.tenant_id,
       contato,
@@ -58,10 +92,68 @@ async function handleIncoming(req, res) {
       direcao: 'recebida',
     });
 
-    await maybeAutoReply(tenant, telefone, contato, texto);
+    await maybeAutoReply(tenant, telefone, contato, texto, conversa.id);
   } catch (err) {
     console.error('whatsapp-webhook error', err);
   }
+}
+
+function extrairConteudo(message) {
+  switch (message.type) {
+    case 'text':     return { tipo: 'texto',     texto: message.text?.body || '' };
+    case 'image':    return { tipo: 'imagem',    texto: message.image?.caption || '📷 Imagem' };
+    case 'audio':    return { tipo: 'audio',     texto: '🎤 Áudio' };
+    case 'video':    return { tipo: 'video',     texto: message.video?.caption || '🎬 Vídeo' };
+    case 'document': return { tipo: 'documento', texto: `📎 ${message.document?.filename || 'Documento'}` };
+    case 'button':   return { tipo: 'texto',     texto: message.button?.text || '' };
+    case 'interactive': return { tipo: 'texto',  texto: message.interactive?.button_reply?.title || message.interactive?.list_reply?.title || '' };
+    default:         return { tipo: 'outro',     texto: `[${message.type}]` };
+  }
+}
+
+async function atualizarStatus(tenantId, st) {
+  const mapa = { sent: 'enviado', delivered: 'entregue', read: 'lido', failed: 'erro' };
+  const status = mapa[st.status];
+  if (!status || !st.id) return;
+  const upd = { status_envio: status };
+  if (status === 'erro') upd.erro = st.errors?.[0]?.title || 'falha no envio';
+  await supabase.from('mensagens').update(upd).eq('tenant_id', tenantId).eq('wa_msg_id', st.id);
+}
+
+async function garantirConexao(tenantId, phoneNumberId, numeroDisplay) {
+  const { data: existente } = await supabase.from('whatsapp_conexoes')
+    .select('id').eq('tenant_id', tenantId).eq('phone_number_id', phoneNumberId).maybeSingle();
+  if (existente) {
+    await supabase.from('whatsapp_conexoes').update({ status: 'conectado' }).eq('id', existente.id);
+    return existente;
+  }
+  const { data: nova } = await supabase.from('whatsapp_conexoes').insert({
+    tenant_id: tenantId,
+    nome: 'WhatsApp Oficial',
+    tipo: 'oficial',
+    status: 'conectado',
+    phone_number_id: phoneNumberId,
+    numero: numeroDisplay || null,
+  }).select('id').single();
+  return nova;
+}
+
+async function garantirConversa(tenantId, conexaoId, telefone, contato) {
+  const { data: existente } = await supabase.from('conversas')
+    .select('id, nao_lidas, status')
+    .eq('tenant_id', tenantId).eq('conexao_id', conexaoId).eq('contato_numero', telefone)
+    .maybeSingle();
+  if (existente) return existente;
+
+  const { data: nova } = await supabase.from('conversas').insert({
+    tenant_id: tenantId,
+    conexao_id: conexaoId,
+    contato_numero: telefone,
+    contato_nome: contato,
+    status: 'aberta',
+    nao_lidas: 0, // o caller incrementa quando a mensagem realmente entra
+  }).select('id, nao_lidas, status').single();
+  return nova;
 }
 
 async function findTenantByPhoneNumberId(phoneNumberId) {
@@ -75,7 +167,7 @@ async function findTenantByPhoneNumberId(phoneNumberId) {
   return { tenant_id: row.tenant_id, whatsapp: row.valor };
 }
 
-async function maybeAutoReply(tenant, telefone, contato, textoRecebido) {
+async function maybeAutoReply(tenant, telefone, contato, textoRecebido, conversaId) {
   const [{ data: aiRow }, { data: autoRow }] = await Promise.all([
     supabase.from('configuracoes').select('valor').eq('tenant_id', tenant.tenant_id).eq('chave', 'openai_config').maybeSingle(),
     supabase.from('configuracoes').select('valor').eq('tenant_id', tenant.tenant_id).eq('chave', 'automacao_config').maybeSingle(),
@@ -110,7 +202,24 @@ async function maybeAutoReply(tenant, telefone, contato, textoRecebido) {
     respondidoPor = 'humano';
   }
 
-  await sendWhatsappMessage(tenant.whatsapp, telefone, resposta);
+  const envio = await sendWhatsappMessage(tenant.whatsapp, telefone, resposta);
+
+  // Resposta da IA também aparece na Central WhatsApp
+  if (conversaId) {
+    await supabase.from('mensagens').insert({
+      tenant_id: tenant.tenant_id,
+      conversa_id: conversaId,
+      direcao: 'enviada',
+      tipo: 'texto',
+      conteudo: resposta,
+      autor_nome: respondidoPor === 'ia' ? '🤖 IA' : 'Automático',
+      wa_msg_id: envio?.messages?.[0]?.id || null,
+    });
+    await supabase.from('conversas').update({
+      ultima_msg: resposta,
+      ultima_msg_at: new Date().toISOString(),
+    }).eq('id', conversaId);
+  }
 
   await supabase.from('whatsapp_logs').insert({
     tenant_id: tenant.tenant_id,
@@ -136,9 +245,10 @@ function withinAllowedWindow(auto) {
 }
 
 async function sendWhatsappMessage(whatsapp, telefone, texto) {
-  await fetch(`https://graph.facebook.com/v19.0/${whatsapp.phoneNumberId}/messages`, {
+  const r = await fetch(`https://graph.facebook.com/v19.0/${whatsapp.phoneNumberId}/messages`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${whatsapp.accessToken}` },
     body: JSON.stringify({ messaging_product: 'whatsapp', to: telefone, type: 'text', text: { body: texto } }),
   });
+  try { return await r.json(); } catch { return null; }
 }

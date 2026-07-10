@@ -13,6 +13,8 @@ import Auditoria from '../components/admin/Auditoria';
 import Seguranca from '../components/admin/Seguranca';
 import Whatsapp from '../components/admin/Whatsapp';
 import VendasPipeline from '../components/admin/VendasPipeline';
+import ApiIntegracoes from '../components/admin/ApiIntegracoes';
+import CentralWhatsapp from '../components/admin/CentralWhatsapp';
 import Calendar from '../components/shared/Calendar';
 import ProntuarioModal from '../components/modals/ProntuarioModal';
 import CaixaModal from '../components/modals/CaixaModal';
@@ -31,6 +33,8 @@ const PANELS = {
   seguranca: Seguranca,
   whatsapp:  Whatsapp,
   pipeline:  VendasPipeline,
+  api:       ApiIntegracoes,
+  central:   CentralWhatsapp,
 };
 
 const PANEL_TITLES = {
@@ -47,12 +51,19 @@ const PANEL_TITLES = {
   seguranca: 'Segurança da Conta',
   whatsapp: 'WhatsApp & IA',
   pipeline: 'Vendas Pipeline',
+  api: 'API & Integrações',
+  central: 'Central WhatsApp',
 };
+
+// Painéis restritos a admin — o menu esconde, mas isto garante mesmo se o
+// activePanel for forçado por outro caminho (devtools, código futuro)
+const ADMIN_ONLY_PANELS = ['api'];
 
 export default function Admin() {
   const { activePanel, usuario } = useCRM();
-  const Panel = PANELS[activePanel] || Dashboard;
-  const title = PANEL_TITLES[activePanel] || 'Dashboard';
+  const bloqueado = ADMIN_ONLY_PANELS.includes(activePanel) && usuario?.role !== 'admin';
+  const Panel = bloqueado ? Dashboard : (PANELS[activePanel] || Dashboard);
+  const title = bloqueado ? 'Dashboard Diária' : (PANEL_TITLES[activePanel] || 'Dashboard');
   const isRec = usuario?.perfil === 'recepcao';
 
   return (
