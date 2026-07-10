@@ -22,6 +22,7 @@ export default function Footer() {
         <div className="fc">
           <h4>Contato</h4>
           <a href="https://wa.me/5562981949053" target="_blank" rel="noreferrer">(62) 98194-9053</a>
+          <a href="https://wa.me/5562920056261" target="_blank" rel="noreferrer">(62) 92005-6261</a>
           <a>@avancercrm</a>
           <a>contato@avancercrm.com.br</a>
           <a>Brasília — DF | Goiânia — GO</a>
@@ -30,6 +31,7 @@ export default function Footer() {
       <div className="fbot">
         <p>© {new Date().getFullYear()} AvancerCRM Soluções Digitais. Todos os direitos reservados.</p>
         <p>AvancerCRM — Sistema de Gestão para Clínicas Odontológicas</p>
+        <p>LUCAS MARTINS GOMES DE MORAES — CNPJ 61.844.108/0001-55</p>
       </div>
     </footer>
   );
