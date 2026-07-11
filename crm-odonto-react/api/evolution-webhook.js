@@ -11,9 +11,18 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
-  res.status(200).json({ received: true }); // responde rápido; processa depois
-
+  // IMPORTANTE: na Vercel a função é congelada assim que responde, então
+  // PROCESSAMOS tudo ANTES de responder (senão as gravações não completam).
   try {
+    await processar(req);
+  } catch (e) {
+    console.error('evolution-webhook error', e);
+  }
+  return res.status(200).json({ received: true });
+}
+
+async function processar(req) {
+  {
     const body = req.body || {};
     const evento = body.event || body.type;
     const instancia = body.instance || body.instanceName;
@@ -86,8 +95,6 @@ export default async function handler(req, res) {
       }
       return;
     }
-  } catch (e) {
-    console.error('evolution-webhook error', e);
   }
 }
 

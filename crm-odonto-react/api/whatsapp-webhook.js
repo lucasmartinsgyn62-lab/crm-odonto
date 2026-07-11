@@ -33,9 +33,8 @@ async function handleVerify(req, res) {
 }
 
 async function handleIncoming(req, res) {
-  // Sempre responde 200 rápido pra Meta não re-enviar o evento.
-  res.status(200).json({ received: true });
-
+  // Na Vercel a função congela ao responder — processa ANTES de responder,
+  // senão as gravações (mensagens/conversas) não completam. É rápido (<2s).
   try {
     const entry = req.body?.entry?.[0];
     const change = entry?.changes?.[0]?.value;
@@ -96,6 +95,7 @@ async function handleIncoming(req, res) {
   } catch (err) {
     console.error('whatsapp-webhook error', err);
   }
+  return res.status(200).json({ received: true });
 }
 
 function extrairConteudo(message) {
