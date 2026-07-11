@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════════════
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
-import { processarWebhooks } from '../_lib/webhook-dispatch.js';
+import { processarWebhooks } from './_lib/webhook-dispatch.js';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
