@@ -21,12 +21,14 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
   if (req.method === 'OPTIONS') return res.status(204).end();
 
-  // Segmentos após /api/v1/. Preferimos req.query.path (catch-all do Vercel),
-  // mas caímos pra req.url quando ele não vem preenchido (varia por ambiente).
-  let path = [].concat(req.query.path || []).filter(Boolean);
+  // Segmentos após /api/v1/. O rewrite do vercel.json injeta ?p=<caminho>;
+  // caímos pra req.query.path (catch-all) e por fim pra req.url por segurança.
+  let path = [];
+  if (typeof req.query.p === 'string') path = req.query.p.split('/').filter(Boolean);
+  if (!path.length) path = [].concat(req.query.path || []).filter(Boolean);
   if (!path.length) {
     const semQuery = (req.url || '').split('?')[0];
-    path = semQuery.replace(/^\/api\/v1\/?/, '').split('/').filter(Boolean);
+    path = semQuery.replace(/^\/api\/(v1|apiv1)\/?/, '').split('/').filter(Boolean);
   }
   const rota = path.join('/');
 
