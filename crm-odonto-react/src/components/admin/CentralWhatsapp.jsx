@@ -476,11 +476,12 @@ export default function CentralWhatsapp() {
       )}
     </div>
 
-    {/* ── Modal ⚙: gerenciar filas e respostas rápidas (admin) ── */}
+    {/* ── Modal ⚙: conexões QR, filas e respostas rápidas (admin) ── */}
     {showConfig && (
       <ConfigModal
         filas={filas} setFilas={setFilas}
         rapidas={rapidas} setRapidas={setRapidas}
+        conexoes={conexoes} setConexoes={setConexoes}
         tenantId={tenantId} showToast={showToast}
         onClose={() => setShowConfig(false)}
       />
@@ -489,11 +490,89 @@ export default function CentralWhatsapp() {
   );
 }
 
-// ─── Modal de configuração: filas + respostas rápidas ───────────
-function ConfigModal({ filas, setFilas, rapidas, setRapidas, tenantId, showToast, onClose }) {
+// ─── Modal de configuração: conexões QR + filas + respostas rápidas ──
+function ConfigModal({ filas, setFilas, rapidas, setRapidas, conexoes, setConexoes, tenantId, showToast, onClose }) {
   const [novaFila, setNovaFila] = useState('');
   const [novoAtalho, setNovoAtalho] = useState('');
   const [novoTexto, setNovoTexto] = useState('');
+
+  // conexões QR
+  const [evoCfg, setEvoCfg] = useState(null);       // {base_url} ou null
+  const [evoForm, setEvoForm] = useState({ base_url: '', api_key: '' });
+  const [novoWpp, setNovoWpp] = useState('');
+  const [novoSetor, setNovoSetor] = useState('recepcao');
+  const [qrConexao, setQrConexao] = useState(null); // { id, qr_code }
+  const [conectando, setConectando] = useState(false);
+
+  useEffect(() => {
+    supabase.from('evolution_config').select('base_url').eq('tenant_id', tenantId).maybeSingle()
+      .then(({ data }) => setEvoCfg(data || null));
+  }, [tenantId]);
+
+  // realtime: quando o funcionário escaneia, o status/QR muda no banco → some o QR
+  useEffect(() => {
+    if (!qrConexao) return;
+    const ch = supabase.channel(`qr-${qrConexao.id}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'whatsapp_conexoes', filter: `id=eq.${qrConexao.id}` },
+        payload => {
+          if (payload.new.status === 'conectado') {
+            showToast('✅ WhatsApp conectado!', 'success');
+            setConexoes(p => p.map(c => c.id === payload.new.id ? payload.new : c));
+            setQrConexao(null);
+          } else if (payload.new.qr_code && payload.new.qr_code !== qrConexao.qr_code) {
+            setQrConexao(q => ({ ...q, qr_code: payload.new.qr_code }));
+          }
+        })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qrConexao?.id]);
+
+  async function salvarEvoCfg() {
+    if (!/^https?:\/\//.test(evoForm.base_url) || !evoForm.api_key.trim()) {
+      showToast('Informe a URL do VPS (http/https) e a API key', 'warning'); return;
+    }
+    const { error } = await supabase.from('evolution_config')
+      .upsert({ tenant_id: tenantId, base_url: evoForm.base_url.trim(), api_key: evoForm.api_key.trim() });
+    if (error) { showToast('Erro: ' + error.message, 'error'); return; }
+    setEvoCfg({ base_url: evoForm.base_url.trim() });
+    setEvoForm({ base_url: '', api_key: '' });
+    showToast('✔ Servidor de conexões salvo', 'success');
+  }
+
+  async function conectarWpp() {
+    if (!novoWpp.trim()) { showToast('Dê um nome (ex: Recepção — Ana)', 'warning'); return; }
+    setConectando(true);
+    try {
+      const { data: sess } = await supabase.auth.getSession();
+      const r = await fetch('/api/evolution-connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sess?.session?.access_token}` },
+        body: JSON.stringify({ acao: 'conectar', nome: novoWpp.trim(), setor: novoSetor }),
+      });
+      const ct = r.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) { showToast('Conexão QR funciona no site publicado (não no dev local).', 'warning'); return; }
+      const j = await r.json();
+      if (!r.ok) { showToast(j.error || 'Erro ao conectar', 'error'); return; }
+      setNovoWpp('');
+      setQrConexao({ id: j.conexao_id, qr_code: j.qr_code });
+      const { data: cx } = await supabase.from('whatsapp_conexoes').select('id, nome, tipo, setor, status, numero').eq('tenant_id', tenantId);
+      setConexoes(cx || []);
+    } catch { showToast('Falha de rede', 'error'); } finally { setConectando(false); }
+  }
+
+  async function desconectar(cx) {
+    if (!confirm(`Desconectar "${cx.nome}"? As conversas ficam salvas.`)) return;
+    const { data: sess } = await supabase.auth.getSession();
+    const r = await fetch('/api/evolution-connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${sess?.session?.access_token}` },
+      body: JSON.stringify({ acao: 'desconectar', conexao_id: cx.id }),
+    }).catch(() => null);
+    if (r && r.ok) { setConexoes(p => p.map(c => c.id === cx.id ? { ...c, status: 'desconectado' } : c)); showToast('Desconectado', 'success'); }
+    else showToast('Não consegui desconectar agora', 'error');
+  }
+
+  const conexoesQr = (conexoes || []).filter(c => c.tipo === 'qr');
 
   async function addFila() {
     const nome = novaFila.trim();
@@ -538,6 +617,62 @@ function ConfigModal({ filas, setFilas, rapidas, setRapidas, tenantId, showToast
           <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--v2)' }}>⚙ Configurações da Central</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: 'var(--cinza)' }}>✕</button>
         </div>
+
+        {/* ── conexões WhatsApp via QR Code ── */}
+        <h4 style={{ fontSize: 13, fontWeight: 800, marginBottom: '.5rem' }}>📱 WhatsApps conectados (QR Code)</h4>
+        {!evoCfg ? (
+          <div style={{ background: 'var(--b2)', border: '1px solid var(--borda)', borderRadius: 10, padding: '.8rem', marginBottom: '1.2rem' }}>
+            <p style={{ fontSize: 12, color: 'var(--cinza)', marginBottom: '.6rem', lineHeight: 1.6 }}>
+              Para espelhar o WhatsApp dos funcionários por QR Code, informe o servidor de conexões (Evolution API no seu VPS).
+              A chave fica guardada com segurança e nunca aparece no navegador.
+            </p>
+            <div style={{ display: 'grid', gap: '.4rem' }}>
+              <input className="inf" placeholder="URL do servidor (ex: https://evo.seudominio.com)" value={evoForm.base_url} onChange={e => setEvoForm(f => ({ ...f, base_url: e.target.value }))} />
+              <div style={{ display: 'flex', gap: '.4rem' }}>
+                <input className="inf" style={{ flex: 1 }} placeholder="API key global da Evolution" value={evoForm.api_key} onChange={e => setEvoForm(f => ({ ...f, api_key: e.target.value }))} />
+                <button className="btn-salvar-atualiz" style={{ fontSize: 12 }} onClick={salvarEvoCfg}>Salvar</button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ marginBottom: '1.2rem' }}>
+            <div style={{ display: 'flex', gap: '.4rem', marginBottom: '.6rem', flexWrap: 'wrap' }}>
+              <input className="inf" style={{ flex: 1, minWidth: 160 }} placeholder="Nome (ex: Recepção — Ana)" value={novoWpp} onChange={e => setNovoWpp(e.target.value)} />
+              <select className="inf" style={{ width: 130, fontSize: 12 }} value={novoSetor} onChange={e => setNovoSetor(e.target.value)}>
+                <option value="recepcao">Recepção</option>
+                <option value="comercial">Comercial</option>
+              </select>
+              <button className="btn-salvar-atualiz" style={{ fontSize: 12 }} disabled={conectando} onClick={conectarWpp}>
+                {conectando ? '…' : '➕ Conectar por QR'}
+              </button>
+            </div>
+
+            {/* QR pra escanear */}
+            {qrConexao && (
+              <div style={{ textAlign: 'center', background: 'var(--b2)', border: '1px solid var(--borda)', borderRadius: 10, padding: '1rem', marginBottom: '.8rem' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, marginBottom: '.5rem' }}>📲 Abra o WhatsApp do funcionário → Aparelhos conectados → Conectar aparelho</div>
+                {qrConexao.qr_code
+                  ? <img src={qrConexao.qr_code} alt="QR Code" style={{ width: 220, height: 220, borderRadius: 8, background: '#fff' }} />
+                  : <div style={{ fontSize: 12, color: 'var(--cinza)', padding: '2rem' }}>Gerando QR Code…</div>}
+                <div style={{ fontSize: 11, color: 'var(--cinza)', marginTop: '.5rem' }}>O código some sozinho quando conectar. Some antes? Clique em Conectar de novo.</div>
+              </div>
+            )}
+
+            {/* lista de conexões QR */}
+            <div style={{ display: 'grid', gap: '.35rem' }}>
+              {conexoesQr.length === 0 && <span style={{ fontSize: 12, color: 'var(--cinza)' }}>Nenhum WhatsApp conectado por QR ainda.</span>}
+              {conexoesQr.map(cx => (
+                <div key={cx.id} style={{ display: 'flex', gap: '.6rem', alignItems: 'center', border: '1px solid var(--borda)', borderRadius: 8, padding: '.45rem .6rem', fontSize: 12 }}>
+                  <span style={{ fontSize: 13 }}>{cx.status === 'conectado' ? '🟢' : cx.status === 'pendente' ? '🟡' : '🔴'}</span>
+                  <span style={{ fontWeight: 700 }}>{cx.nome}</span>
+                  {cx.numero && <span style={{ color: 'var(--cinza)' }}>{cx.numero}</span>}
+                  <span style={{ marginLeft: 'auto', fontSize: 10, color: 'var(--cinza)', textTransform: 'uppercase' }}>{cx.setor || ''}</span>
+                  <button onClick={() => desconectar(cx)} style={{ background: 'none', border: 'none', color: '#c62828', cursor: 'pointer' }}>✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* filas */}
         <h4 style={{ fontSize: 13, fontWeight: 800, marginBottom: '.5rem' }}>📋 Filas de atendimento</h4>
