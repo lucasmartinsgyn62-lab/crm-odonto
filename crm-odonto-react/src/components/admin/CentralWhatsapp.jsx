@@ -18,6 +18,36 @@ function horaCurta(d) {
 }
 function iniciais(nome) { return (nome || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase(); }
 
+// ── Paleta oficial do WhatsApp (modo claro) ─────────────────────
+const WA = {
+  verde: '#00a884',        // botão enviar / acentos
+  verdeEsc: '#008069',
+  enviada: '#d9fdd3',      // bolha enviada (verde clarinho)
+  recebida: '#ffffff',     // bolha recebida (branca)
+  texto: '#111b21',
+  sub: '#667781',
+  badge: '#25d366',        // contador de não lidas (verde)
+  check: '#53bdeb',        // ✓✓ azul de lido
+  ativa: '#f0f2f5',        // conversa ativa / hover
+  barra: '#f0f2f5',        // barras (topo/rodapé) cinza claro
+  papel: '#efeae2',        // bege do papel de parede
+  borda: '#e9edef',
+};
+// papel de parede bege com o padrão de rabiscos (doodle) do WhatsApp
+const WA_DOODLE = encodeURIComponent(
+  "<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150'>" +
+  "<g fill='none' stroke='#d8cdb8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.6'>" +
+  "<path d='M16 26 q0-9 9-9 h20 q9 0 9 9 v9 q0 9-9 9 h-14 l-7 7 v-7 q-8 0-8-9 z'/>" +
+  "<path d='M118 30 c-3-7-14-5-14 3 c0 7 14 13 14 13 c0 0 14-6 14-13 c0-8-11-10-14-3 z'/>" +
+  "<circle cx='42' cy='100' r='10'/><circle cx='38' cy='97' r='1.3'/><circle cx='46' cy='97' r='1.3'/><path d='M37 103 q5 5 10 0'/>" +
+  "<path d='M124 92 l3 7 l8 1 l-6 5 l1 8 l-6-4 l-6 4 l1-8 l-6-5 l8-1 z'/>" +
+  "<path d='M92 108 l5-12 l5 12 z'/>" +
+  "<path d='M74 60 h20 M74 66 h13'/>" +
+  "<path d='M20 78 q6-6 12 0 q6 6 12 0'/>" +
+  "</g></svg>"
+);
+const WA_PAPEL = { backgroundColor: WA.papel, backgroundImage: `url("data:image/svg+xml,${WA_DOODLE}")`, backgroundSize: '150px 150px' };
+
 export default function CentralWhatsapp() {
   const { usuario, showToast } = useCRM();
   const tenantId = usuario?.tenant_id;
@@ -322,9 +352,9 @@ export default function CentralWhatsapp() {
           {listaFiltrada.length === 0 && <div style={{ padding: '2rem 1rem', textAlign: 'center', fontSize: 13, color: 'var(--cinza)' }}>Nenhuma conversa aqui.</div>}
           {listaFiltrada.map(c => (
             <div key={c.id} onClick={() => abrirConversa(c)}
-              style={{ display: 'flex', gap: '.6rem', padding: '.7rem .75rem', cursor: 'pointer', borderBottom: '1px solid var(--borda)',
-                background: ativa?.id === c.id ? '#fff' : 'transparent', borderLeft: ativa?.id === c.id ? '3px solid var(--v2)' : '3px solid transparent' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--v2)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
+              style={{ display: 'flex', gap: '.6rem', padding: '.7rem .75rem', cursor: 'pointer', borderBottom: `1px solid ${WA.borda}`,
+                background: ativa?.id === c.id ? WA.ativa : 'transparent', borderLeft: ativa?.id === c.id ? `3px solid ${WA.verde}` : '3px solid transparent' }}>
+              <div style={{ width: 44, height: 44, borderRadius: '50%', background: WA.verde, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14, flexShrink: 0 }}>
                 {iniciais(c.contato_nome)}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -333,13 +363,13 @@ export default function CentralWhatsapp() {
                   <span style={{ fontSize: 10, color: 'var(--cinza)', flexShrink: 0 }}>{horaCurta(c.ultima_msg_at)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: 6, marginTop: 2 }}>
-                  <span style={{ fontSize: 12, color: 'var(--cinza)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.ultima_msg || '—'}</span>
-                  {c.nao_lidas > 0 && <span style={{ background: '#22c55e', color: '#fff', fontSize: 10, fontWeight: 800, borderRadius: 10, padding: '1px 6px', flexShrink: 0 }}>{c.nao_lidas}</span>}
+                  <span style={{ fontSize: 12, color: WA.sub, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.ultima_msg || '—'}</span>
+                  {c.nao_lidas > 0 && <span style={{ background: WA.badge, color: '#fff', fontSize: 10, fontWeight: 800, borderRadius: 10, padding: '1px 6px', flexShrink: 0, minWidth: 18, textAlign: 'center' }}>{c.nao_lidas}</span>}
                 </div>
                 <div style={{ display: 'flex', gap: 4, marginTop: 3, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--v2)', background: 'var(--vc, #ede9fe)', borderRadius: 8, padding: '0 6px' }}>{nomeConexao(c.conexao_id)}</span>
-                  {filaDe(c.fila_id) && <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', background: filaDe(c.fila_id).cor || 'var(--v2)', borderRadius: 8, padding: '0 6px' }}>{filaDe(c.fila_id).nome}</span>}
-                  {c.atribuido_a && <span style={{ fontSize: 9, fontWeight: 700, color: '#666', background: '#eee', borderRadius: 8, padding: '0 6px' }}>👤 {nomeEquipe(c.atribuido_a) || '—'}</span>}
+                  <span style={{ fontSize: 9, fontWeight: 700, color: WA.verdeEsc, background: '#d9f2e6', borderRadius: 8, padding: '0 6px' }}>{nomeConexao(c.conexao_id)}</span>
+                  {filaDe(c.fila_id) && <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', background: filaDe(c.fila_id).cor || WA.verde, borderRadius: 8, padding: '0 6px' }}>{filaDe(c.fila_id).nome}</span>}
+                  {c.atribuido_a && <span style={{ fontSize: 9, fontWeight: 700, color: '#5b6b60', background: '#e7f3ec', borderRadius: 8, padding: '0 6px' }}>👤 {nomeEquipe(c.atribuido_a) || '—'}</span>}
                 </div>
               </div>
             </div>
@@ -349,15 +379,15 @@ export default function CentralWhatsapp() {
 
       {/* ═══ Coluna 2: chat ═══ */}
       {!ativa ? (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cinza)', fontSize: 14, flexDirection: 'column', gap: 8 }}>
-          <div style={{ fontSize: 40 }}>💬</div>
-          Selecione uma conversa ao lado
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: WA.sub, fontSize: 14, flexDirection: 'column', gap: 10, borderTop: `4px solid ${WA.verde}`, ...WA_PAPEL }}>
+          <div style={{ fontSize: 52, opacity: .5 }}>💬</div>
+          <div style={{ background: 'rgba(255,255,255,.7)', padding: '.4rem 1rem', borderRadius: 20 }}>Selecione uma conversa ao lado</div>
         </div>
       ) : (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           {/* header do chat */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', padding: '.6rem .9rem', borderBottom: '1px solid var(--borda)', flexWrap: 'wrap' }}>
-            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--v2)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '.7rem', padding: '.6rem .9rem', borderBottom: `1px solid ${WA.borda}`, background: WA.barra, flexWrap: 'wrap' }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: WA.verde, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 13 }}>
               {iniciais(ativa.contato_nome)}
             </div>
             <div style={{ minWidth: 0 }}>
@@ -376,30 +406,31 @@ export default function CentralWhatsapp() {
             </div>
           </div>
 
-          {/* mensagens */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', background: '#f4f1fa', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {/* mensagens — papel de parede bege com rabiscos do WhatsApp */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '1rem 6%', display: 'flex', flexDirection: 'column', gap: 4, ...WA_PAPEL }}>
             {mensagens.map(m => {
               const minha = m.direcao === 'enviada';
               const nota = m.direcao === 'nota';
               return (
                 <div key={m.id} style={{ alignSelf: nota ? 'center' : minha ? 'flex-end' : 'flex-start', maxWidth: '72%' }}>
                   <div style={{
-                    background: nota ? '#fef9c3' : minha ? 'var(--v2)' : '#fff',
-                    color: nota ? '#713f12' : minha ? '#fff' : 'var(--preto)',
-                    border: nota ? '1px dashed #eab308' : '1px solid var(--borda)',
-                    borderRadius: nota ? 10 : minha ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                    padding: '.5rem .75rem', fontSize: 13, lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+                    background: nota ? '#fff5c4' : minha ? WA.enviada : WA.recebida,
+                    color: nota ? '#5b4a12' : WA.texto,
+                    border: nota ? '1px solid #e6d878' : 'none',
+                    borderRadius: nota ? 10 : minha ? '8px 8px 2px 8px' : '8px 8px 8px 2px',
+                    boxShadow: nota ? 'none' : '0 1px 0.5px rgba(11,20,26,.13)',
+                    padding: '.4rem .6rem .3rem', fontSize: 13.5, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word',
                   }}>
                     {nota && <div style={{ fontSize: 10, fontWeight: 800, marginBottom: 2 }}>📌 NOTA INTERNA {m.autor_nome ? `— ${m.autor_nome}` : ''}</div>}
-                    {!nota && minha && m.autor_nome && <div style={{ fontSize: 10, fontWeight: 700, opacity: .85, marginBottom: 2 }}>{m.autor_nome}</div>}
+                    {!nota && minha && m.autor_nome && <div style={{ fontSize: 11, fontWeight: 700, color: WA.verdeEsc, marginBottom: 1 }}>{m.autor_nome}</div>}
                     {m.conteudo}
-                    <div style={{ fontSize: 9, opacity: .7, textAlign: 'right', marginTop: 3 }}>
+                    <span style={{ fontSize: 10, color: WA.sub, marginLeft: 8, float: 'right', position: 'relative', top: 4 }}>
                       {horaCurta(m.created_at)}
-                      {minha && m.status_envio === 'erro' && ' ⚠ falhou'}
-                      {minha && m.status_envio === 'lido' && ' ✓✓'}
-                      {minha && m.status_envio === 'entregue' && ' ✓✓'}
-                      {minha && m.status_envio === 'enviado' && ' ✓'}
-                    </div>
+                      {minha && m.status_envio === 'erro' && <span style={{ color: '#c62828' }}> ⚠</span>}
+                      {minha && (m.status_envio === 'lido')      && <span style={{ color: WA.check }}> ✓✓</span>}
+                      {minha && (m.status_envio === 'entregue')  && <span style={{ color: WA.sub }}> ✓✓</span>}
+                      {minha && (m.status_envio === 'enviado')   && <span style={{ color: WA.sub }}> ✓</span>}
+                    </span>
                   </div>
                 </div>
               );
@@ -408,7 +439,7 @@ export default function CentralWhatsapp() {
           </div>
 
           {/* caixa de envio */}
-          <div style={{ borderTop: '1px solid var(--borda)', padding: '.6rem .75rem', background: modoNota ? '#fefce8' : '#fff', position: 'relative' }}>
+          <div style={{ borderTop: `1px solid ${WA.borda}`, padding: '.55rem .75rem', background: modoNota ? '#fdf6d0' : WA.barra, position: 'relative' }}>
             {/* respostas rápidas: digite "/" */}
             {sugestoes.length > 0 && (
               <div style={{ position: 'absolute', bottom: '100%', left: 60, right: 120, background: '#fff', border: '1px solid var(--borda)', borderRadius: 10, boxShadow: '0 -6px 24px rgba(0,0,0,.12)', overflow: 'hidden', zIndex: 10 }}>
@@ -428,12 +459,13 @@ export default function CentralWhatsapp() {
                 style={{ border: '1px solid var(--borda)', background: modoNota ? '#fef08a' : '#fff', borderRadius: 8, padding: '.5rem .6rem', cursor: 'pointer', fontSize: 14 }}>
                 📌
               </button>
-              <textarea className="inf" rows={1} value={texto} style={{ flex: 1, resize: 'none', maxHeight: 110 }}
+              <textarea className="inf" rows={1} value={texto} style={{ flex: 1, resize: 'none', maxHeight: 110, borderRadius: 20, background: '#fff', border: `1px solid ${WA.borda}` }}
                 placeholder={modoNota ? '📌 Nota interna — o cliente NÃO recebe isso…' : 'Digite a mensagem…  (dica: "/" abre respostas rápidas)'}
                 onChange={e => setTexto(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!sugestoes.length) enviar(); else setTexto(sugestoes[0].texto); } }} />
-              <button className="btn-salvar-atualiz" style={{ padding: '.55rem 1rem' }} disabled={enviando} onClick={enviar}>
-                {enviando ? '…' : modoNota ? '📌 Anotar' : '➤ Enviar'}
+              <button style={{ background: WA.verde, color: '#fff', border: 'none', borderRadius: '50%', width: 42, height: 42, cursor: 'pointer', fontSize: 16, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                disabled={enviando} onClick={enviar} title={modoNota ? 'Anotar' : 'Enviar'}>
+                {enviando ? '…' : modoNota ? '📌' : '➤'}
               </button>
             </div>
           </div>
