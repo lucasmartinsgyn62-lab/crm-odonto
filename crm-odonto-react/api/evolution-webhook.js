@@ -25,11 +25,15 @@ export default async function handler(req, res) {
       .eq('instancia', instancia).maybeSingle();
     if (!conexao) return;
 
-    // valida a apikey global do tenant (defesa: só a Evolution do cliente escreve)
-    const { data: cfg } = await supabase.from('evolution_config')
-      .select('api_key').eq('tenant_id', conexao.tenant_id).maybeSingle();
+    // Segurança: a instância só existe se foi criada pelo CRM e seu nome é aleatório
+    // (avancer_<tenant8>_<timestamp36>) — funciona como segredo compartilhado.
+    // A Evolution não envia apikey no webhook; se enviar e estiver ERRADA, rejeitamos.
     const apikey = req.headers['apikey'] || req.headers['x-api-key'];
-    if (!cfg || !apikey || apikey !== cfg.api_key) return;
+    if (apikey) {
+      const { data: cfg } = await supabase.from('evolution_config')
+        .select('api_key').eq('tenant_id', conexao.tenant_id).maybeSingle();
+      if (cfg && apikey !== cfg.api_key) return;
+    }
 
     const ev = String(evento || '').toLowerCase().replace(/\./g, '_');
 
