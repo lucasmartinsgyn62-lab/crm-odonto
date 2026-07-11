@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
     // acha a conexão + tenant pela instância
     const { data: conexao } = await supabase.from('whatsapp_conexoes')
-      .select('id, tenant_id, contato_nome, numero, status')
+      .select('id, tenant_id, nome, numero, status')
       .eq('instancia', instancia).maybeSingle();
     if (!conexao) return;
 
@@ -53,27 +53,36 @@ export default async function handler(req, res) {
     }
 
     if (ev === 'messages_upsert') {
+      // MODO MONITORAMENTO: capturamos AMBOS os lados.
+      //  - fromMe=false → mensagem que o cliente mandou pro funcionário (recebida)
+      //  - fromMe=true  → resposta que o FUNCIONÁRIO deu pelo celular dele (enviada)
+      // Assim o admin vê a conversa inteira, dos dois lados, na Central.
       const msgs = Array.isArray(body.data) ? body.data : [body.data];
       for (const m of msgs) {
-        if (!m?.key || m.key.fromMe) continue;               // ignora o que o próprio número enviou
+        if (!m?.key) continue;
         const jid = m.key.remoteJid || '';
-        if (jid.endsWith('@g.us')) continue;                 // ignora grupos
-        const telefone = jid.split('@')[0];
-        const nome = m.pushName || telefone;
+        if (jid.endsWith('@g.us') || jid === 'status@broadcast') continue; // ignora grupos e status
+        const doFuncionario = !!m.key.fromMe;
+        const telefone = jid.split('@')[0];                  // o contato (cliente) é sempre o remoteJid
+        const nomeContato = m.pushName || telefone;
         const { tipo, texto } = extrair(m.message);
         const waId = m.key.id;
 
-        const conversa = await garantirConversa(conexao.tenant_id, conexao.id, telefone, nome);
+        const conversa = await garantirConversa(conexao.tenant_id, conexao.id, telefone, nomeContato);
         const { error } = await supabase.from('mensagens').insert({
           tenant_id: conexao.tenant_id, conversa_id: conversa.id,
-          direcao: 'recebida', tipo, conteudo: texto, wa_msg_id: waId,
+          direcao: doFuncionario ? 'enviada' : 'recebida',
+          tipo, conteudo: texto, wa_msg_id: waId,
+          autor_nome: doFuncionario ? conexao.nome : null, // nome do funcionário na bolha enviada
         });
         if (error) { if (error.code !== '23505') console.error('evo msg:', error.message); continue; }
 
         await supabase.from('conversas').update({
-          contato_nome: nome, ultima_msg: texto, ultima_msg_at: new Date().toISOString(),
-          nao_lidas: (conversa.nao_lidas || 0) + 1,
-          ...(conversa.status === 'resolvida' ? { status: 'aberta' } : {}),
+          ...(doFuncionario ? {} : { contato_nome: nomeContato }),
+          ultima_msg: texto, ultima_msg_at: new Date().toISOString(),
+          // só conta "não lida" quando é o cliente que fala; resposta do funcionário não é pendência
+          ...(doFuncionario ? {} : { nao_lidas: (conversa.nao_lidas || 0) + 1 }),
+          ...(!doFuncionario && conversa.status === 'resolvida' ? { status: 'aberta' } : {}),
         }).eq('id', conversa.id);
       }
       return;

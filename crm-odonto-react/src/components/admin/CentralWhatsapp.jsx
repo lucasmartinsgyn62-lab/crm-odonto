@@ -34,6 +34,7 @@ export default function CentralWhatsapp() {
   const [busca, setBusca] = useState('');
   const [filtroFila, setFiltroFila] = useState('');
   const [filtroAtend, setFiltroAtend] = useState('');
+  const [filtroConexao, setFiltroConexao] = useState(''); // = filtrar por funcionário (WhatsApp)
   const [texto, setTexto] = useState('');
   const [modoNota, setModoNota] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -205,6 +206,7 @@ export default function CentralWhatsapp() {
   const listaFiltrada = useMemo(() => {
     let l = conversas;
     if (tab !== 'todas') l = l.filter(c => c.status === tab);
+    if (filtroConexao) l = l.filter(c => c.conexao_id === filtroConexao);
     if (filtroFila) l = l.filter(c => c.fila_id === filtroFila);
     if (filtroAtend === 'ninguem') l = l.filter(c => !c.atribuido_a);
     else if (filtroAtend) l = l.filter(c => c.atribuido_a === filtroAtend);
@@ -213,7 +215,7 @@ export default function CentralWhatsapp() {
       l = l.filter(c => (c.contato_nome || '').toLowerCase().includes(b) || (c.contato_numero || '').includes(b));
     }
     return l;
-  }, [conversas, tab, busca, filtroFila, filtroAtend]);
+  }, [conversas, tab, busca, filtroConexao, filtroFila, filtroAtend]);
 
   const nomeEquipe = id => equipe.find(e => e.id === id)?.nome || null;
   const nomeConexao = id => conexoes.find(x => x.id === id)?.nome || 'WhatsApp';
@@ -296,9 +298,17 @@ export default function CentralWhatsapp() {
               </button>
             ))}
           </div>
+          {/* filtro por FUNCIONÁRIO (cada WhatsApp conectado) — principal no modo monitoramento */}
+          {conexoes.length > 1 && (
+            <select className="inf" style={{ width: '100%', fontSize: 12, padding: '.35rem .5rem', marginBottom: 4, fontWeight: 700, borderColor: filtroConexao ? 'var(--v2)' : 'var(--borda)' }}
+              value={filtroConexao} onChange={e => setFiltroConexao(e.target.value)}>
+              <option value="">👥 Todos os funcionários / WhatsApps</option>
+              {conexoes.map(cx => <option key={cx.id} value={cx.id}>{cx.tipo === 'qr' ? '📱' : '🏢'} {cx.nome}{cx.setor ? ` (${cx.setor})` : ''}</option>)}
+            </select>
+          )}
           <div style={{ display: 'flex', gap: 4 }}>
             <select className="inf" style={{ flex: 1, fontSize: 11, padding: '.3rem .4rem' }} value={filtroFila} onChange={e => setFiltroFila(e.target.value)}>
-              <option value="">Todas as filas</option>
+              <option value="">Todas as categorias</option>
               {filas.map(f => <option key={f.id} value={f.id}>{f.nome}</option>)}
             </select>
             <select className="inf" style={{ flex: 1, fontSize: 11, padding: '.3rem .4rem' }} value={filtroAtend} onChange={e => setFiltroAtend(e.target.value)}>
