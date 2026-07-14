@@ -49,7 +49,7 @@ export default function Hero() {
 
       <div className="av-hero-grid">
         {/* ESQUERDA — copy agressiva */}
-        <div>
+        <div className="av-hero-copy">
           <div className="av-badge av-badge-forte">
             🔥 SUPORTE PRESENCIAL EM BRASÍLIA E GOIÂNIA + TREINAMENTO PRESENCIAL
           </div>

@@ -485,14 +485,15 @@ body.av-dark::before{display:none}
 .av-hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(184,108,255,.2) 0%,rgba(124,58,237,.08) 36%,transparent 70%);filter:blur(2px);top:-100px;right:-100px;pointer-events:none;animation:avHalo 5s ease-in-out infinite}
 .av-hero-glow2{width:400px;height:400px;top:auto;bottom:-120px;left:-120px;right:auto;animation-delay:2.5s}
 .av-hero-grid{max-width:1200px;margin:0 auto;padding:4rem 3rem;display:grid;grid-template-columns:1.15fr .85fr;gap:3rem;align-items:center;width:100%}
+.av-hero-copy,.av-wa-copy{background:rgba(255,255,255,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(124,58,237,.4);border-radius:26px;padding:2.2rem;box-shadow:0 20px 60px rgba(45,20,70,.24),0 0 24px rgba(124,58,237,.12)}
 .av-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(124,58,237,.16);border:1px solid rgba(167,139,250,.35);color:var(--av-roxo3);padding:.45rem 1.1rem;border-radius:20px;font-size:11px;letter-spacing:1.5px;font-weight:700;margin-bottom:1.6rem;animation:pulse 3s ease-in-out infinite}
 /* Badge AGRESSIVO — destaque suporte + treinamento presencial */
 .av-badge-forte{background:linear-gradient(135deg,#7C3AED 0%,#9333EA 55%,#C026D3 100%)!important;border:1.5px solid rgba(255,255,255,.5)!important;color:#fff!important;font-size:13px!important;font-weight:900!important;letter-spacing:.6px!important;padding:.6rem 1.35rem!important;border-radius:14px!important;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.4);animation:avBadgeForte 1.6s ease-in-out infinite!important}
 @keyframes avBadgeForte{0%,100%{box-shadow:0 8px 26px rgba(124,58,237,.6),0 0 0 0 rgba(192,38,211,.6);transform:scale(1)}50%{box-shadow:0 12px 36px rgba(147,51,234,.85),0 0 0 12px rgba(192,38,211,0);transform:scale(1.04)}}
-.av-h1{color:#fff;font-size:52px;font-weight:900;line-height:1.08;margin-bottom:1.2rem;font-family:"Inter",sans-serif;letter-spacing:-1.5px;text-shadow:0 3px 24px rgba(0,0,0,.5)}
+.av-h1{color:#21152f;font-size:52px;font-weight:950;line-height:1.05;margin-bottom:1.2rem;font-family:"Inter",sans-serif;letter-spacing:-1.8px;text-shadow:none}
 .av-h1 em{font-style:normal;background:linear-gradient(90deg,var(--av-roxo2),#fff,var(--av-neon),var(--av-roxo2));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:avShine 4s linear infinite;filter:drop-shadow(0 0 9px rgba(184,108,255,.72))}
-.av-hero-sub{color:rgba(255,255,255,.86);font-size:16px;line-height:1.8;margin-bottom:2rem;max-width:520px;text-shadow:0 2px 12px rgba(0,0,0,.5)}
-.av-hero-sub strong{color:#e9d5ff}
+.av-hero-sub{color:#51475c;font-size:15px;line-height:1.72;margin-bottom:1.7rem;max-width:520px;text-shadow:none;font-weight:500}
+.av-hero-sub strong{color:var(--av-roxo);font-weight:850}
 .av-hero-btns{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.4rem}
 .av-hero-chips{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem}
 .av-hero-chips span{color:var(--av-roxo3);font-size:12px;font-weight:600}
@@ -752,13 +753,14 @@ body.av-dark .av-depo-area,
 body.av-dark .av-logo-tag,
 body.av-dark .av-brand-tagline{color:#756a80}
 body.av-dark .av-hero .av-stat-lbl,
-body.av-dark .av-hero .av-logo-tag{color:rgba(255,255,255,.72);text-shadow:0 2px 10px rgba(0,0,0,.5)}
-body.av-dark .av-hero .av-hero-chips span{color:#f3e8ff;text-shadow:0 2px 10px rgba(0,0,0,.55)}
-body.av-dark .av-wa-sec .av-h2{color:#fff;text-shadow:0 3px 24px rgba(0,0,0,.55)}
+body.av-dark .av-hero .av-logo-tag{color:#756a80;text-shadow:none}
+body.av-dark .av-hero .av-hero-chips span{color:var(--av-roxo);text-shadow:none;font-weight:750}
+body.av-dark .av-wa-sec .av-h2{color:#21152f;text-shadow:none;font-weight:950;letter-spacing:-1.2px}
 body.av-dark .av-wa-sec .av-wa-copy p,
-body.av-dark .av-wa-sec .av-wa-bullets li{color:rgba(255,255,255,.9);text-shadow:0 2px 12px rgba(0,0,0,.55)}
-body.av-dark .av-wa-sec .av-tag{color:#e9d5ff;text-shadow:0 0 14px rgba(184,108,255,.8)}
-body.av-dark .av-stat-num{color:#fff;text-shadow:0 0 16px rgba(184,108,255,.8)}
+body.av-dark .av-wa-sec .av-wa-bullets li{color:#51475c;text-shadow:none;font-weight:550}
+body.av-dark .av-wa-sec .av-wa-copy p strong{color:var(--av-roxo)}
+body.av-dark .av-wa-sec .av-tag{color:var(--av-roxo);text-shadow:none}
+body.av-dark .av-stat-num{color:var(--av-roxo);text-shadow:0 0 14px rgba(124,58,237,.24)}
 body.av-dark .av-footer .fi-title,
 body.av-dark .av-footer a,
 body.av-dark .av-footer p{color:#5b5268}
@@ -858,6 +860,7 @@ body.av-dark .av-footer p{color:#5b5268}
   .av-h2{font-size:23px}
   .av-sec{padding:3.2rem 1.1rem}
   .av-hero-grid{padding:2.2rem 1.1rem}
+  .av-hero-copy,.av-wa-copy{padding:1.4rem 1.2rem;border-radius:20px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   .av-hero-logo{max-width:225px}
   .av-logo-halo{width:240px;height:240px}
   .av-hero-sub{font-size:14px}
