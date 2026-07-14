@@ -38,6 +38,11 @@ export default function Hero() {
 
   return (
     <section id="sec-hero" className="av-hero">
+      <video className="av-hero-video" autoPlay muted loop playsInline preload="metadata" aria-hidden="true">
+        <source src="/landing-hero.mp4" type="video/mp4" />
+      </video>
+      <div className="av-hero-video-overlay" />
+
       {/* brilho roxo de fundo */}
       <div className="av-hero-glow" />
       <div className="av-hero-glow av-hero-glow2" />
