@@ -486,7 +486,7 @@ body.av-dark::before{display:none}
 .av-hero-glow2{width:400px;height:400px;top:auto;bottom:-120px;left:-120px;right:auto;animation-delay:2.5s}
 .av-hero-grid{max-width:1200px;margin:0 auto;padding:4rem 3rem;display:grid;grid-template-columns:1.15fr .85fr;gap:3rem;align-items:center;width:100%}
 .av-hero-copy,.av-wa-copy{background:rgba(255,255,255,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(124,58,237,.4);border-radius:26px;padding:2.2rem;box-shadow:0 20px 60px rgba(45,20,70,.24),0 0 24px rgba(124,58,237,.12)}
-.av-hero-copy{padding-bottom:calc(2.2rem + 38px)}
+.av-hero-copy{padding-bottom:calc(2.2rem + 6cm)}
 .av-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(124,58,237,.16);border:1px solid rgba(167,139,250,.35);color:var(--av-roxo3);padding:.45rem 1.1rem;border-radius:20px;font-size:11px;letter-spacing:1.5px;font-weight:700;margin-bottom:1.6rem;animation:pulse 3s ease-in-out infinite}
 /* Badge AGRESSIVO — destaque suporte + treinamento presencial */
 .av-badge-forte{background:linear-gradient(135deg,#7C3AED 0%,#9333EA 55%,#C026D3 100%)!important;border:1.5px solid rgba(255,255,255,.5)!important;color:#fff!important;font-size:13px!important;font-weight:900!important;letter-spacing:.6px!important;padding:.6rem 1.35rem!important;border-radius:14px!important;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.4);animation:avBadgeForte 1.6s ease-in-out infinite!important}
@@ -863,7 +863,7 @@ body.av-dark .av-footer p{color:#5b5268}
   .av-sec{padding:3.2rem 1.1rem}
   .av-hero-grid{padding:2.2rem 1.1rem}
   .av-hero-copy,.av-wa-copy{padding:1.4rem 1.2rem;border-radius:20px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-  .av-hero-copy{padding-bottom:calc(1.4rem + 38px)}
+  .av-hero-copy{padding-bottom:calc(1.4rem + 6cm)}
   .av-hero-logo{max-width:225px}
   .av-logo-halo{width:240px;height:240px}
   .av-hero-sub{font-size:14px}
