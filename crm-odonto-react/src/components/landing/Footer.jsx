@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="av-footer">
       <div className="fi">
         <div className="fb">
-          <img src="/logo-avancer-branca.png" alt="AvancerCRM" style={{ height: 90, width: 'auto', marginBottom: '.8rem' }} />
+          <img src="/logo-avancer.svg" alt="AvancerCRM" style={{ height: 90, width: 'auto', marginBottom: '.8rem', filter: 'drop-shadow(0 0 10px rgba(124,58,237,.35))' }} />
           <span className="fsub">SOLUÇÕES DIGITAIS PARA CLÍNICAS</span>
           <p>
             O CRM odontológico com suporte presencial em Brasília e Goiânia.

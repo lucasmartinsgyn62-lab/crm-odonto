@@ -97,7 +97,7 @@ export default function Hero() {
         <div className="av-hero-logo-wrap">
           <div className="av-logo-halo" />
           <img
-            src="/logo-avancer-branca.png"
+            src="/logo-avancer.svg"
             alt="AvancerCRM"
             className="av-hero-logo"
           />

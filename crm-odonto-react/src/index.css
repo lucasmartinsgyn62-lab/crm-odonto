@@ -443,12 +443,16 @@ table.tbl tbody tr:hover td{background:#fafaf8}
    Não interfere nas classes do admin acima.
    ═══════════════════════════════════════════════════════════ */
 :root{
-  --av-bg:#0B0817;--av-bg2:#130E26;--av-bg3:#1A1233;
+  --av-bg:#fff;--av-bg2:#fff;--av-bg3:#faf7ff;
   --av-roxo:#7C3AED;--av-roxo2:#A78BFA;--av-roxo3:#C4B5FD;
-  --av-borda:rgba(167,139,250,.18);
-  --av-txt:rgba(255,255,255,.75);
+  --av-neon:#b86cff;--av-neon-soft:#d8b4fe;
+  --av-borda:rgba(184,108,255,.38);
+  --av-txt:#5b5268;
+  --av-glow:0 0 12px rgba(184,108,255,.52),0 0 32px rgba(124,58,237,.3);
+  --av-glow-strong:0 0 10px rgba(216,180,254,.8),0 0 26px rgba(184,108,255,.72),0 0 58px rgba(124,58,237,.42);
 }
-body.av-dark{background:var(--av-bg)}
+body.av-dark{background:#fff;color:#21152f}
+body.av-dark::before{display:none}
 
 @keyframes avHalo{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.15);opacity:.85}}
 @keyframes avShine{0%{background-position:200% center}100%{background-position:-200% center}}
@@ -457,36 +461,36 @@ body.av-dark{background:var(--av-bg)}
 .av-logo-blend{mix-blend-mode:screen}
 
 /* Ticker */
-.av-ticker{background:linear-gradient(90deg,#4C1D95,var(--av-roxo),#4C1D95)!important}
+.av-ticker{background:linear-gradient(90deg,#4C1D95,var(--av-roxo),#4C1D95)!important;box-shadow:0 0 22px rgba(124,58,237,.75)}
 .av-ticker .tdot{background:var(--av-roxo3)}
 
 /* Navbar */
-.av-nav{background:rgba(11,8,23,.65);backdrop-filter:blur(14px);border-bottom:1px solid var(--av-borda)}
-.av-nav.scrolled{background:rgba(11,8,23,.92);box-shadow:0 4px 24px rgba(0,0,0,.5)}
-.av-nav-link{cursor:pointer;color:var(--av-txt);text-decoration:none;font-size:13px;font-weight:600;transition:.2s}
-.av-nav-link:hover{color:var(--av-roxo3)}
+.av-nav{background:rgba(255,255,255,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--av-borda);box-shadow:0 8px 30px rgba(124,58,237,.14)}
+.av-nav.scrolled{background:rgba(255,255,255,.97);box-shadow:0 4px 28px rgba(124,58,237,.2)}
+.av-nav-link{cursor:pointer;color:var(--av-roxo);text-decoration:none;font-size:13px;font-weight:700;transition:.2s}
+.av-nav-link:hover{color:var(--av-neon);text-shadow:0 0 12px rgba(184,108,255,.75)}
 
 /* Botões */
-.av-btn-cta{background:linear-gradient(135deg,var(--av-roxo) 0%,#9333EA 100%);color:#fff;border:none;padding:.9rem 2rem;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:.25s;font-family:"Inter",sans-serif;box-shadow:0 8px 28px rgba(124,58,237,.45);display:inline-flex;align-items:center;gap:.5rem;justify-content:center}
-.av-btn-cta:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(124,58,237,.65)}
-.av-btn-ghost{background:transparent;color:#fff;border:1.5px solid rgba(167,139,250,.4);padding:.9rem 1.8rem;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:.25s;font-family:"Inter",sans-serif}
+.av-btn-cta{background:linear-gradient(135deg,var(--av-roxo) 0%,#9333EA 100%);color:#fff;border:1px solid rgba(216,180,254,.7);padding:.9rem 2rem;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;transition:.25s;font-family:"Inter",sans-serif;box-shadow:var(--av-glow);display:inline-flex;align-items:center;gap:.5rem;justify-content:center;text-shadow:0 0 10px rgba(255,255,255,.42)}
+.av-btn-cta:hover{transform:translateY(-2px);box-shadow:var(--av-glow-strong)}
+.av-btn-ghost{background:#fff;color:var(--av-roxo);border:1.5px solid var(--av-roxo2);padding:.9rem 1.8rem;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:.25s;font-family:"Inter",sans-serif;box-shadow:0 0 18px rgba(124,58,237,.18)}
 .av-btn-ghost:hover{background:rgba(124,58,237,.15);border-color:var(--av-roxo2);transform:translateY(-2px)}
 .av-btn-sm{padding:.5rem 1.2rem!important;font-size:12px!important;border-radius:8px!important}
 .av-btn-full{width:100%}
 
 /* Hero */
-.av-hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at 70% 20%,#1E1440 0%,var(--av-bg) 55%);padding-top:108px}
-.av-hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.28) 0%,transparent 70%);top:-100px;right:-100px;pointer-events:none;animation:avHalo 5s ease-in-out infinite}
+.av-hero{min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden;background:#fff;padding-top:108px}
+.av-hero-glow{position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(184,108,255,.2) 0%,rgba(124,58,237,.08) 36%,transparent 70%);filter:blur(2px);top:-100px;right:-100px;pointer-events:none;animation:avHalo 5s ease-in-out infinite}
 .av-hero-glow2{width:400px;height:400px;top:auto;bottom:-120px;left:-120px;right:auto;animation-delay:2.5s}
 .av-hero-grid{max-width:1200px;margin:0 auto;padding:4rem 3rem;display:grid;grid-template-columns:1.15fr .85fr;gap:3rem;align-items:center;width:100%}
 .av-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(124,58,237,.16);border:1px solid rgba(167,139,250,.35);color:var(--av-roxo3);padding:.45rem 1.1rem;border-radius:20px;font-size:11px;letter-spacing:1.5px;font-weight:700;margin-bottom:1.6rem;animation:pulse 3s ease-in-out infinite}
 /* Badge AGRESSIVO — destaque suporte + treinamento presencial */
 .av-badge-forte{background:linear-gradient(135deg,#7C3AED 0%,#9333EA 55%,#C026D3 100%)!important;border:1.5px solid rgba(255,255,255,.5)!important;color:#fff!important;font-size:13px!important;font-weight:900!important;letter-spacing:.6px!important;padding:.6rem 1.35rem!important;border-radius:14px!important;text-transform:uppercase;text-shadow:0 1px 6px rgba(0,0,0,.4);animation:avBadgeForte 1.6s ease-in-out infinite!important}
 @keyframes avBadgeForte{0%,100%{box-shadow:0 8px 26px rgba(124,58,237,.6),0 0 0 0 rgba(192,38,211,.6);transform:scale(1)}50%{box-shadow:0 12px 36px rgba(147,51,234,.85),0 0 0 12px rgba(192,38,211,0);transform:scale(1.04)}}
-.av-h1{color:#fff;font-size:52px;font-weight:900;line-height:1.08;margin-bottom:1.2rem;font-family:"Inter",sans-serif;letter-spacing:-1.5px}
-.av-h1 em{font-style:normal;background:linear-gradient(90deg,var(--av-roxo2),#E9D5FF,var(--av-roxo2));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:avShine 4s linear infinite}
+.av-h1{color:#21152f;font-size:52px;font-weight:900;line-height:1.08;margin-bottom:1.2rem;font-family:"Inter",sans-serif;letter-spacing:-1.5px}
+.av-h1 em{font-style:normal;background:linear-gradient(90deg,var(--av-roxo2),#fff,var(--av-neon),var(--av-roxo2));background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:avShine 4s linear infinite;filter:drop-shadow(0 0 9px rgba(184,108,255,.72))}
 .av-hero-sub{color:var(--av-txt);font-size:16px;line-height:1.8;margin-bottom:2rem;max-width:520px}
-.av-hero-sub strong{color:#fff}
+.av-hero-sub strong{color:var(--av-roxo)}
 .av-hero-btns{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.4rem}
 .av-hero-chips{display:flex;gap:1.2rem;flex-wrap:wrap;margin-bottom:2rem}
 .av-hero-chips span{color:var(--av-roxo3);font-size:12px;font-weight:600}
@@ -662,7 +666,52 @@ body.av-dark{background:var(--av-bg)}
 .av-cont-form select.inf option{background:var(--av-bg2);color:#fff}
 
 /* Footer */
-.av-footer{background:#070510!important;border-top:1px solid var(--av-borda)}
+.av-footer{background:#fff!important;border-top:1px solid var(--av-borda)}
+
+/* Landing clara: branco absoluto com o roxo da marca em efeito neon */
+body.av-dark .av-brand,
+body.av-dark .av-wa-sec,
+body.av-dark .av-sec-recursos,
+body.av-dark .av-sec-demo,
+body.av-dark .av-sec-planos,
+body.av-dark .av-sec-depo,
+body.av-dark .av-sec-cont{background:#fff}
+body.av-dark .av-brand{background:#fff}
+body.av-dark .av-h2,
+body.av-dark .av-demo-text h3,
+body.av-dark .av-rec-card h3,
+body.av-dark .av-func-item strong,
+body.av-dark .av-plano-nome,
+body.av-dark .av-dif-card h3,
+body.av-dark .av-depo-nome,
+body.av-dark .av-ci-t strong,
+body.av-dark .av-cont-form h3{color:#21152f}
+body.av-dark .av-rec-card,
+body.av-dark .av-func-group,
+body.av-dark .av-plano-card,
+body.av-dark .av-dif-card,
+body.av-dark .av-depo-card,
+body.av-dark .av-ci,
+body.av-dark .av-cont-form{background:#fff;border-color:rgba(124,58,237,.38);box-shadow:0 0 14px rgba(124,58,237,.14),0 10px 32px rgba(76,29,149,.08)}
+body.av-dark .av-dor-box{background:#fff;border-color:rgba(124,58,237,.38);box-shadow:0 0 22px rgba(124,58,237,.13)}
+body.av-dark .av-plano-card.destaque,
+body.av-dark .av-dif-ia{background:linear-gradient(160deg,#fff 0%,#faf5ff 100%);border-color:var(--av-neon);box-shadow:var(--av-glow)}
+body.av-dark .av-demo-frame{background:#fff;border-color:rgba(124,58,237,.4);box-shadow:var(--av-glow)}
+body.av-dark .av-demo-bar{background:#faf7ff}
+body.av-dark .av-cont-form .fg label{color:#5b5268}
+body.av-dark .av-cont-form .inf{background:#fff;border-color:rgba(124,58,237,.35);color:#21152f}
+body.av-dark .av-cont-form .inf::placeholder{color:#8d8299}
+body.av-dark .av-cont-form select.inf option{background:#fff;color:#21152f}
+body.av-dark .av-plano-preco .valor{color:var(--av-roxo);text-shadow:0 0 18px rgba(124,58,237,.32)}
+body.av-dark .av-plano-preco .mes,
+body.av-dark .av-stat-lbl,
+body.av-dark .av-depo-area,
+body.av-dark .av-logo-tag,
+body.av-dark .av-brand-tagline{color:#756a80}
+body.av-dark .av-stat-num{color:var(--av-roxo);text-shadow:0 0 16px rgba(124,58,237,.35)}
+body.av-dark .av-footer .fi-title,
+body.av-dark .av-footer a,
+body.av-dark .av-footer p{color:#5b5268}
 
 /* ─── Animações de entrada (scroll reveal — re-disparam a cada passagem) ─── */
 @keyframes avInUp{from{opacity:0;transform:translateY(44px)}to{opacity:1;transform:none}}

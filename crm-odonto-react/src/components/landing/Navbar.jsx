@@ -36,7 +36,7 @@ export default function Navbar({ onLoginClick }) {
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         style={{ cursor: 'pointer', lineHeight: 1 }}
       >
-        <img src="/logo-avancer-branca.png" alt="AvancerCRM" style={{ height: 60, width: 'auto', display: 'block', filter: 'drop-shadow(0 0 10px rgba(124,58,237,.5))' }} />
+        <img src="/logo-avancer.svg" alt="AvancerCRM" style={{ height: 60, width: 'auto', display: 'block', filter: 'drop-shadow(0 0 10px rgba(124,58,237,.5))' }} />
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
