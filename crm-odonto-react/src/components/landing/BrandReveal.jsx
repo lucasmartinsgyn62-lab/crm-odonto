@@ -70,6 +70,10 @@ export default function BrandReveal() {
 
   return (
     <section className="av-wa-sec" ref={secRef}>
+      <video className="av-wa-bg-video" autoPlay muted loop playsInline preload="metadata" aria-hidden="true">
+        <source src="/landing-section-2.mp4" type="video/mp4" />
+      </video>
+      <div className="av-wa-video-overlay" />
       <div className="av-brand-glow" />
       <div className="av-wa-grid">
 
