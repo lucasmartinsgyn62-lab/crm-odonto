@@ -1,13 +1,15 @@
 *{margin:0;padding:0;box-sizing:border-box}
+/* TEMA AVANCERCRM (02/08): branco + AZUL NEON — nicho Odonto do AvancerCRM.
+   (paleta antiga roxa preservada no git; só as variáveis mudaram) */
 :root{
-  --v1:#4C1D95;--v2:#7C3AED;--v3:#9333EA;--v4:#A78BFA;
-  --vc:#F3EEFF;--vm:#DDD6FE;
-  --b1:#FAF8FF;--b2:#F1EBFE;--b3:#C4B5FD;
-  --preto:#111;--cinza:#666;--cinza-cl:#999;
-  --borda:#E4E0EE;--fundo:#FBFAFF;--white:#fff;
-  --ouro:#7C3AED;--ouro2:#9333EA;
+  --v1:#0077C2;--v2:#009FE8;--v3:#00B3FF;--v4:#00E0FF;
+  --vc:#EAF7FF;--vm:#C7EDFF;
+  --b1:#F7FCFF;--b2:#E8F4FD;--b3:#9FE3FF;
+  --preto:#0f172a;--cinza:#64748b;--cinza-cl:#94a3b8;
+  --borda:#DCEDF8;--fundo:#F9FDFF;--white:#fff;
+  --ouro:#00B3FF;--ouro2:#00E0FF;
   --r:12px;--rl:20px;--rxl:28px;
-  --shadow:0 2px 16px rgba(124,58,237,.12);
+  --shadow:0 2px 16px rgba(0,179,255,.15);
 }
 html{scroll-behavior:smooth}
 body{font-family:"Inter",sans-serif;background:var(--b1);color:var(--preto);overflow-x:hidden;font-size:14px}
