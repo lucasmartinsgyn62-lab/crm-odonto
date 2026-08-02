@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useCRM } from '../../context/CRMContext';
+import RobosOdonto from './RobosOdonto';
 
 // ─── Constants ───────────────────────────────────────────────
 const TABS = [
+  { id: 'robos',    label: '🚀 Robôs de mensagens' },
   { id: 'conexao',  label: '🔗 Conexão WhatsApp' },
   { id: 'ia',       label: '🤖 Configurar IA' },
   { id: 'automacao',label: '⚙️ Automação & Regras' },
@@ -46,7 +48,7 @@ function uid() { return ++_uid; }
 export default function Whatsapp() {
   const { usuario, showToast } = useCRM();
   const tenantId = usuario?.tenant_id;
-  const [tab, setTab]     = useState('conexao');
+  const [tab, setTab]     = useState('robos');
   const [saving, setSaving] = useState(false);
 
   // ── Tab 1 state
@@ -324,6 +326,9 @@ export default function Whatsapp() {
           }}>{t.label}</button>
         ))}
       </div>
+
+      {/* ══ ABA 0: Robôs de mensagens (vitrine do disparo) ══ */}
+      {tab==='robos' && <RobosOdonto />}
 
       {/* ══ ABA 1: Conexão ══════════════════════════════════ */}
       {tab==='conexao' && (
