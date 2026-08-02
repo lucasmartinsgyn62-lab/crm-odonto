@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { CRMProvider, useCRM } from './context/CRMContext';
-import Landing from './pages/Landing';
 import Admin from './pages/Admin';
 import SuperAdmin from './pages/SuperAdmin';
 import ApiDocs from './pages/ApiDocs';
@@ -21,12 +20,22 @@ function AuthGate({ children, allowRoles }) {
   return children;
 }
 
+function PortaDeEntrada() {
+  const { usuario, authLoading } = useCRM();
+  if (authLoading) return null;
+  if (usuario) return <Navigate to={usuario.role === 'super_admin' ? '/superadmin' : '/admin'} replace />;
+  window.location.replace('https://avancercrm.vercel.app');
+  return null;
+}
+
 function AppRoutes() {
   return (
     <>
       <Toast />
       <Routes>
-        <Route path="/" element={<Landing />} />
+        {/* AVANCERCRM (02/08): o site institucional do odonto foi ELIMINADO deste
+            nicho — logado cai no backend; deslogado volta pro login do AvancerCRM. */}
+        <Route path="/" element={<PortaDeEntrada />} />
         <Route path="/api-docs" element={<ApiDocs />} />
         <Route path="/admin" element={
           <AuthGate allowRoles={['admin','recepcao']}>

@@ -27,7 +27,8 @@ export default function Sidebar() {
   const { usuario, logout, activePanel, setActivePanel, permissions } = useCRM();
   const navigate = useNavigate();
 
-  function handleLogout() { logout(); navigate('/'); }
+  // Sair volta pro LOGIN DO AVANCERCRM (o site antigo do odonto foi eliminado)
+  function handleLogout() { logout(); window.location.href = 'https://avancercrm.vercel.app'; }
 
   const initials = (usuario?.nome || 'AD').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
   const isAdmin  = usuario?.role === 'admin';
