@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { supabase } from '../../lib/supabase';
+import { enviarAnexo, AnexoImg, urlAnexo } from '../../lib/anexos';
 
 function pad(n) { return n < 10 ? '0' + n : '' + n; }
 function nowStr() {
@@ -37,7 +37,8 @@ function PSelect({ label, value, onChange, options, span }) {
 }
 
 export default function ProntuarioModal() {
-  const { prontuarioModal, setProntuarioModal, state, dispatch, showToast, procNames, usuario } = useCRM();
+  const { prontuarioModal, setProntuarioModal, state, dispatch, showToast, procNames, usuario,
+          setActivePanel, setPacienteFoco } = useCRM();
   const [novaAtualiz, setNovaAtualiz] = useState('');
   const [imgPreview, setImgPreview] = useState(null);
   const [pront, setPront] = useState({ ...EMPTY_PRONT });
@@ -120,11 +121,9 @@ export default function ProntuarioModal() {
     if (!files.length) return;
     const novos = [...imagens];
     for (const f of files) {
-      const path = `${usuario?.tenant_id || 'geral'}/${crypto.randomUUID()}-${f.name.replace(/[^\w.\-]/g, '_')}`;
-      const { error } = await supabase.storage.from('prontuarios').upload(path, f);
-      if (error) { showToast('Falha no upload: ' + error.message, 'error'); continue; }
-      const { data: pub } = supabase.storage.from('prontuarios').getPublicUrl(path);
-      novos.push({ name: f.name, url: pub.publicUrl, path, tipo: f.type, dt: new Date().toISOString() });
+      const { anexo, error } = await enviarAnexo(f, usuario?.tenant_id);
+      if (error) { showToast('Falha no upload: ' + error, 'error'); continue; }
+      novos.push(anexo);
     }
     dispatch({ type: 'UPDATE_IMGS_SLOT', payload: { agKey, horario, imagens: novos } });
   }
@@ -147,6 +146,13 @@ export default function ProntuarioModal() {
             </div>
           </div>
           <div style={{display:'flex',alignItems:'center',gap:'.7rem'}}>
+            {cliente.id && (
+              <button className="btsv" style={{background:'linear-gradient(135deg,#00b3ff,#00e0ff)'}}
+                title="Odontograma, radiografias e plano de tratamento"
+                onClick={() => { setPacienteFoco(cliente.id); setActivePanel('prontuario'); setProntuarioModal(null); }}>
+                🦷 Prontuário Inteligente
+              </button>
+            )}
             <span className="mpront-badge">PRONTUÁRIO</span>
             <button className="mpront-close" onClick={fechar}>✕</button>
           </div>
@@ -253,7 +259,7 @@ export default function ProntuarioModal() {
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:'.7rem',marginTop:'.9rem'}}>
                 {imagens.map((img, i) => (
                   <div key={i} style={{position:'relative',borderRadius:8,overflow:'hidden',cursor:'pointer',aspectRatio:'1',background:'#f5f5f5'}}>
-                    <img src={img.url || img.data} style={{width:'100%',height:'100%',objectFit:'cover'}} onClick={() => setImgPreview(img.url || img.data)} alt=""/>
+                    <AnexoImg item={img} style={{width:'100%',height:'100%',objectFit:'cover'}} onClick={async () => setImgPreview(await urlAnexo(img))} />
                     <button onClick={() => remImg(i)} style={{position:'absolute',top:2,right:2,background:'rgba(0,0,0,.6)',color:'#fff',border:'none',borderRadius:'50%',width:18,height:18,fontSize:10,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
                   </div>
                 ))}

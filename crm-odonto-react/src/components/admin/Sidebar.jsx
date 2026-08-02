@@ -9,6 +9,7 @@ const MENU = [
   { id: 'agenda',         label: 'Agenda',              icon: 'ti-calendar',         perm: 'agenda' , cor: '#0891b2' },
   { section: 'GESTÃO' },
   { id: 'clientes',       label: 'Pacientes',            icon: 'ti-users',            perm: 'clientes' , cor: '#0d9488' },
+  { id: 'prontuario',     label: 'Prontuário Inteligente', icon: 'ti-dental-broken',  perm: 'prontuario' , cor: '#00b3ff' },
   { id: 'dentistas',      label: 'Dentistas',           icon: 'ti-stethoscope',      perm: 'dentistas' , cor: '#4f46e5' },
   { id: 'origens',        label: 'Origens',             icon: 'ti-map-pin',          perm: 'origens' , cor: '#0d9488' },
   { id: 'procedimentos',  label: 'Procedimentos',       icon: 'ti-dental',           perm: 'procedimentos' , cor: '#7c3aed' },

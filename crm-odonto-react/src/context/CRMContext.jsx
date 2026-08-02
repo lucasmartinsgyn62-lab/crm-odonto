@@ -11,11 +11,11 @@ function todayStr() {
 }
 
 const ADMIN_PERMS = {
-  dashboard:true, agenda:true, clientes:true, dentistas:true,
+  dashboard:true, agenda:true, clientes:true, prontuario:true, dentistas:true,
   origens:true, procedimentos:true, relatorio:true, caixa:true, historico_caixa:true, auditoria:true
 };
 const RECEPCAO_PERMS = {
-  dashboard:false, agenda:true, clientes:true, dentistas:false,
+  dashboard:false, agenda:true, clientes:true, prontuario:false, dentistas:false,
   origens:false, procedimentos:false, relatorio:false, caixa:false, historico_caixa:false, auditoria:false
 };
 
@@ -40,6 +40,8 @@ export function CRMProvider({ children }) {
   const [selectedDentista,  setSelectedDentista]= useState('');
   const [prontuarioModal,   setProntuarioModal] = useState(null);
   const [caixaModal,        setCaixaModal]      = useState(null);
+  // paciente que outra tela pediu para abrir no Prontuário Inteligente
+  const [pacienteFoco,      setPacienteFoco]    = useState(null);
 
   // refs para evitar closures obsoletos no dispatch
   const agendaRef   = useRef(agenda);
@@ -557,6 +559,7 @@ export function CRMProvider({ children }) {
       selectedDentista, setSelectedDentista,
       prontuarioModal, setProntuarioModal,
       caixaModal, setCaixaModal,
+      pacienteFoco, setPacienteFoco,
       getAgKey, getDateStr,
       todayStr, pad,
       superAdmin,

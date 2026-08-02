@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useCRM } from '../../context/CRMContext';
-import { supabase } from '../../lib/supabase';
+import { enviarAnexo, AnexoImg, urlAnexo } from '../../lib/anexos';
 import { TIPO_LIST } from '../../constants';
 
 const EMPTY_PRONT = {
@@ -12,7 +12,7 @@ const EMPTY_PRONT = {
 const EMPTY_CLI = {nome:'',wpp:'',orig:'',tipo:'NOVO',areas:[],obs:'',prontuario:{...EMPTY_PRONT}};
 
 export default function Clientes() {
-  const { state, dispatch, showToast, setProntuarioModal, usuario } = useCRM();
+  const { state, dispatch, showToast, setProntuarioModal, usuario, setActivePanel, setPacienteFoco } = useCRM();
   const [form, setForm] = useState({...EMPTY_CLI, prontuario:{...EMPTY_PRONT}});
   const [editId, setEditId] = useState(null);
   const [busca, setBusca] = useState('');
@@ -29,11 +29,9 @@ export default function Clientes() {
     if (!files.length) return;
     const novos = [...(form.prontuario.imagens || [])];
     for (const f of files) {
-      const path = `${usuario?.tenant_id || 'geral'}/${crypto.randomUUID()}-${f.name.replace(/[^\w.\-]/g, '_')}`;
-      const { error } = await supabase.storage.from('prontuarios').upload(path, f);
-      if (error) { showToast('Falha no upload: ' + error.message, 'error'); continue; }
-      const { data: pub } = supabase.storage.from('prontuarios').getPublicUrl(path);
-      novos.push({ name: f.name, url: pub.publicUrl, path, tipo: f.type, dt: new Date().toISOString() });
+      const { anexo, error } = await enviarAnexo(f, usuario?.tenant_id);
+      if (error) { showToast('Falha no upload: ' + error, 'error'); continue; }
+      novos.push(anexo);
     }
     setPront('imagens', novos);
   }
@@ -192,7 +190,7 @@ export default function Clientes() {
                   <div key={i} style={{position:'relative',borderRadius:8,overflow:'hidden',cursor:'pointer',aspectRatio:'1',background:'#f5f5f5',border:'1px solid var(--borda)'}}>
                     {String(img.tipo||'').includes('pdf')
                       ? <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'100%',flexDirection:'column',fontSize:11,color:'var(--cinza)',padding:4,textAlign:'center'}}>📄<span style={{overflow:'hidden',textOverflow:'ellipsis',maxWidth:'100%'}}>{img.name}</span></div>
-                      : <img src={img.url || img.data} style={{width:'100%',height:'100%',objectFit:'cover'}} onClick={() => setImgPreview(img.url || img.data)} alt=""/>}
+                      : <AnexoImg item={img} style={{width:'100%',height:'100%',objectFit:'cover'}} onClick={async () => setImgPreview(await urlAnexo(img))} />}
                     <button type="button" onClick={() => remAnexo(i)} style={{position:'absolute',top:2,right:2,background:'rgba(0,0,0,.6)',color:'#fff',border:'none',borderRadius:'50%',width:18,height:18,fontSize:10,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>✕</button>
                   </div>
                 ))}
@@ -244,6 +242,11 @@ export default function Clientes() {
                 <td style={{fontSize:11}}>{(c.areas||[]).map(a => <span key={a} className="atag">{a}</span>)}</td>
                 <td><span className={`badge ${c.tipo==='NOVO'?'b-rec':'b-fin'}`}>{c.tipo||'—'}</span></td>
                 <td>
+                  <button className="btn-pront" style={{marginRight:4,background:'linear-gradient(135deg,#00b3ff,#00e0ff)',color:'#fff',border:'none'}}
+                    title="Odontograma, radiografias e plano de tratamento"
+                    onClick={() => { setPacienteFoco(c.id); setActivePanel('prontuario'); }}>
+                    <i className="ti ti-dental"></i> Inteligente
+                  </button>
                   <button className="btn-pront" onClick={() => {
                     // Find a slot for this client to open prontuario
                     let found = null;
