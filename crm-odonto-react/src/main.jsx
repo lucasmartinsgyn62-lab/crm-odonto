@@ -9,10 +9,17 @@ import { supabase } from './lib/supabase.js'
 // direto no backend (/admin), sem tela de login.
 async function consumirSso() {
   const h = new URLSearchParams((window.location.hash || '').replace(/^#/, ''))
+  const th = h.get('sso_th')
   const at = h.get('sso_at'), rt = h.get('sso_rt')
-  if (!at || !rt) return
+  if (!th && !(at && rt)) return
   try {
-    await supabase.auth.setSession({ access_token: at, refresh_token: rt })
+    if (th) {
+      // magic link de USO ÚNICO gerado pelo /api/sso-mint do app-mãe: vira uma
+      // sessão NOVA e independente (não compartilha refresh token com ninguém)
+      await supabase.auth.verifyOtp({ type: 'magiclink', token_hash: th })
+    } else {
+      await supabase.auth.setSession({ access_token: at, refresh_token: rt })
+    }
   } finally {
     // limpa os tokens da barra de endereço e vai pro backend
     window.history.replaceState({}, '', '/admin')
