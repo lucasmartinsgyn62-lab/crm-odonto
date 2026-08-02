@@ -3,6 +3,7 @@ import { useCRM } from '../../context/CRMContext';
 import Odontograma, { ESTADOS, LegendaOdontograma } from './Odontograma';
 import { FACES, FACES_NOME, nomeDente, SUP_PERM, INF_PERM } from '../../lib/odontograma';
 import { enviarAnexo, useAnexoUrl, urlAnexo } from '../../lib/anexos';
+import { STATUS as STATUS_ORC, hojeStr as hojeOrc, somaDias } from '../../lib/orcamento';
 import { num as toNum } from '../../constants';
 
 const RX_EXEMPLO = '/exemplo-radiografia-panoramica.svg';
@@ -140,12 +141,24 @@ export default function ProntuarioInteligente() {
     dispatch({ type: 'UPDATE_CLIENTE', payload: { id: paciente.id, prontuario: { ...(paciente.prontuario || {}), ...patch } } });
   }
   function setDentes(novosDentes) {
-    salvarPront({
+    const patch = {
       odontograma: {
         ...(pront.odontograma || {}), dentes: novosDentes,
         atualizado_em: new Date().toISOString(), atualizado_por: usuario?.nome || usuario?.email || '',
       },
-    });
+    };
+    // ORÇAMENTO AUTOMÁTICO: no momento em que o dentista lança o primeiro
+    // procedimento, o plano já vira orçamento na fila da recepção.
+    const temPendente = Object.values(novosDentes).some(d => (d.itens || []).some(i => i.status !== 'concluido'));
+    if (temPendente && !pront.orcamento) {
+      patch.orcamento = {
+        status: 'aguardando', criado_em: hojeOrc(), validade: somaDias(hojeOrc(), 30),
+        desconto: 0, descontoTipo: '%', parcelas: 1, obs: '',
+        historico: [{ quando: new Date().toISOString(), evento: 'Orçamento gerado pelo prontuário', quem: usuario?.nome || '' }],
+      };
+      showToast('🧾 Orçamento gerado — já está na tela de Orçamentos para a recepção', 'success');
+    }
+    salvarPront(patch);
   }
 
   /* ── itens do plano ── */
@@ -320,7 +333,14 @@ export default function ProntuarioInteligente() {
         <div className="pi-kpis">
           <div className="pi-kpi"><span>Dentes com tratamento</span><b>{Object.keys(dentes).length}</b><i>de 32</i></div>
           <div className="pi-kpi"><span>Procedimentos no plano</span><b>{totais.qtd}</b><i>{itens.filter(i => i.status === 'concluido').length} concluídos</i></div>
-          <div className="pi-kpi"><span>Plano em aberto</span><b>{brl(totais.planejado + totais.andamento)}</b><i>total {brl(totais.geral)}</i></div>
+          <div className="pi-kpi" style={{ cursor: pront.orcamento ? 'pointer' : 'default' }}
+            onClick={() => pront.orcamento && setActivePanel('orcamentos')}
+            title={pront.orcamento ? 'Abrir na tela de Orçamentos' : ''}>
+            <span>Plano em aberto</span><b>{brl(totais.planejado + totais.andamento)}</b>
+            <i>{pront.orcamento
+              ? `🧾 orçamento ${STATUS_ORC[pront.orcamento.status]?.label.toLowerCase() || pront.orcamento.status}`
+              : `total ${brl(totais.geral)}`}</i>
+          </div>
           <div className="pi-kpi"><span>Já investido</span><b>{brl(investido)}</b><i>{linhaTempo.length} consultas</i></div>
           <div className="pi-kpi"><span>Próxima consulta</span><b>{proxima ? proxima.data : '—'}</b><i>{proxima ? `${proxima.hora} · ${proxima.dentista}` : 'sem agendamento'}</i></div>
           <div className="pi-kpi"><span>Última visita</span><b>{ultima ? ultima.data : '—'}</b><i>{ultima ? ultima.status : 'primeira consulta'}</i></div>

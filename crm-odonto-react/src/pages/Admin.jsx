@@ -4,6 +4,7 @@ import Dashboard from '../components/admin/Dashboard';
 import Agenda from '../components/admin/Agenda';
 import Clientes from '../components/admin/Clientes';
 import ProntuarioInteligente from '../components/admin/ProntuarioInteligente';
+import Orcamentos from '../components/admin/Orcamentos';
 import Dentistas from '../components/admin/Dentistas';
 import Origens from '../components/admin/Origens';
 import Procedimentos from '../components/admin/Procedimentos';
@@ -25,6 +26,7 @@ const PANELS = {
   agenda: Agenda,
   clientes: Clientes,
   prontuario: ProntuarioInteligente,
+  orcamentos: Orcamentos,
   dentistas: Dentistas,
   origens: Origens,
   procedimentos: Procedimentos,
@@ -44,6 +46,7 @@ const PANEL_TITLES = {
   agenda: 'Agenda',
   clientes: 'Pacientes',
   prontuario: 'Prontuário Inteligente',
+  orcamentos: 'Orçamentos',
   dentistas: 'Dentistas',
   origens: 'Origens',
   procedimentos: 'Procedimentos',

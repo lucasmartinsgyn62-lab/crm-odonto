@@ -11,11 +11,11 @@ function todayStr() {
 }
 
 const ADMIN_PERMS = {
-  dashboard:true, agenda:true, clientes:true, prontuario:true, dentistas:true,
+  dashboard:true, agenda:true, clientes:true, prontuario:true, orcamentos:true, dentistas:true,
   origens:true, procedimentos:true, relatorio:true, caixa:true, historico_caixa:true, auditoria:true
 };
 const RECEPCAO_PERMS = {
-  dashboard:false, agenda:true, clientes:true, prontuario:false, dentistas:false,
+  dashboard:false, agenda:true, clientes:true, prontuario:false, orcamentos:true, dentistas:false,
   origens:false, procedimentos:false, relatorio:false, caixa:false, historico_caixa:false, auditoria:false
 };
 
