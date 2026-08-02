@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCRM } from '../../context/CRMContext';
+import { supabase } from '../../lib/supabase.js';
 
 const MENU = [
   { section: 'PRINCIPAL' },
@@ -34,6 +36,48 @@ export default function Sidebar() {
   const isAdmin  = usuario?.role === 'admin';
   const isRec    = usuario?.role === 'recepcao';
 
+  // LOGOMARCA DA CLÍNICA (02/08): moldura quadrada — o admin clica, escolhe a
+  // imagem e ela substitui o logotipo; salva em base64 na própria clínica (tenant).
+  const [logo, setLogo] = useState(null);       // { logo_url, logo_altura }
+  const [enviandoLogo, setEnviandoLogo] = useState(false);
+  const logoRef = useRef(null);
+  useEffect(() => {
+    if (!usuario?.tenant_id) return;
+    supabase.from('tenants').select('logo_url, logo_altura').eq('id', usuario.tenant_id).single()
+      .then(({ data }) => setLogo(data || {}));
+  }, [usuario?.tenant_id]);
+  function lerLogoComprimida(f) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(f);
+      img.onload = () => {
+        const alvo = Math.min(360, img.height);
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(img.width * (alvo / img.height)); cv.height = alvo;
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        URL.revokeObjectURL(url);
+        resolve(cv.toDataURL('image/png'));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('imagem inválida')); };
+      img.src = url;
+    });
+  }
+  async function subirLogo(f) {
+    if (!f || !usuario?.tenant_id) return;
+    setEnviandoLogo(true);
+    try {
+      const dataUrl = await lerLogoComprimida(f);
+      await supabase.from('tenants').update({ logo_url: dataUrl }).eq('id', usuario.tenant_id);
+      setLogo(l => ({ ...l, logo_url: dataUrl }));
+    } catch { /* mantém a moldura */ }
+    setEnviandoLogo(false);
+    if (logoRef.current) logoRef.current.value = '';
+  }
+  async function ajustarLogo(altura) {
+    setLogo(l => ({ ...l, logo_altura: altura }));
+    await supabase.from('tenants').update({ logo_altura: altura }).eq('id', usuario.tenant_id);
+  }
+
   // Filtra seções — mostra seção só se tiver ao menos 1 item visível após ela
   function isVisible(item) {
     if (item.section !== undefined) return true;
@@ -55,15 +99,25 @@ export default function Sidebar() {
   return (
     <div className="sidebar">
       <div className="sb-logo">
-        <img
-          src="/logo-avancer-branca.png"
-          alt="AvancerCRM"
-          style={{
-            height: 96, width: 'auto', display: 'block', margin: '0 auto',
-            animation: 'logoFloat 4s ease-in-out infinite',
-            filter: 'drop-shadow(0 0 14px rgba(255,255,255,.35)) drop-shadow(0 0 6px rgba(196,181,253,.5))',
-          }}
-        />
+        <input ref={logoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => subirLogo(e.target.files?.[0])} />
+        {logo?.logo_url ? (
+          <img src={logo.logo_url} alt="Logomarca da clínica" title={isAdmin ? 'Clique para trocar a logomarca' : ''}
+            onClick={() => isAdmin && logoRef.current?.click()}
+            style={{ height: logo.logo_altura || 72, maxWidth: '86%', objectFit: 'contain', display: 'block', margin: '0 auto', cursor: isAdmin ? 'pointer' : 'default' }} />
+        ) : (
+          <div onClick={() => isAdmin && logoRef.current?.click()} title={isAdmin ? 'Clique para enviar a logomarca da clínica' : ''}
+            style={{ width: 84, height: 84, margin: '0 auto', border: '2px dashed rgba(255,255,255,.45)', borderRadius: 16,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3,
+              cursor: isAdmin ? 'pointer' : 'default', color: '#fff' }}>
+            <i className={`ti ${enviandoLogo ? 'ti-loader-2' : 'ti-photo-plus'}`} style={{ fontSize: 24, opacity: .9 }}></i>
+            <span style={{ fontSize: 9, fontWeight: 700, opacity: .85, textAlign: 'center', lineHeight: 1.2 }}>SUA LOGO<br />AQUI</span>
+          </div>
+        )}
+        {isAdmin && logo?.logo_url && (
+          <input type="range" min="36" max="120" value={logo.logo_altura || 72}
+            onChange={e => ajustarLogo(+e.target.value)} title="Ajustar a proporção da logo"
+            style={{ width: '70%', display: 'block', margin: '6px auto 0', accentColor: '#fff' }} />
+        )}
       </div>
       <div className="sb-menu">
         {isRec && (
