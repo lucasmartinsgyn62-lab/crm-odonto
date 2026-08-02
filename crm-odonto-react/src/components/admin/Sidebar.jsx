@@ -25,6 +25,62 @@ const MENU = [
   { id: 'api',            label: 'API & Integrações',   icon: 'ti-plug-connected',   perm: 'api', adminOnly: true },
 ];
 
+// ENQUADRADOR (02/08): simula o quadro do menu — arrasta a imagem, dá zoom e
+// salva exatamente o recorte que vai aparecer.
+const QUADRO = 220, SAIDA = 360;
+function EnquadradorLogo({ imgSrc, onSalvar, onCancelar }) {
+  const [img, setImg] = useState(null);
+  const [zoom, setZoom] = useState(1);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const arrasto = useRef(null);
+  useEffect(() => {
+    const i = new Image();
+    i.onload = () => { setImg(i); setZoom(1); setPos({ x: 0, y: 0 }); };
+    i.src = imgSrc;
+  }, [imgSrc]);
+  if (!img) return null;
+  const s0 = Math.min(QUADRO / img.width, QUADRO / img.height);
+  const w = img.width * s0 * zoom, h = img.height * s0 * zoom;
+  const baixar = e => { arrasto.current = { x: e.clientX - pos.x, y: e.clientY - pos.y }; e.currentTarget.setPointerCapture?.(e.pointerId); };
+  const mover = e => { if (arrasto.current) setPos({ x: e.clientX - arrasto.current.x, y: e.clientY - arrasto.current.y }); };
+  const soltar = () => { arrasto.current = null; };
+  function salvar() {
+    const k = SAIDA / QUADRO;
+    const cv = document.createElement('canvas');
+    cv.width = SAIDA; cv.height = SAIDA;
+    cv.getContext('2d').drawImage(img, ((QUADRO - w) / 2 + pos.x) * k, ((QUADRO - h) / 2 + pos.y) * k, w * k, h * k);
+    onSalvar(cv.toDataURL('image/png'));
+  }
+  return (
+    <div onClick={e => e.target === e.currentTarget && onCancelar()}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,.6)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <div style={{ background: '#fff', borderRadius: 16, padding: 22, width: '100%', maxWidth: 420, color: '#0f172a' }}>
+        <h3 style={{ margin: '0 0 4px', border: 'none', padding: 0 }}>🖼️ Enquadrar a logomarca</h3>
+        <div style={{ fontSize: 12.5, color: '#64748b', marginBottom: 12 }}>Este é o <b>quadro exato do menu</b>. Arraste para posicionar e use o zoom — o que você vê é o que fica.</div>
+        <div style={{ background: '#0aa2e0', border: '1px solid #e2e8f0', borderRadius: 14, padding: '18px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <div onPointerDown={baixar} onPointerMove={mover} onPointerUp={soltar} onPointerLeave={soltar}
+            style={{ width: QUADRO, height: QUADRO, border: '2px dashed rgba(255,255,255,.7)', borderRadius: 16, overflow: 'hidden', position: 'relative', cursor: 'grab', background: 'rgba(255,255,255,.08)', touchAction: 'none' }}>
+            <img src={imgSrc} alt="" draggable={false}
+              style={{ position: 'absolute', left: (QUADRO - w) / 2 + pos.x, top: (QUADRO - h) / 2 + pos.y, width: w, height: h, maxWidth: 'none', pointerEvents: 'none', userSelect: 'none' }} />
+          </div>
+          <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,.85)' }}>⬆ assim vai ficar no topo do menu</div>
+        </div>
+        <label style={{ display: 'block', fontSize: 11.5, fontWeight: 600, color: '#64748b', marginBottom: 4 }}>🔍 Zoom ({Math.round(zoom * 100)}%)</label>
+        <input type="range" min="0.4" max="3" step="0.02" value={zoom} onChange={e => setZoom(+e.target.value)} style={{ width: '100%' }} />
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 12 }}>
+          <button onClick={() => { setZoom(1); setPos({ x: 0, y: 0 }); }} style={btnGhost}>↺ Recentralizar</button>
+          <span style={{ display: 'inline-flex', gap: 8 }}>
+            <button onClick={onCancelar} style={btnGhost}>Cancelar</button>
+            <button onClick={salvar} style={btnCheia}>✓ Usar este enquadramento</button>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+const btnGhost = { background: '#fff', border: '1px solid #e2e8f0', borderRadius: 9, padding: '7px 12px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', color: '#475569' };
+const btnCheia = { background: '#0aa2e0', border: 'none', borderRadius: 9, padding: '7px 12px', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', color: '#fff' };
+
 export default function Sidebar() {
   const { usuario, logout, activePanel, setActivePanel, permissions } = useCRM();
   const navigate = useNavigate();
@@ -46,32 +102,21 @@ export default function Sidebar() {
     supabase.from('tenants').select('logo_url, logo_altura').eq('id', usuario.tenant_id).single()
       .then(({ data }) => setLogo(data || {}));
   }, [usuario?.tenant_id]);
-  function lerLogoComprimida(f) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(f);
-      img.onload = () => {
-        const alvo = Math.min(360, img.height);
-        const cv = document.createElement('canvas');
-        cv.width = Math.round(img.width * (alvo / img.height)); cv.height = alvo;
-        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-        URL.revokeObjectURL(url);
-        resolve(cv.toDataURL('image/png'));
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('imagem inválida')); };
-      img.src = url;
-    });
-  }
-  async function subirLogo(f) {
+  const [enquadrando, setEnquadrando] = useState(null); // dataURL → abre o enquadrador
+  function subirLogo(f) {
     if (!f || !usuario?.tenant_id) return;
-    setEnviandoLogo(true);
+    const r = new FileReader();
+    r.onload = () => setEnquadrando(r.result);
+    r.readAsDataURL(f);
+    if (logoRef.current) logoRef.current.value = '';
+  }
+  async function salvarEnquadramento(dataUrl) {
+    setEnquadrando(null); setEnviandoLogo(true);
     try {
-      const dataUrl = await lerLogoComprimida(f);
       await supabase.from('tenants').update({ logo_url: dataUrl }).eq('id', usuario.tenant_id);
       setLogo(l => ({ ...l, logo_url: dataUrl }));
     } catch { /* mantém a moldura */ }
     setEnviandoLogo(false);
-    if (logoRef.current) logoRef.current.value = '';
   }
   async function ajustarLogo(altura) {
     setLogo(l => ({ ...l, logo_altura: altura }));
@@ -114,10 +159,17 @@ export default function Sidebar() {
           </div>
         )}
         {isAdmin && logo?.logo_url && (
-          <input type="range" min="36" max="120" value={logo.logo_altura || 72}
-            onChange={e => ajustarLogo(+e.target.value)} title="Ajustar a proporção da logo"
-            style={{ width: '70%', display: 'block', margin: '6px auto 0', accentColor: '#fff' }} />
+          <>
+            <input type="range" min="36" max="120" value={logo.logo_altura || 72}
+              onChange={e => ajustarLogo(+e.target.value)} title="Ajustar o tamanho da logo no menu"
+              style={{ width: '70%', display: 'block', margin: '6px auto 0', accentColor: '#fff' }} />
+            <button onClick={() => setEnquadrando(logo.logo_url)} title="Reposicionar/zoom no quadro"
+              style={{ display: 'block', margin: '4px auto 0', background: 'rgba(255,255,255,.18)', color: '#fff', border: 'none', borderRadius: 8, fontSize: 10, fontWeight: 700, padding: '3px 10px', cursor: 'pointer' }}>
+              🖼️ Enquadrar
+            </button>
+          </>
         )}
+        {enquadrando && <EnquadradorLogo imgSrc={enquadrando} onSalvar={salvarEnquadramento} onCancelar={() => setEnquadrando(null)} />}
       </div>
       <div className="sb-menu">
         {isRec && (
