@@ -5,24 +5,24 @@ import { supabase } from '../../lib/supabase.js';
 
 const MENU = [
   { section: 'PRINCIPAL' },
-  { id: 'dashboard',      label: 'Dashboard Diária',    icon: 'ti-layout-dashboard', perm: 'dashboard' },
-  { id: 'agenda',         label: 'Agenda',              icon: 'ti-calendar',         perm: 'agenda' },
+  { id: 'dashboard',      label: 'Dashboard Diária',    icon: 'ti-layout-dashboard', perm: 'dashboard' , cor: '#0ea5e9' },
+  { id: 'agenda',         label: 'Agenda',              icon: 'ti-calendar',         perm: 'agenda' , cor: '#0891b2' },
   { section: 'GESTÃO' },
-  { id: 'clientes',       label: 'Pacientes',            icon: 'ti-users',            perm: 'clientes' },
-  { id: 'dentistas',      label: 'Dentistas',           icon: 'ti-stethoscope',      perm: 'dentistas' },
-  { id: 'origens',        label: 'Origens',             icon: 'ti-map-pin',          perm: 'origens' },
-  { id: 'procedimentos',  label: 'Procedimentos',       icon: 'ti-dental',           perm: 'procedimentos' },
+  { id: 'clientes',       label: 'Pacientes',            icon: 'ti-users',            perm: 'clientes' , cor: '#0d9488' },
+  { id: 'dentistas',      label: 'Dentistas',           icon: 'ti-stethoscope',      perm: 'dentistas' , cor: '#4f46e5' },
+  { id: 'origens',        label: 'Origens',             icon: 'ti-map-pin',          perm: 'origens' , cor: '#0d9488' },
+  { id: 'procedimentos',  label: 'Procedimentos',       icon: 'ti-dental',           perm: 'procedimentos' , cor: '#7c3aed' },
   { section: 'ANÁLISE' },
-  { id: 'relatorio',      label: 'Relatórios',          icon: 'ti-chart-bar',        perm: 'relatorio' },
-  { id: 'auditoria',      label: 'Auditoria',           icon: 'ti-history-toggle',   perm: 'auditoria' },
+  { id: 'relatorio',      label: 'Relatórios',          icon: 'ti-chart-bar',        perm: 'relatorio' , cor: '#0ea5e9' },
+  { id: 'auditoria',      label: 'Auditoria',           icon: 'ti-history-toggle',   perm: 'auditoria' , cor: '#0891b2' },
   { section: 'CAIXA' },
-  { id: 'caixa',          label: 'Fechamento de Caixa', icon: 'ti-cash-register',    perm: 'caixa' },
-  { id: 'historico-caixa',label: 'Histórico de Caixa', icon: 'ti-history',          perm: 'historico_caixa' },
+  { id: 'caixa',          label: 'Fechamento de Caixa', icon: 'ti-cash-register',    perm: 'caixa' , cor: '#ea580c' },
+  { id: 'historico-caixa',label: 'Histórico de Caixa', icon: 'ti-history',          perm: 'historico_caixa' , cor: '#b45309' },
   { section: 'AUTOMAÇÃO' },
-  { id: 'central',        label: 'Central WhatsApp',    icon: 'ti-messages',         perm: 'central' },
-  { id: 'whatsapp',       label: 'WhatsApp & IA',       icon: 'ti-brand-whatsapp',   perm: 'whatsapp' },
-  { id: 'pipeline',       label: 'Vendas Pipeline',     icon: 'ti-layout-kanban',    perm: 'pipeline' },
-  { id: 'api',            label: 'API & Integrações',   icon: 'ti-plug-connected',   perm: 'api', adminOnly: true },
+  { id: 'central',        label: 'Central WhatsApp',    icon: 'ti-messages',         perm: 'central' , cor: '#16a34a' },
+  { id: 'whatsapp',       label: 'WhatsApp & IA',       icon: 'ti-brand-whatsapp',   perm: 'whatsapp' , cor: '#7c3aed' },
+  { id: 'pipeline',       label: 'Vendas Pipeline',     icon: 'ti-layout-kanban',    perm: 'pipeline' , cor: '#4f46e5' },
+  { id: 'api',            label: 'API & Integrações',   icon: 'ti-plug-connected',   perm: 'api', adminOnly: true , cor: '#0d9488' },
 ];
 
 // ENQUADRADOR (02/08): simula o quadro do menu — arrasta a imagem, dá zoom e
@@ -187,7 +187,7 @@ export default function Sidebar() {
               className={`mi${activePanel === item.id ? ' active' : ''}`}
               onClick={() => item.href ? window.open(item.href, '_blank', 'noopener') : setActivePanel(item.id)}
             >
-              <i className={`ti ${item.icon}`}></i>
+              <i className={`ti ${item.icon}`} style={{ color: activePanel === item.id ? '#fff' : item.cor }}></i>
               {item.label}
               {item.href && <i className="ti ti-external-link" style={{ marginLeft: 'auto', fontSize: 12, opacity: .6 }}></i>}
             </div>
