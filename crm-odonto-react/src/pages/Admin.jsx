@@ -61,6 +61,28 @@ const PANEL_TITLES = {
   central: 'Central WhatsApp',
 };
 
+// Uma frase embaixo do título dizendo, em português de gente, PARA QUE SERVE a
+// tela. Vale para todas — o cliente nunca fica olhando uma tela sem saber o que é.
+const PANEL_EXPLICACAO = {
+  dashboard: 'O resumo de hoje: quem está marcado, quem já foi atendido e quanto entrou.',
+  agenda: 'A agenda do dia. Escolha o dentista, clique na lupa e marque o paciente no horário.',
+  clientes: 'Cadastro dos pacientes e a ficha de saúde de cada um.',
+  prontuario: 'A boca do paciente: a radiografia em cima e o desenho dos dentes embaixo, para marcar o que vai ser tratado.',
+  orcamentos: 'Os tratamentos que o dentista montou, prontos para você cobrar e agendar.',
+  dentistas: 'Quem atende na clínica. Cada dentista tem a sua agenda.',
+  origens: 'Por onde o paciente conheceu a clínica. É isso que alimenta o relatório de marketing.',
+  procedimentos: 'A sua tabela de preços. Dá para importar a tabela do convênio por planilha.',
+  relatorio: 'Como foi o mês: faturamento, faltas, origem dos pacientes e desempenho de cada dentista.',
+  auditoria: 'Quem fez o quê no sistema, com data e hora.',
+  caixa: 'O dinheiro que entrou hoje. Confira e feche o caixa no fim do expediente.',
+  'historico-caixa': 'Os caixas que já foram fechados, dia por dia.',
+  seguranca: 'Proteja a sua conta com a verificação em duas etapas.',
+  whatsapp: 'Mensagens automáticas para confirmar consulta, cobrar e trazer paciente de volta.',
+  pipeline: 'Os interessados que ainda não fecharam tratamento, do primeiro contato ao sim.',
+  api: 'Ligue o CRM a outros sistemas (site, automações). Área técnica.',
+  central: 'As conversas de WhatsApp da clínica, tudo em um lugar só.',
+};
+
 // Painéis restritos a admin — o menu esconde, mas isto garante mesmo se o
 // activePanel for forçado por outro caminho (devtools, código futuro)
 const ADMIN_ONLY_PANELS = ['api'];
@@ -70,6 +92,7 @@ export default function Admin() {
   const bloqueado = ADMIN_ONLY_PANELS.includes(activePanel) && usuario?.role !== 'admin';
   const Panel = bloqueado ? Dashboard : (PANELS[activePanel] || Dashboard);
   const title = bloqueado ? 'Dashboard Diária' : (PANEL_TITLES[activePanel] || 'Dashboard');
+  const explicacao = PANEL_EXPLICACAO[bloqueado ? 'dashboard' : activePanel];
   const isRec = usuario?.perfil === 'recepcao';
 
   return (
@@ -77,7 +100,10 @@ export default function Admin() {
       <Sidebar />
       <div className="adm-main">
         <div className="adm-top">
-          <h1 id="adm-title">{title}</h1>
+          <div>
+            <h1 id="adm-title">{title}</h1>
+            {explicacao && <p className="adm-sub">{explicacao}</p>}
+          </div>
           <div className="top-r">
             <Calendar />
             <span style={{ fontSize: 12, color: 'var(--cinza)' }} id="top-perfil-label">

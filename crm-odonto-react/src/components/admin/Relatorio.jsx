@@ -44,6 +44,7 @@ const CORES_GRAF = ['#7C3AED','#9333EA','#A78BFA','#C4B5FD','#4C1D95','#D8B4FE',
 export default function Relatorio() {
   const { state, procPrecos, loadAgendaMes } = useCRM();
   const now = new Date();
+  const [visao, setVisao] = useState('resumo');
   const [mes, setMes] = useState(String(now.getMonth() + 1).padStart(2, '0'));
   const [ano, setAno] = useState(String(now.getFullYear()));
 
@@ -246,10 +247,7 @@ export default function Relatorio() {
     <div>
       {/* Cabeçalho */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'1rem',marginBottom:'1.4rem'}}>
-        <div>
-          <h2 style={{fontFamily:"'Inter',sans-serif",fontSize:22,fontWeight:800,color:'var(--v1)',marginBottom:2}}>Relatório Gerencial</h2>
-          <p style={{fontSize:12,color:'var(--cinza)'}}>Visão consolidada de todos os profissionais</p>
-        </div>
+        <div />{/* o título e a explicação já vêm do cabeçalho da tela */}
         <div style={{display:'flex',gap:'.5rem',alignItems:'center',flexWrap:'wrap'}}>
           <div className="rel-mes-wrap">
             <label>📅 Período:</label>
@@ -267,6 +265,14 @@ export default function Relatorio() {
         </div>
       </div>
 
+      {/* SUBMENUS: uma pergunta por vez, para não poluir a tela */}
+      <div className="pi-abas" style={{ marginBottom: 14 }}>
+        {[['resumo', '📊 Resumo do mês'], ['dinheiro', '💰 De onde vem o dinheiro'], ['detalhes', '🔎 Olhar de perto']].map(([id, lb]) => (
+          <button key={id} className={visao === id ? 'pi-on' : ''} onClick={() => setVisao(id)}>{lb}</button>
+        ))}
+      </div>
+
+      {visao === 'resumo' && (<>
       {/* KPIs com comparativo */}
       <div className="kr kr4">
         <div className="kc verde">
@@ -312,6 +318,9 @@ export default function Relatorio() {
         </div>
       </div>
 
+      </>)}
+
+      {visao === 'dinheiro' && (<>
       {/* GRÁFICOS: pizza origem + barras dentista */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1.2rem',marginBottom:'1.2rem'}} className="rel-graf-2col">
         <div className="tc" style={{marginBottom:0}}>
@@ -348,6 +357,9 @@ export default function Relatorio() {
         </div>
       </div>
 
+      </>)}
+
+      {visao === 'detalhes' && (<>
       {/* OCUPAÇÃO DA AGENDA */}
       <div className="tc" style={{marginBottom:'1.2rem'}}>
         <div className="th"><h3>🗓️ Taxa de Ocupação da Agenda</h3></div>
@@ -489,6 +501,7 @@ export default function Relatorio() {
           </tbody>
         </table>
       </div>
+      </>)}
     </div>
   );
 }

@@ -1054,6 +1054,24 @@ body.av-dark .av-footer p{color:#5b5268}
 .pi-vazio{font-size:12.5px;color:var(--cinza-cl);padding:.6rem 0}
 .pi-chipn{font-size:11px;font-weight:700;color:#fff;background:var(--v2);border-radius:999px;padding:.15rem .6rem;margin-left:6px}
 .od-svg{width:100%;height:auto;display:block;border:1px solid var(--borda);border-radius:var(--r);background:#fbfeff}
+/* radiografia acima do odontograma (mesma página, um em cima do outro) */
+.rx-palco{background:#0b1116;border-radius:var(--r);display:flex;align-items:center;justify-content:center;padding:8px;max-height:340px;overflow:hidden}
+.rx-palco img{max-width:100%;max-height:320px;object-fit:contain;cursor:zoom-in;display:block}
+.rx-linha{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:10px}
+.rx-linha label{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;color:var(--cinza)}
+.rx-linha input[type="range"]{width:120px;accent-color:var(--v3)}
+.rx-info{margin-left:auto;font-size:11.5px;color:var(--cinza-cl);font-weight:600}
+.rx-b{padding:.32rem .6rem !important;font-size:11.5px !important}
+.rx-vazio{display:flex;flex-direction:column;align-items:center;gap:6px;padding:1.6rem;border:2px dashed var(--b3);border-radius:var(--r);background:var(--b1);text-align:center}
+.rx-vazio b{font-size:14px}
+.rx-vazio span{font-size:12.5px;color:var(--cinza);max-width:420px}
+.rx-minis{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.rx-mini{width:104px;border:2px solid var(--borda);border-radius:10px;overflow:hidden;background:#0b1116;cursor:pointer;padding:0;display:block}
+.rx-mini.sel{border-color:var(--v3);box-shadow:0 0 10px rgba(0,179,255,.4)}
+.rx-mini img{width:100%;height:58px;object-fit:cover;display:block}
+.rx-mini i{display:block;font-style:normal;font-size:10px;font-weight:700;color:var(--cinza);background:#fff;padding:3px 4px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pi-mais{background:none;border:none;color:var(--v1);font-size:12px;font-weight:700;cursor:pointer;padding:8px 0 0;text-align:left}
+.pi-titulinho{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:var(--cinza-cl);margin:14px 0 6px;border-top:1px solid var(--borda);padding-top:10px}
 .od-dente:hover{filter:drop-shadow(0 0 6px rgba(0,179,255,.55))}
 .od-legenda{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin-top:8px}
 .od-legenda span{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--cinza);font-weight:600}
@@ -1106,6 +1124,16 @@ body.av-dark .av-footer p{color:#5b5268}
 .pi-ficha-item{background:var(--b1);border:1px solid var(--borda);border-radius:10px;padding:.5rem .7rem;display:flex;flex-direction:column}
 .pi-ficha-item span{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--cinza-cl)}
 .pi-ficha-item b{font-size:13px;color:var(--preto)}
+/* frase didática embaixo do título de cada tela */
+.adm-sub{font-size:12.5px;color:var(--cinza);margin-top:2px;max-width:760px;line-height:1.35}
+/* bloco padrão: título simples + explicação curta (usado dentro das telas) */
+.bl{background:#fff;border:1px solid var(--borda);border-radius:var(--rl);padding:1rem 1.1rem;margin-bottom:14px;box-shadow:var(--shadow)}
+.bl-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.bl-h h3{font-size:15.5px;font-weight:800;color:var(--preto);border:none;padding:0;margin:0}
+.bl-h p{font-size:12px;color:var(--cinza);margin-top:2px;max-width:640px;line-height:1.35}
+.bl-acoes{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.bl-passo{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#00b3ff,#00e0ff);color:#fff;font-size:11px;font-weight:800;margin-right:6px;flex:0 0 auto}
+
 /* ═══════════ ORÇAMENTOS (do prontuário para a recepção) ═══════════ */
 .orc-wrap{display:flex;flex-direction:column;gap:12px}
 .orc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(370px,1fr));gap:14px}
@@ -1123,6 +1151,9 @@ body.av-dark .av-footer p{color:#5b5268}
 .orc-aviso{font-size:11.5px;font-weight:700;border-radius:9px;padding:.4rem .6rem}
 .orc-acoes{display:flex;flex-wrap:wrap;gap:5px;margin-top:auto;padding-top:4px}
 .orc-b{padding:.32rem .6rem !important;font-size:11.5px !important}
+.orc-b.grande{padding:.45rem .9rem !important;font-size:12.5px !important;font-weight:800}
+.orc-mais{background:none;border:none;color:var(--cinza);font-size:11.5px;font-weight:700;cursor:pointer;padding:.32rem .4rem}
+.orc-mais:hover{color:var(--v1)}
 .orc-modal{background:#fff;border-radius:var(--rl);width:min(860px,96vw);max-height:92vh;overflow:auto;color:var(--preto)}
 .orc-modal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:1rem 1rem .6rem;position:sticky;top:0;background:#fff;border-bottom:1px solid var(--borda);z-index:2}
 .orc-totais{display:flex;flex-wrap:wrap;gap:1.4rem;background:var(--vc);border-radius:12px;padding:.7rem 1rem;margin-top:10px}

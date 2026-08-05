@@ -174,6 +174,7 @@ export default function Orcamentos() {
   const [busca, setBusca] = useState('');
   const [detalhe, setDetalhe] = useState(null);
   const [agendando, setAgendando] = useState(null);
+  const [mais, setMais] = useState({});          // cartões com as ações extras abertas
 
   const lista = useMemo(() => state.clientes
     .map(orcamentoDe)
@@ -274,16 +275,14 @@ export default function Orcamentos() {
 
   return (
     <div className="orc-wrap">
-      {/* KPIs */}
+      {/* 3 números que importam */}
       <div className="pi-kpis">
-        <div className="pi-kpi"><span>⏳ Aguardando aprovação</span><b style={{ color: '#B45309' }}>{brl(kpi.vAguardando)}</b><i>{kpi.aguardando} orçamento(s)</i></div>
-        <div className="pi-kpi"><span>✅ Aprovado — a cobrar</span><b style={{ color: '#1D4ED8' }}>{brl(kpi.vAprovado)}</b><i>{kpi.aprovado} paciente(s)</i></div>
-        <div className="pi-kpi"><span>📅 Agendado</span><b style={{ color: '#7C3AED' }}>{brl(kpi.vAgendado)}</b><i>{kpi.agendado} na agenda</i></div>
-        <div className="pi-kpi"><span>💰 Pago</span><b style={{ color: '#15803D' }}>{brl(kpi.vPago)}</b><i>{kpi.pago} fechado(s)</i></div>
-        <div className="pi-kpi"><span>📈 Taxa de fechamento</span><b>{kpi.conversao}%</b><i>{lista.length} orçamentos no total</i></div>
+        <div className="pi-kpi"><span>⏳ Esperando o paciente decidir</span><b style={{ color: '#B45309' }}>{brl(kpi.vAguardando)}</b><i>{kpi.aguardando} orçamento(s) — ligue para eles</i></div>
+        <div className="pi-kpi"><span>✅ Aprovado, falta receber</span><b style={{ color: '#1D4ED8' }}>{brl(kpi.vAprovado + kpi.vAgendado)}</b><i>{kpi.aprovado + kpi.agendado} paciente(s)</i></div>
+        <div className="pi-kpi"><span>💰 Já pago</span><b style={{ color: '#15803D' }}>{brl(kpi.vPago)}</b><i>{kpi.conversao}% dos orçamentos fecham</i></div>
       </div>
 
-      {/* filtros */}
+      {/* filtros — nomes do dia a dia */}
       <div className="pi-abas" style={{ marginTop: 4 }}>
         <button className={filtro === 'todos' ? 'pi-on' : ''} onClick={() => setFiltro('todos')}>Todos ({lista.length})</button>
         {ORDEM_STATUS.map(s => (
@@ -296,9 +295,9 @@ export default function Orcamentos() {
       </div>
 
       {visiveis.length === 0 && (
-        <div className="fp"><p className="pi-vazio">
-          Nenhum orçamento aqui. Assim que o dentista lançar procedimentos no <b>Prontuário Inteligente</b>,
-          o orçamento aparece nesta tela automaticamente.
+        <div className="bl"><p className="pi-vazio">
+          Nada por aqui. Quando o dentista marcar os dentes na tela <b>Prontuário Inteligente</b>,
+          o orçamento aparece nesta tela sozinho.
         </p></div>
       )}
 
@@ -322,17 +321,16 @@ export default function Orcamentos() {
               </div>
 
               <div className="orc-valor">
-                <div><span>Total</span><b>{brl(o.total)}</b></div>
-                {o.parcelas > 1 && <div><span>Parcelado</span><b>{o.parcelas}x {brl(o.parcela)}</b></div>}
-                <div><span>Criado</span><b>{o.criado_em}</b></div>
-                <div><span>Validade</span><b style={{ color: vencido ? '#B91C1C' : undefined }}>{o.validade}</b></div>
+                <div><span>Valor do tratamento</span><b>{brl(o.total)}</b></div>
+                {o.parcelas > 1 && <div><span>Pode parcelar</span><b>{o.parcelas}x {brl(o.parcela)}</b></div>}
+                <div><span>Vale até</span><b style={{ color: vencido ? '#B91C1C' : undefined }}>{o.validade}</b></div>
               </div>
 
               <div className="orc-dentes">
-                {o.itens.slice(0, 6).map(i => (
+                {o.itens.slice(0, 3).map(i => (
                   <span key={i.id} title={`${i.proc} — ${brl(i.valor)}`}>{i.dente} · {i.proc}</span>
                 ))}
-                {o.itens.length > 6 && <span>+{o.itens.length - 6}</span>}
+                {o.itens.length > 3 && <span>+{o.itens.length - 3} tratamento(s)</span>}
               </div>
 
               {o.status === 'agendado' && o.agenda && (
@@ -349,23 +347,35 @@ export default function Orcamentos() {
                 </div>
               )}
 
+              {/* SÓ o próximo passo em destaque; o resto fica escondido em "mais" */}
               <div className="orc-acoes">
-                <button className="btsv orc-b" style={{ background: '#0ea5e9' }} onClick={() => setDetalhe(o)}>🔍 Ver</button>
-                <button className="btsv orc-b" style={{ background: '#16a34a' }} onClick={() => cobrar(o)}>💬 Cobrar</button>
                 {o.status === 'aguardando' && <>
-                  <button className="btsv orc-b" onClick={() => aprovar(o)}>✅ Aprovar</button>
-                  <button className="btsv orc-b" style={{ background: '#b91c1c' }} onClick={() => recusar(o)}>✖ Recusar</button>
+                  <button className="btsv orc-b grande" style={{ background: '#16a34a' }} onClick={() => cobrar(o)}>💬 Mandar para o paciente</button>
+                  <button className="btsv orc-b" onClick={() => aprovar(o)}>✅ Ele aceitou</button>
                 </>}
-                {(o.status === 'aprovado' || o.status === 'agendado') &&
-                  <button className="btsv orc-b" style={{ background: '#7c3aed' }} onClick={() => setAgendando(o)}>
-                    📅 {o.status === 'agendado' ? 'Reagendar' : 'Agendar'}
-                  </button>}
-                {o.status !== 'pago' && o.status !== 'recusado' &&
-                  <button className="btsv orc-b" style={{ background: '#15803d' }} onClick={() => marcarPago(o)}>💰 Recebi</button>}
-                {o.status === 'recusado' && <button className="btsv orc-b" style={{ background: '#64748b' }} onClick={() => reabrir(o)}>↺ Reabrir</button>}
-                <button className="btsv orc-b" style={{ background: '#475569' }}
-                  onClick={() => { setPacienteFoco(o.cliente.id); setActivePanel('prontuario'); }}>🦷 Prontuário</button>
+                {o.status === 'aprovado' &&
+                  <button className="btsv orc-b grande" style={{ background: '#7c3aed' }} onClick={() => setAgendando(o)}>📅 Marcar a consulta</button>}
+                {o.status === 'agendado' &&
+                  <button className="btsv orc-b grande" style={{ background: '#15803d' }} onClick={() => marcarPago(o)}>💰 Recebi o pagamento</button>}
+                {o.status === 'recusado' &&
+                  <button className="btsv orc-b" style={{ background: '#64748b' }} onClick={() => reabrir(o)}>↺ Tentar de novo</button>}
+                <button className="btsv orc-b" style={{ background: '#0ea5e9' }} onClick={() => setDetalhe(o)}>🔍 Ver tudo</button>
+                <button className="orc-mais" onClick={() => setMais(m => ({ ...m, [o.cliente.id]: !m[o.cliente.id] }))}>
+                  {mais[o.cliente.id] ? '▾ menos' : '⋯ mais'}
+                </button>
               </div>
+              {mais[o.cliente.id] && (
+                <div className="orc-acoes">
+                  {o.status !== 'aguardando' && <button className="btsv orc-b" style={{ background: '#16a34a' }} onClick={() => cobrar(o)}>💬 Mandar no WhatsApp</button>}
+                  {o.status === 'aguardando' && <button className="btsv orc-b" style={{ background: '#b91c1c' }} onClick={() => recusar(o)}>✖ Não quis</button>}
+                  {(o.status === 'aprovado' || o.status === 'agendado') &&
+                    <button className="btsv orc-b" style={{ background: '#7c3aed' }} onClick={() => setAgendando(o)}>📅 {o.status === 'agendado' ? 'Trocar horário' : 'Marcar consulta'}</button>}
+                  {o.status === 'aprovado' &&
+                    <button className="btsv orc-b" style={{ background: '#15803d' }} onClick={() => marcarPago(o)}>💰 Recebi</button>}
+                  <button className="btsv orc-b" style={{ background: '#475569' }}
+                    onClick={() => { setPacienteFoco(o.cliente.id); setActivePanel('prontuario'); }}>🦷 Ver a boca do paciente</button>
+                </div>
+              )}
             </div>
           );
         })}
