@@ -13,13 +13,16 @@ async function consumirSso() {
   const at = h.get('sso_at'), rt = h.get('sso_rt')
   if (!th && !(at && rt)) return
   try {
+    let erro = null
     if (th) {
       // magic link de USO ÚNICO gerado pelo /api/sso-mint do app-mãe: vira uma
       // sessão NOVA e independente (não compartilha refresh token com ninguém)
-      await supabase.auth.verifyOtp({ type: 'magiclink', token_hash: th })
+      ;({ error: erro } = await supabase.auth.verifyOtp({ type: 'magiclink', token_hash: th }))
     } else {
-      await supabase.auth.setSession({ access_token: at, refresh_token: rt })
+      ;({ error: erro } = await supabase.auth.setSession({ access_token: at, refresh_token: rt }))
     }
+    // SSO grudou: zera a guarda anti-pingue-pongue da PortaDeEntrada
+    if (!erro) sessionStorage.removeItem('odonto_bounce')
   } finally {
     // limpa os tokens da barra de endereço e vai pro backend
     window.history.replaceState({}, '', '/admin')

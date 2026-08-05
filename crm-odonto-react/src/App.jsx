@@ -24,7 +24,14 @@ function PortaDeEntrada() {
   const { usuario, authLoading } = useCRM();
   if (authLoading) return null;
   if (usuario) return <Navigate to={usuario.role === 'super_admin' ? '/superadmin' : '/admin'} replace />;
-  window.location.replace('https://sistema.avancercrm.com.br');
+  // Guarda anti-pingue-pongue (05/08): se o sistema nos mandou de volta DESLOGADOS
+  // duas vezes seguidas, a sessão de lá está velha e o SSO não gruda — devolvemos
+  // com ?relogin=1 para o app-mãe DERRUBAR a sessão e mostrar o login (sem isso a
+  // tela fica piscando num loop infinito entre os dois apps).
+  const ultimaVolta = +sessionStorage.getItem('odonto_bounce') || 0;
+  const repetiu = Date.now() - ultimaVolta < 60000;
+  sessionStorage.setItem('odonto_bounce', String(Date.now()));
+  window.location.replace('https://sistema.avancercrm.com.br' + (repetiu ? '/?relogin=1' : ''));
   return null;
 }
 
