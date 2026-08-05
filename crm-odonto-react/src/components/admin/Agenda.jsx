@@ -390,6 +390,7 @@ export default function Agenda() {
                 <button
                   className="btn-pront"
                   style={{ display: 'block', marginTop: 4, fontSize: 9, padding: '2px 6px', background: '#3A3A3A', color: '#fff', borderColor: '#3A3A3A', letterSpacing: 1 }}
+                  data-guia="agenda.encaixe"
                   onClick={() => criarEncaixe(h)}
                   title="Adicionar um encaixe neste horário"
                 >

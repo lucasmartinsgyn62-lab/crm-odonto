@@ -347,7 +347,7 @@ export default function ProntuarioInteligente() {
                 {TIPOS_RX.map(t => <option key={t}>{t}</option>)}
               </select>
               <input ref={fileRef} type="file" accept="image/*,.pdf" multiple style={{ display: 'none' }} onChange={subirRx} />
-              <button className="btsv" onClick={() => fileRef.current?.click()} disabled={enviando}>
+              <button data-guia="pront.rx" className="btsv" onClick={() => fileRef.current?.click()} disabled={enviando}>
                 {enviando ? '⏳ enviando…' : '📤 Enviar radiografia'}
               </button>
             </>}>
@@ -385,10 +385,12 @@ export default function ProntuarioInteligente() {
               <label className="pi-check"><input type="checkbox" checked={decidua} onChange={e => { setDecidua(e.target.checked); setSel(new Set()); }} /> dentes de leite</label>
               {sel.size > 0 && <button className="btsv rx-b" style={{ background: '#64748b' }} onClick={() => setSel(new Set())}>Limpar seleção</button>}
             </>}>
+            <div data-guia="pront.odontograma">
             <Odontograma
               dentes={dentes} selecionados={sel} decidua={decidua}
               onToggle={n => setSel(s => { const x = new Set(s); if (x.has(n)) x.delete(n); else x.add(n); return x; })}
             />
+            </div>
             <LegendaOdontograma />
           </Bloco>
         </div>
@@ -453,7 +455,7 @@ export default function ProntuarioInteligente() {
               )}
 
               <button className="btsv" style={{ marginTop: 12, fontSize: 14, padding: '.6rem 1.4rem' }}
-                disabled={!sel.size} onClick={() => aplicar(novo)}>
+                data-guia="pront.lancar" disabled={!sel.size} onClick={() => aplicar(novo)}>
                 ✓ Anotar no dente {selArr.join(', ')}
               </button>
             </div>

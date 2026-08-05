@@ -318,7 +318,7 @@ export default function Whatsapp() {
       {/* Tab bar */}
       <div style={{display:'flex',gap:0,marginBottom:'1.5rem',borderBottom:'2px solid var(--borda)',flexWrap:'wrap'}}>
         {TABS.map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} style={{
+          <button key={t.id} data-guia={`wpp.${t.id}`} onClick={()=>setTab(t.id)} style={{
             background:'none',border:'none',padding:'.6rem 1rem',fontSize:12.5,fontWeight:600,
             cursor:'pointer',marginBottom:'-2px',whiteSpace:'nowrap',
             borderBottom:tab===t.id?'2px solid var(--v2)':'2px solid transparent',

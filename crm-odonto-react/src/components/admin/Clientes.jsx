@@ -81,7 +81,7 @@ export default function Clientes() {
         <p className="bl-h-sub">Só o nome é obrigatório. O WhatsApp serve para confirmar consulta e mandar orçamento.</p>
         <div className="gg2">
           <div className="fgg"><label>Nome completo *</label>
-            <input className="inf" placeholder="Nome..." value={form.nome} onChange={e => setField('nome', e.target.value)}/>
+            <input data-guia="cli.nome" className="inf" placeholder="Nome..." value={form.nome} onChange={e => setField('nome', e.target.value)}/>
           </div>
           <div className="fgg"><label>WhatsApp</label>
             <input className="inf" placeholder="(62) 9 0000-0000" value={form.wpp} onChange={e => setField('wpp', e.target.value)}/>
@@ -108,7 +108,7 @@ export default function Clientes() {
             type="button"
             className="btsv"
             style={{background:prontAberto?'var(--v1)':'var(--v2)',display:'inline-flex',alignItems:'center',gap:8}}
-            onClick={() => setProntAberto(o => !o)}
+            data-guia="cli.ficha" onClick={() => setProntAberto(o => !o)}
           >
             🦷 Ficha de saúde do paciente <span style={{color:'#FFD54F',fontWeight:900}}>*</span>
             <span style={{fontSize:10,opacity:.85}}>{prontAberto ? '(fechar)' : 'clique para preencher — leva 1 minuto'}</span>
@@ -209,7 +209,7 @@ export default function Clientes() {
         )}
 
         <div style={{display:'flex',gap:'.7rem',alignItems:'center',marginTop:'.7rem'}}>
-          <button className="btsv" onClick={salvar}>{editId !== null ? 'Atualizar paciente' : 'Salvar paciente'}</button>
+          <button data-guia="cli.salvar" className="btsv" onClick={salvar}>{editId !== null ? 'Atualizar paciente' : 'Salvar paciente'}</button>
           {editId !== null && <button className="btsv" style={{background:'#e0e0e0',color:'#333'}} onClick={cancelar}>Cancelar edição</button>}
           <span style={{fontSize:11,color:'var(--cinza-cl)'}}>
             {editId !== null ? 'Editando paciente' : 'Dados migram para a agenda ao selecionar o nome'}

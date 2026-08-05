@@ -20,6 +20,8 @@ import CentralWhatsapp from '../components/admin/CentralWhatsapp';
 import Calendar from '../components/shared/Calendar';
 import ProntuarioModal from '../components/modals/ProntuarioModal';
 import CaixaModal from '../components/modals/CaixaModal';
+import CaueChat from '../components/CaueChat';
+import CaueApresentacao from '../components/CaueApresentacao';
 
 const PANELS = {
   dashboard: Dashboard,
@@ -117,6 +119,9 @@ export default function Admin() {
       </div>
       <ProntuarioModal />
       <CaixaModal />
+      {/* CAUÊ: apresentação ao entrar + chat flutuante com modo guia e ações */}
+      <CaueApresentacao usuario={usuario} />
+      <CaueChat />
     </div>
   );
 }

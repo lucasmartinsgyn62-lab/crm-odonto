@@ -249,7 +249,7 @@ export default function Relatorio() {
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',flexWrap:'wrap',gap:'1rem',marginBottom:'1.4rem'}}>
         <div />{/* o título e a explicação já vêm do cabeçalho da tela */}
         <div style={{display:'flex',gap:'.5rem',alignItems:'center',flexWrap:'wrap'}}>
-          <div className="rel-mes-wrap">
+          <div className="rel-mes-wrap" data-guia="rel.periodo">
             <label>📅 Período:</label>
             <select className="rel-sel-mes" value={mes} onChange={e => setMes(e.target.value)}>
               {MESES_NOME.map((m, i) => (

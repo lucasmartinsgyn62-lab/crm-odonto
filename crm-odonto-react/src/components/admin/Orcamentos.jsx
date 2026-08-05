@@ -350,13 +350,13 @@ export default function Orcamentos() {
               {/* SÓ o próximo passo em destaque; o resto fica escondido em "mais" */}
               <div className="orc-acoes">
                 {o.status === 'aguardando' && <>
-                  <button className="btsv orc-b grande" style={{ background: '#16a34a' }} onClick={() => cobrar(o)}>💬 Mandar para o paciente</button>
-                  <button className="btsv orc-b" onClick={() => aprovar(o)}>✅ Ele aceitou</button>
+                  <button data-guia="orc.cobrar" className="btsv orc-b grande" style={{ background: '#16a34a' }} onClick={() => cobrar(o)}>💬 Mandar para o paciente</button>
+                  <button data-guia="orc.aprovar" className="btsv orc-b" onClick={() => aprovar(o)}>✅ Ele aceitou</button>
                 </>}
                 {o.status === 'aprovado' &&
-                  <button className="btsv orc-b grande" style={{ background: '#7c3aed' }} onClick={() => setAgendando(o)}>📅 Marcar a consulta</button>}
+                  <button className="btsv orc-b grande" style={{ background: '#7c3aed' }} data-guia="orc.agendar" onClick={() => setAgendando(o)}>📅 Marcar a consulta</button>}
                 {o.status === 'agendado' &&
-                  <button className="btsv orc-b grande" style={{ background: '#15803d' }} onClick={() => marcarPago(o)}>💰 Recebi o pagamento</button>}
+                  <button className="btsv orc-b grande" style={{ background: '#15803d' }} data-guia="orc.recebi" onClick={() => marcarPago(o)}>💰 Recebi o pagamento</button>}
                 {o.status === 'recusado' &&
                   <button className="btsv orc-b" style={{ background: '#64748b' }} onClick={() => reabrir(o)}>↺ Tentar de novo</button>}
                 <button className="btsv orc-b" style={{ background: '#0ea5e9' }} onClick={() => setDetalhe(o)}>🔍 Ver tudo</button>

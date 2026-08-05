@@ -148,7 +148,7 @@ export default function Caixa() {
                 dispatch({ type: 'SET_CAIXA_SENHA', payload: nova.trim() });
                 showToast('✔ Senha do caixa atualizada!');
               }}>🔑</button>
-              <button className="btsv btn-fechar-caixa" onClick={abrirSenhaFechamento}>
+              <button data-guia="caixa.fechar" className="btsv btn-fechar-caixa" onClick={abrirSenhaFechamento}>
                 <i className="ti ti-lock"></i> Fechar o caixa de hoje
               </button>
             </>)}

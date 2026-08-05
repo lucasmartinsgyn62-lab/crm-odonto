@@ -75,6 +75,7 @@ export default function Sidebar() {
             <div
               key={item.id}
               className={`mi${activePanel === item.id ? ' active' : ''}`}
+              data-guia={`menu.${item.id}`}
               onClick={() => item.href ? window.open(item.href, '_blank', 'noopener') : setActivePanel(item.id)}
             >
               <i className={`ti ${item.icon}`} style={{ color: activePanel === item.id ? '#fff' : item.cor }}></i>
@@ -85,7 +86,7 @@ export default function Sidebar() {
         })}
       </div>
       <div className="sb-foot">
-        <div className="sb-user" onClick={() => setActivePanel('seguranca')} style={{ cursor: 'pointer' }} title="Segurança da conta (2FA)">
+        <div className="sb-user" data-guia="seg.usuario" onClick={() => setActivePanel('seguranca')} style={{ cursor: 'pointer' }} title="Segurança da conta (2FA)">
           <div className="sb-av">{initials}</div>
           <div>
             <div className="sb-un">{usuario?.nome || 'Usuário'}</div>

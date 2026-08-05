@@ -184,7 +184,7 @@ export default function Procedimentos() {
             <PaletaCores value={novo.cor} onChange={cor => setNovo({ ...novo, cor })} allowClear />
           </label>
           <button className="btsv" onClick={addNovo}>+ Cadastrar</button>
-          <button className="btsv" style={{ background: '#7C3AED' }} onClick={() => setShowImport(true)}>
+          <button data-guia="proc.importar" className="btsv" style={{ background: '#7C3AED' }} onClick={() => setShowImport(true)}>
             📥 Importar convênio (XLS)
           </button>
         </div>
