@@ -98,11 +98,11 @@ export default function Caixa() {
       {/* KPIs */}
       <div className="kr" style={{ gridTemplateColumns: 'repeat(6,1fr)', gap: '.9rem', marginBottom: '1.2rem' }}>
         <div className="kc">
-          <div className="kl">Atendimentos</div>
+          <div className="kl">Pagamentos de hoje</div>
           <div className="kv">{entries.length}</div>
         </div>
         <div className="kc verde">
-          <div className="kl">Total</div>
+          <div className="kl">Total do dia</div>
           <div className="kv" style={{ color: 'var(--v2)' }}>{fmtR(total)}</div>
         </div>
         <div className="kc">
@@ -114,11 +114,11 @@ export default function Caixa() {
           <div className="kv">{fmtR(din)}</div>
         </div>
         <div className="kc">
-          <div className="kl">Cartão Déb.</div>
+          <div className="kl">Cartão débito</div>
           <div className="kv">{fmtR(deb)}</div>
         </div>
         <div className="kc">
-          <div className="kl">Cartão Créd.</div>
+          <div className="kl">Cartão crédito</div>
           <div className="kv">{fmtR(cred)}</div>
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function Caixa() {
       <div className="tc">
         <div className="th">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <h3><i className="ti ti-cash-register"></i> Atendimentos Finalizados</h3>
+            <h3><i className="ti ti-cash-register"></i> O que foi pago hoje</h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--cinza)' }}>Data:</label>
               <input
@@ -149,7 +149,7 @@ export default function Caixa() {
                 showToast('✔ Senha do caixa atualizada!');
               }}>🔑</button>
               <button className="btsv btn-fechar-caixa" onClick={abrirSenhaFechamento}>
-                <i className="ti ti-lock"></i> Fechar Caixa do Dia
+                <i className="ti ti-lock"></i> Fechar o caixa de hoje
               </button>
             </>)}
           </div>

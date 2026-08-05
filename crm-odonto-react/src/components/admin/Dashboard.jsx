@@ -46,41 +46,29 @@ export default function Dashboard() {
 
       <div className="kr kr4">
         <div className="kc verde">
-          <div className="kl">Total Agendados</div>
+          <div className="kl">Marcados hoje</div>
           <div className="kv">{total}</div>
           <div className="ks">{dateStr}</div>
         </div>
         <div className="kc verde">
-          <div className="kl">Atendidos</div>
+          <div className="kl">Já atendidos</div>
           <div className="kv">{atendidos}</div>
-          <div className="ks">atendimentos concluídos</div>
+          <div className="ks">{total > 0 ? Math.round((atendidos/total)*100) : 0}% dos marcados</div>
         </div>
         <div className="kc gold">
-          <div className="kl">Aguardando</div>
+          <div className="kl">Esperando na recepção</div>
           <div className="kv">{aguardando}</div>
-          <div className="ks">na fila</div>
+          <div className="ks">{faltaram} falta(s) hoje</div>
         </div>
-        <div className="kc red">
-          <div className="kl">Faltas</div>
-          <div className="kv">{faltaram}</div>
-          <div className="ks">sem/com aviso</div>
-        </div>
-      </div>
-      <div className="kr kr3">
-        <div className="kc verde" style={{gridColumn:'span 2'}}>
-          <div className="kl">Receita do Dia</div>
+        <div className="kc verde">
+          <div className="kl">Entrou hoje</div>
           <div className="kv" style={{color:'var(--v2)'}}>{fmtR(receita)}</div>
-          <div className="ks">apenas atendidos</div>
-        </div>
-        <div className="kc">
-          <div className="kl">Taxa de Comparecimento</div>
-          <div className="kv">{total > 0 ? Math.round((atendidos/total)*100) : 0}%</div>
-          <div className="ks">atendidos / agendados</div>
+          <div className="ks">só quem já foi atendido</div>
         </div>
       </div>
 
       <div className="tc">
-        <div className="th"><h3>Últimos atendimentos {selectedDentista ? `— ${selectedDentista}` : '— todos os dentistas'}</h3></div>
+        <div className="th"><h3>Quem passou (e quem falta) hoje {selectedDentista ? ` — ${selectedDentista}` : ''}</h3></div>
         <table className="tbl">
           <thead>
             <tr>

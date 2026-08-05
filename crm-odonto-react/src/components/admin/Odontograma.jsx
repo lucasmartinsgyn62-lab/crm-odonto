@@ -91,7 +91,8 @@ export default function Odontograma({
   const an = anatomia();
 
   return (
-    <svg viewBox={`0 0 ${VIEW.w} ${VIEW.h}`} className="od-svg" role="img" aria-label="Odontograma panorâmico">
+    // viewBox recortado: tira o vazio de cima e de baixo e o desenho ocupa melhor o espaço
+    <svg viewBox={`0 46 ${VIEW.w} ${VIEW.h - 86}`} className="od-svg" role="img" aria-label="Odontograma panorâmico">
       <defs>
         <linearGradient id="od-bg" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#FBFEFF" /><stop offset="100%" stopColor="#F2FAFF" />

@@ -77,7 +77,8 @@ export default function Clientes() {
   return (
     <div>
       <div className="fp">
-        <h3>{editId !== null ? 'Editar paciente' : 'Cadastrar novo paciente'}</h3>
+        <h3>{editId !== null ? 'Editar paciente' : 'Cadastrar paciente'}</h3>
+        <p className="bl-h-sub">Só o nome é obrigatório. O WhatsApp serve para confirmar consulta e mandar orçamento.</p>
         <div className="gg2">
           <div className="fgg"><label>Nome completo *</label>
             <input className="inf" placeholder="Nome..." value={form.nome} onChange={e => setField('nome', e.target.value)}/>
@@ -109,8 +110,8 @@ export default function Clientes() {
             style={{background:prontAberto?'var(--v1)':'var(--v2)',display:'inline-flex',alignItems:'center',gap:8}}
             onClick={() => setProntAberto(o => !o)}
           >
-            🦷 Prontuário Odontológico <span style={{color:'#FFD54F',fontWeight:900}}>*</span>
-            <span style={{fontSize:10,opacity:.85}}>{prontAberto ? '(fechar)' : 'obrigatório — clique para preencher'}</span>
+            🦷 Ficha de saúde do paciente <span style={{color:'#FFD54F',fontWeight:900}}>*</span>
+            <span style={{fontSize:10,opacity:.85}}>{prontAberto ? '(fechar)' : 'clique para preencher — leva 1 minuto'}</span>
           </button>
         </div>
         {prontAberto && (
@@ -218,7 +219,7 @@ export default function Clientes() {
 
       <div className="tc">
         <div className="th">
-          <h3>Pacientes ({clientes.length})</h3>
+          <h3>Pacientes cadastrados ({clientes.length})</h3>
           <input className="isrch" placeholder="Buscar..." value={busca} onChange={e => setBusca(e.target.value)}/>
         </div>
         <table className="tbl">

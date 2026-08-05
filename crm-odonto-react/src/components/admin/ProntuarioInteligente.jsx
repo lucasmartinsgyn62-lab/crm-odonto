@@ -332,6 +332,9 @@ export default function ProntuarioInteligente() {
       {/* ═══════════ BOCA DO PACIENTE: RX em cima, odontograma embaixo ═══════════ */}
       {aba === 'boca' && (
         <>
+        {/* raio-X e odontograma lado a lado (cada um na metade), para o dentista
+            ver tudo de uma vez — e o quadro do tratamento logo abaixo */}
+        <div className="pi-boca">
           <Bloco passo="1" titulo="Radiografia do paciente"
             explicacao="A imagem que veio do raio-X. Serve para o dentista olhar antes de marcar os dentes aqui embaixo."
             acoes={<>
@@ -388,12 +391,16 @@ export default function ProntuarioInteligente() {
             />
             <LegendaOdontograma />
           </Bloco>
+        </div>
 
-          {/* quadro do lançamento — só aparece quando há dente selecionado */}
-          {sel.size > 0 && (
-            <Bloco passo="3" titulo={`O que vai ser feito no dente ${selArr.join(', ')}?`}
-              explicacao="Escolha pelos botões rápidos ou pela lista. O valor vem da sua tabela de preços e pode ser mudado."
-              acoes={<button className="btsv" style={{ background: '#b91c1c' }} onClick={limparDentes}>🗑 Apagar deste dente</button>}>
+          {/* quadro do lançamento — sempre visível, para o dentista já ver o que fazer */}
+          <Bloco passo="3"
+              titulo={sel.size ? `O que vai ser feito no dente ${selArr.join(', ')}?` : 'O que vai ser feito no dente'}
+              explicacao={sel.size
+                ? 'Escolha pelos botões rápidos ou pela lista. O valor vem da sua tabela de preços e pode ser mudado.'
+                : 'Clique em um dente no desenho aí em cima que este quadro libera.'}
+              acoes={sel.size > 0 && <button className="btsv" style={{ background: '#b91c1c' }} onClick={limparDentes}>🗑 Apagar deste dente</button>}>
+            <div className={sel.size ? '' : 'pi-travado'}>
               <div className="pi-atalhos">
                 {ATALHOS.map(a => (
                   <button key={a.label} onClick={() => aplicar({ ...a, valor: procPrecos[a.proc] ?? '', dentista: novo.dentista, data: hoje() })}>{a.label}</button>
@@ -445,31 +452,35 @@ export default function ProntuarioInteligente() {
                 </div>
               )}
 
-              <button className="btsv" style={{ marginTop: 12, fontSize: 14, padding: '.6rem 1.4rem' }} onClick={() => aplicar(novo)}>
+              <button className="btsv" style={{ marginTop: 12, fontSize: 14, padding: '.6rem 1.4rem' }}
+                disabled={!sel.size} onClick={() => aplicar(novo)}>
                 ✓ Anotar no dente {selArr.join(', ')}
               </button>
+            </div>
 
-              {itensSelecionados.length > 0 && (
-                <>
-                  <div className="pi-titulinho">Já está anotado neste dente</div>
-                  {itensSelecionados.map(i => (
-                    <div key={i.id} className="pi-item">
-                      <span className="pi-item-dente" style={{ background: ESTADOS[i.marca || i.status]?.stroke || '#94a3b8' }}>{i.dente}</span>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <b>{i.proc}</b>
-                        <span>{i.faces?.length ? `faces ${i.faces.join('')} · ` : ''}{i.data}{i.dentista ? ' · ' + i.dentista : ''}</span>
-                      </div>
-                      <b style={{ whiteSpace: 'nowrap' }}>{brl(i.valor)}</b>
-                      <select className="inf pi-mini" value={i.status} onChange={e => mudarStatus(i.dente, i.id, e.target.value)}>
-                        {STATUS_ITEM.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
-                      </select>
-                      <button className="pi-x" onClick={() => removerItem(i.dente, i.id)}>✕</button>
-                    </div>
-                  ))}
-                </>
-              )}
-            </Bloco>
-          )}
+            {/* o que já está marcado: do dente escolhido ou, sem seleção, o resumo do paciente */}
+            <div className="pi-titulinho">
+              {sel.size ? 'Já está anotado neste dente' : `Já está marcado na boca deste paciente (${itens.length})`}
+            </div>
+            {(sel.size ? itensSelecionados : itens).slice(0, sel.size ? 99 : 6).map(i => (
+              <div key={i.id} className="pi-item">
+                <span className="pi-item-dente" style={{ background: ESTADOS[i.marca || i.status]?.stroke || '#94a3b8' }}>{i.dente}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <b>{i.proc}</b>
+                  <span>{i.faces?.length ? `faces ${i.faces.join('')} · ` : ''}{i.data}{i.dentista ? ' · ' + i.dentista : ''}</span>
+                </div>
+                <b style={{ whiteSpace: 'nowrap' }}>{brl(i.valor)}</b>
+                <select className="inf pi-mini" value={i.status} onChange={e => mudarStatus(i.dente, i.id, e.target.value)}>
+                  {STATUS_ITEM.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                </select>
+                <button className="pi-x" onClick={() => removerItem(i.dente, i.id)}>✕</button>
+              </div>
+            ))}
+            {itens.length === 0 && <p className="pi-vazio">Nada marcado ainda neste paciente.</p>}
+            {!sel.size && itens.length > 6 && (
+              <button className="pi-mais" onClick={() => setAba('plano')}>▸ ver os {itens.length} tratamentos na aba “Tratamento e valores”</button>
+            )}
+          </Bloco>
         </>
       )}
 
