@@ -56,11 +56,7 @@ export default function Auditoria() {
 
   return (
     <div>
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--v1)', marginBottom: 2 }}>Trilha de Auditoria</h2>
-        <p style={{ fontSize: 12, color: 'var(--cinza)' }}>Registro de quem fez o quê no sistema — visível apenas para administradores.</p>
-      </div>
-
+      {/* o título e a explicação já vêm do cabeçalho da tela */}
       <div className="tc">
         <div className="th" style={{ gap: '.6rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>

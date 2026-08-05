@@ -97,7 +97,7 @@ function saudacaoNome(usuario) {
 const FALLBACK = 'Não consegui falar com o meu cérebro agora 😅 Tente de novo em instantes — ou me pergunte de outro jeito que eu tento pelo caminho curto.';
 
 export default function CaueChat() {
-  const { usuario, state, dispatch, procPrecos, setActivePanel } = useCRM();
+  const { usuario, state, dispatch, procPrecos } = useCRM();
   const [abertoChat, setAbertoChat] = useState(false);
   const [msgs, setMsgs] = useState([{ de: 'caue', txt: `Oi${saudacaoNome(usuario)}! Eu sou o Cauê, seu assistente aqui do sistema. 💙 Pergunte como fazer qualquer coisa — marcar consulta, odontograma, orçamento, caixa, relatórios…` }]);
   const [txt, setTxt] = useState('');
@@ -133,7 +133,7 @@ export default function CaueChat() {
     if (!t || pensando) return;
     setMsgs(m => [...m, { de: 'eu', txt: t }]);
     setTxt(''); setPensando(true);
-    let resposta = '';
+    let resposta = '', conversaId = null;
     try {
       const { data } = await supabase.auth.getSession();
       const r = await fetch('/api/caue-chat', {
@@ -143,6 +143,7 @@ export default function CaueChat() {
       });
       const j = await r.json().catch(() => null);
       resposta = (r.ok && j?.resposta) ? j.resposta : '';
+      conversaId = j?.conversaId || null;
     } catch { /* sem rede: plano B */ }
     if (!resposta) resposta = (RESPOSTAS.find(x => x.re.test(t)) || { txt: FALLBACK }).txt;
     setPensando(false);
@@ -150,9 +151,17 @@ export default function CaueChat() {
     const a = extrairAcao(resposta);
     const g = extrairGuia(resposta) || (pediuGuia(t) ? detectarGuiaPorTexto(t) : null);
 
-    setMsgs(m => [...m, { de: 'caue', txt: limparMarcadores(resposta) || 'Certo!' }]);
+    setMsgs(m => [...m, { de: 'caue', txt: limparMarcadores(resposta) || 'Certo!', conversaId }]);
     if (a && CAUE_ACOES[a.nome]) setAcao({ ...a, estado: 'aguardando' });
     if (g && CAUE_ROTEIROS[g]) { setGuia(g); setAbertoChat(false); }
+  }
+
+  // 👍/👎 na resposta: grava em caue_conversas.util (a RLS deixa: é da clínica do usuário)
+  async function avaliar(idx, util) {
+    const m = msgs[idx];
+    if (!m?.conversaId) return;
+    setMsgs(ms => ms.map((x, i) => (i === idx ? { ...x, util } : x)));
+    await supabase.from('caue_conversas').update({ util }).eq('id', m.conversaId);
   }
 
   async function confirmarAcao() {
@@ -189,8 +198,20 @@ export default function CaueChat() {
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: 12 }}>
             {msgs.map((m, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: m.de === 'eu' ? 'flex-end' : 'flex-start', marginBottom: 8 }}>
+              <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: m.de === 'eu' ? 'flex-end' : 'flex-start', marginBottom: 8 }}>
                 <div style={{ maxWidth: '85%', fontSize: 12.5, lineHeight: 1.45, padding: '8px 11px', borderRadius: 12, whiteSpace: 'pre-wrap', background: m.de === 'eu' ? 'linear-gradient(135deg,#00b3ff,#00e0ff)' : 'var(--b2)', color: m.de === 'eu' ? '#fff' : 'var(--preto)' }}>{m.txt}</div>
+                {m.de === 'caue' && m.conversaId && (
+                  <div style={{ display: 'flex', gap: 4, marginTop: 3 }}>
+                    {m.util === undefined || m.util === null ? (<>
+                      <button title="Resposta ajudou" onClick={() => avaliar(i, true)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, opacity: .55 }}>👍</button>
+                      <button title="Não ajudou" onClick={() => avaliar(i, false)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, opacity: .55 }}>👎</button>
+                    </>) : (
+                      <span style={{ fontSize: 10.5, color: 'var(--cinza-cl)' }}>{m.util ? '👍 valeu!' : '👎 anotado — vou melhorar'}</span>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
             {pensando && (

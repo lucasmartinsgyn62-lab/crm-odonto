@@ -44,6 +44,7 @@ export default function Dentistas() {
     <div>
       <div className="fp">
         <h3>{editId !== null ? 'Editar dentista' : 'Cadastrar dentista'}</h3>
+        <p className="bl-h-sub">Cada dentista cadastrado ganha a própria agenda e aparece nos relatórios.</p>
         <div className="gg2">
           <div className="fgg"><label>Nome completo *</label>
             <input className="inf" placeholder="Dr. Nome Sobrenome" value={form.nome} onChange={e => setF('nome', e.target.value)}/>

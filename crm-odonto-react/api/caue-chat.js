@@ -54,14 +54,19 @@ export default async function handler(req, res) {
       resposta = j.resposta;
     } finally { clearTimeout(timer); }
 
-    // histórico gravado com o JWT do próprio usuário (a RLS carimba a clínica dele)
-    fetch(`${SB_URL}/rest/v1/caue_conversas`, {
-      method: 'POST',
-      headers: { apikey: SB_KEY, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tenant_id: perfil.tenant_id, usuario_id: user.id, thread: thread || null, pergunta: msg, resposta }),
-    }).catch(() => { /* o histórico é bônus: nunca derruba a resposta */ });
+    // histórico gravado com o JWT do próprio usuário (a RLS carimba a clínica dele).
+    // O id volta para o navegador para o 👍/👎 marcar ESTA resposta.
+    let conversaId = null;
+    try {
+      const h = await fetch(`${SB_URL}/rest/v1/caue_conversas`, {
+        method: 'POST',
+        headers: { apikey: SB_KEY, Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+        body: JSON.stringify({ tenant_id: perfil.tenant_id, usuario_id: user.id, thread: thread || null, pergunta: msg, resposta }),
+      });
+      conversaId = (await h.json().catch(() => []))[0]?.id || null;
+    } catch { /* o histórico é bônus: nunca derruba a resposta */ }
 
-    return res.status(200).json({ resposta });
+    return res.status(200).json({ resposta, conversaId });
   } catch (e) {
     const timeout = e?.name === 'AbortError';
     return res.status(timeout ? 504 : 502).json({

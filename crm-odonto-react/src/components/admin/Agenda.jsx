@@ -553,7 +553,7 @@ export default function Agenda() {
       <div className="tc ag-tc">
         <div className="th">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            <h3>Agenda — {getDateStr()}</h3>
+            <h3>📅 {getDateStr()}</h3>
             <div className="dent-sel-wrap">
               <i className="ti ti-stethoscope" style={{ color: 'var(--v2)', fontSize: 14 }}></i>
               <label>Dentista:</label>
@@ -567,7 +567,7 @@ export default function Agenda() {
               <option value="">Todos os status</option>
               {STATUS_LIST.map(s => <option key={s}>{s}</option>)}
             </select>
-            <span style={{ fontSize: 11, color: 'var(--cinza-cl)' }}>{preenchidos} agendados</span>
+            <span style={{ fontSize: 11, color: 'var(--cinza-cl)' }}>{preenchidos} paciente(s) marcados neste dia</span>
           </div>
         </div>
 

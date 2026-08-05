@@ -16,7 +16,7 @@ export default function HistoricoCaixa() {
   return (
     <div className="tc">
       <div className="th">
-        <h3><i className="ti ti-history"></i> Histórico de Fechamentos</h3>
+        <h3><i className="ti ti-history"></i> Caixas já fechados</h3>
       </div>
       <table className="tbl">
         <thead>

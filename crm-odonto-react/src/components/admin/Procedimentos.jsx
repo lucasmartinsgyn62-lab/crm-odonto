@@ -173,7 +173,7 @@ export default function Procedimentos() {
 
       {/* Cadastro rápido */}
       <div className="tc">
-        <div className="th"><h3>Novo Procedimento</h3></div>
+        <div className="th"><div><h3>Adicionar na tabela de preços</h3><p className="bl-h-sub" style={{margin:'2px 0 0'}}>O valor aparece sozinho na agenda e no orçamento quando você escolher este procedimento.</p></div></div>
         <div style={{ display: 'flex', gap: '.6rem', padding: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <input className="inf" style={{ flex: 2, minWidth: 220 }} placeholder="Nome do procedimento"
                  value={novo.nome} onChange={e => setNovo({ ...novo, nome: e.target.value })} />
@@ -193,7 +193,7 @@ export default function Procedimentos() {
       {/* Lista */}
       <div className="tc">
         <div className="th">
-          <h3>Procedimentos ({filtrados.length})</h3>
+          <h3>Sua tabela de preços ({filtrados.length})</h3>
           <div className="th-r" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <i className="ti ti-search" style={{ color: 'var(--v2)', fontSize: 14 }}></i>
             <input className="inf" style={{ width: 220 }} placeholder="Pesquisar procedimento..."

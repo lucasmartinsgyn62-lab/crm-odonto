@@ -22,6 +22,7 @@ export default function Origens() {
     <div>
       <div className="fp">
         <h3>Adicionar nova origem</h3>
+        <p className="bl-h-sub">Origem é por onde o paciente conheceu a clínica (Instagram, indicação…). Você escolhe uma delas ao cadastrar o paciente.</p>
         <div style={{ display: 'flex', gap: '.7rem' }}>
           <input
             className="inf"
