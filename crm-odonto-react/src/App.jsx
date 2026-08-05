@@ -24,7 +24,7 @@ function PortaDeEntrada() {
   const { usuario, authLoading } = useCRM();
   if (authLoading) return null;
   if (usuario) return <Navigate to={usuario.role === 'super_admin' ? '/superadmin' : '/admin'} replace />;
-  window.location.replace('https://avancercrm.vercel.app');
+  window.location.replace('https://sistema.avancercrm.com.br');
   return null;
 }
 
