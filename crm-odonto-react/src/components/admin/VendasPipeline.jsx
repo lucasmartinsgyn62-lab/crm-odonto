@@ -91,26 +91,65 @@ export default function VendasPipeline() {
   const agora      = Date.now();
   const novos7d    = cards.filter(c => agora - new Date(c.created_at).getTime() < 7*86400*1000).length;
 
-  // ── Drag & Drop ───────────────────────────────────────────
+  // ── Drag & Drop (06/08: quadro inteiro vira sensor + rolagem na borda) ──
+  const boardRef = useRef(null);
+  const colRefs  = useRef({});
+
   function onDragStart(e, cardId) {
     dragId.current = cardId;
     e.dataTransfer.effectAllowed = 'move';
   }
+  // arraste cancelado (Esc, soltou fora) não pode deixar o ref sujo — a
+  // próxima soltura moveria o card errado
+  function onDragEnd() { dragId.current = null; setDragOver(null); }
 
   function onDragOver(e, colId) {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOver(colId);
   }
+  // sair para um FILHO da coluna não é sair da coluna — sem esta checagem o
+  // destaque azul piscava em coluna cheia e parecia que "não estava pegando"
+  function onDragLeaveCol(e) {
+    if (!e.currentTarget.contains(e.relatedTarget)) setDragOver(null);
+  }
 
-  async function onDrop(e, colId) {
-    e.preventDefault();
+  // perto da borda do quadro, rola sozinho na direção do arrasto — sem isso as
+  // colunas finais (FECHADO, PERDIDO) eram inalcançáveis com o quadro largo
+  function rolarNaBorda(e) {
+    const el = boardRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const ZONA = 180;
+    if (e.clientX < r.left + ZONA) el.scrollLeft -= Math.ceil((ZONA - (e.clientX - r.left)) / 5);
+    else if (e.clientX > r.right - ZONA) el.scrollLeft += Math.ceil((ZONA - (r.right - e.clientX)) / 5);
+  }
+
+  async function moverPara(colId) {
     setDragOver(null);
     const id = dragId.current;
+    dragId.current = null;
     if (!id || cards.find(c=>c.id===id)?.coluna_id === colId) return;
     setCards(p => p.map(c => c.id===id ? {...c, coluna_id:colId} : c));
     await supabase.from('pipeline_cards').update({ coluna_id:colId, updated_at:new Date().toISOString() }).eq('id', id);
-    dragId.current = null;
+  }
+  async function onDrop(e, colId) {
+    e.preventDefault();
+    e.stopPropagation();               // senão o quadro (fallback) solta de novo
+    await moverPara(colId);
+  }
+  // soltou em qualquer ponto do quadro (vão entre colunas, área cinza):
+  // vai para a coluna mais próxima do ponteiro
+  async function onDropQuadro(e) {
+    e.preventDefault();
+    let melhor = null, menor = Infinity;
+    for (const [colId, el] of Object.entries(colRefs.current)) {
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      const d = e.clientX < r.left ? r.left - e.clientX : e.clientX > r.right ? e.clientX - r.right : 0;
+      if (d < menor) { menor = d; melhor = colId; }
+    }
+    if (melhor) await moverPara(melhor);
   }
 
   // ── Column CRUD ───────────────────────────────────────────
@@ -318,8 +357,14 @@ create policy "pca_tenant" on pipeline_cards
         </div>
       )}
 
-      {/* Kanban */}
-      <div style={{display:'flex',gap:'1rem',overflowX:'auto',paddingBottom:'1rem',alignItems:'flex-start'}}>
+      {/* Kanban — altura presa à janela: a barra horizontal fica colada no
+          rodapé (como a do navegador) e cada coluna rola por dentro. Colunas
+          esticam até o chão: etapa vazia tem a coluna INTEIRA como alvo. */}
+      <div ref={boardRef}
+        onDragOver={e=>{e.preventDefault(); rolarNaBorda(e);}}
+        onDrop={onDropQuadro}
+        style={{display:'flex',gap:'1rem',overflowX:'auto',overflowY:'hidden',
+          height:'calc(100vh - 235px)',paddingBottom:4,alignItems:'stretch'}}>
         {cols.map(col => {
           const colCards = cards.filter(c=>c.coluna_id===col.id);
           const colValor = colCards.reduce((s,c)=>s+(Number(c.valor)||0),0);
@@ -327,11 +372,13 @@ create policy "pca_tenant" on pipeline_cards
 
           return (
             <div key={col.id}
+              ref={el=>{colRefs.current[col.id]=el;}}
               onDragOver={e=>onDragOver(e,col.id)}
               onDrop={e=>onDrop(e,col.id)}
-              onDragLeave={()=>setDragOver(null)}
+              onDragLeave={onDragLeaveCol}
               style={{
                 minWidth:240,maxWidth:260,flexShrink:0,
+                display:'flex',flexDirection:'column',maxHeight:'100%',
                 background:isOver?'#e3f2fd':'var(--b2)',
                 border:`2px solid ${isOver?'var(--v2)':'var(--borda)'}`,
                 borderRadius:'var(--r)',padding:'.75rem',
@@ -367,11 +414,12 @@ create policy "pca_tenant" on pipeline_cards
               )}
 
               {/* Cards */}
-              <div style={{display:'grid',gap:'.4rem',minHeight:80}}>
+              <div style={{display:'grid',gap:'.4rem',minHeight:80,flex:1,overflowY:'auto',alignContent:'start'}}>
                 {colCards.map(card=>(
                   <div key={card.id}
                     draggable
                     onDragStart={e=>onDragStart(e,card.id)}
+                    onDragEnd={onDragEnd}
                     onClick={()=>{setModal(card);setCardForm({nome:card.nome,telefone:card.telefone,email:card.email||'',valor:card.valor||'',responsavel:card.responsavel||'',origem:card.origem||'Instagram',anotacoes:card.anotacoes||''});}}
                     style={{background:'#fff',border:'1px solid var(--borda)',borderRadius:8,padding:'.65rem .75rem',cursor:'grab',fontSize:12,boxShadow:'0 1px 4px rgba(0,0,0,.07)',transition:'box-shadow .15s'}}
                     onMouseEnter={e=>e.currentTarget.style.boxShadow='0 3px 10px rgba(0,0,0,.12)'}
