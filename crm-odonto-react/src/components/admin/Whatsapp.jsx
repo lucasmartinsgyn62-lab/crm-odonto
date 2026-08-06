@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useCRM } from '../../context/CRMContext';
 import RobosOdonto from './RobosOdonto';
+import ConexaoCoexistencia from './ConexaoCoexistencia';
 
 // ─── Constants ───────────────────────────────────────────────
 const TABS = [
@@ -330,9 +331,15 @@ export default function Whatsapp() {
       {/* ══ ABA 0: Robôs de mensagens (vitrine do disparo) ══ */}
       {tab==='robos' && <RobosOdonto />}
 
-      {/* ══ ABA 1: Conexão ══════════════════════════════════ */}
-      {tab==='conexao' && (
-        <div className="fp" style={{maxWidth:680}}>
+      {/* ══ ABA 1: Conexão — COEXISTÊNCIA oficial (05/08) ═══ */}
+      {tab==='conexao' && <>
+        <ConexaoCoexistencia />
+        {/* modo avançado (legado): credenciais coladas na mão — some do caminho do leigo */}
+        <details style={{maxWidth:720,marginTop:14}}>
+          <summary style={{cursor:'pointer',fontSize:12,color:'var(--cinza-cl)',fontWeight:700}}>
+            ⚙️ Configuração manual da Cloud API (modo avançado — só com o suporte)
+          </summary>
+        <div className="fp" style={{maxWidth:680,marginTop:10}}>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'.3rem'}}>
             <h3 style={{margin:0,border:'none',padding:0}}>WhatsApp Business Cloud API</h3>
             {wpStatus==='ok'  && <span style={S.ok}>🟢 Conectado</span>}
@@ -369,7 +376,8 @@ export default function Whatsapp() {
             <button className="btn-salvar-atualiz" onClick={()=>salvar('whatsapp_config',wp)} disabled={saving}>{saving?'Salvando…':'💾 Salvar'}</button>
           </div>
         </div>
-      )}
+        </details>
+      </>}
 
       {/* ══ ABA 2: IA ═══════════════════════════════════════ */}
       {tab==='ia' && (

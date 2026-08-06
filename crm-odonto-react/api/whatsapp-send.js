@@ -66,13 +66,19 @@ export default async function handler(req, res) {
       waMsgId = j?.key?.id || null;
     } else {
       // ── envia pela Cloud API oficial da Meta ──
-      const { data: cfgRow } = await supabase.from('configuracoes')
-        .select('valor').eq('tenant_id', profile.tenant_id).eq('chave', 'whatsapp_config').maybeSingle();
-      const wp = cfgRow?.valor;
-      if (!wp?.phoneNumberId || !wp?.accessToken) {
-        return res.status(409).json({ error: 'WhatsApp oficial não conectado. Configure em WhatsApp & IA → Conexão.' });
+      // COEXISTÊNCIA 1º: credencial do Embedded Signup (server-side); legado depois
+      const { data: credRow } = await supabase.from('wa_credenciais')
+        .select('phone_number_id, access_token').eq('tenant_id', profile.tenant_id).maybeSingle();
+      let wp = credRow ? { phoneNumberId: credRow.phone_number_id, accessToken: credRow.access_token } : null;
+      if (!wp) {
+        const { data: cfgRow } = await supabase.from('configuracoes')
+          .select('valor').eq('tenant_id', profile.tenant_id).eq('chave', 'whatsapp_config').maybeSingle();
+        wp = cfgRow?.valor;
       }
-      const r = await fetch(`https://graph.facebook.com/v19.0/${wp.phoneNumberId}/messages`, {
+      if (!wp?.phoneNumberId || !wp?.accessToken) {
+        return res.status(409).json({ error: 'WhatsApp oficial não conectado. Conecte em WhatsApp & IA → Conexão.' });
+      }
+      const r = await fetch(`https://graph.facebook.com/${process.env.META_GRAPH_VERSION || 'v24.0'}/${wp.phoneNumberId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${wp.accessToken}` },
         body: JSON.stringify({ messaging_product: 'whatsapp', to: conversa.contato_numero, type: 'text', text: { body: texto.trim() } }),

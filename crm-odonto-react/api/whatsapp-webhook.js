@@ -1,9 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'node:crypto';
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+// COEXISTÊNCIA (05/08): o corpo precisa chegar CRU para validar a assinatura
+// X-Hub-Signature-256 da Meta (o parser da Vercel mudaria os bytes).
+export const config = { api: { bodyParser: false } };
+
+function lerCorpoCru(req) {
+  return new Promise((resolve, reject) => {
+    const partes = [];
+    req.on('data', c => partes.push(c));
+    req.on('end', () => resolve(Buffer.concat(partes)));
+    req.on('error', reject);
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method === 'GET') return handleVerify(req, res);
@@ -12,14 +26,18 @@ export default async function handler(req, res) {
 }
 
 // Meta chama com GET na primeira configuração do webhook no Developer Portal.
-// O verify_token é por tenant (cada clínica gera o seu na aba Conexão WhatsApp),
-// então validamos contra todos os tokens salvos em configuracoes.
+// Com a Coexistência o webhook é configurado UMA vez no nível do app
+// (META_VERIFY_TOKEN); os tokens por clínica seguem valendo (legado Cloud API).
 async function handleVerify(req, res) {
   const mode = req.query['hub.mode'];
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
   if (mode !== 'subscribe' || !token) return res.status(403).end();
+
+  if (process.env.META_VERIFY_TOKEN && token === process.env.META_VERIFY_TOKEN) {
+    return res.status(200).send(challenge);
+  }
 
   const { data } = await supabase
     .from('configuracoes')
@@ -36,66 +54,129 @@ async function handleIncoming(req, res) {
   // Na Vercel a função congela ao responder — processa ANTES de responder,
   // senão as gravações (mensagens/conversas) não completam. É rápido (<2s).
   try {
-    const entry = req.body?.entry?.[0];
-    const change = entry?.changes?.[0]?.value;
-    const phoneNumberId = change?.metadata?.phone_number_id;
-    if (!phoneNumberId) return;
+    const bruto = await lerCorpoCru(req);
 
-    const tenant = await findTenantByPhoneNumberId(phoneNumberId);
-    if (!tenant) return;
+    // Assinatura da Meta: obrigatória quando o APP_SECRET estiver configurado.
+    if (process.env.META_APP_SECRET) {
+      const recebida = String(req.headers['x-hub-signature-256'] || '');
+      const esperada = 'sha256=' + crypto.createHmac('sha256', process.env.META_APP_SECRET).update(bruto).digest('hex');
+      const ok = recebida.length === esperada.length &&
+        crypto.timingSafeEqual(Buffer.from(recebida), Buffer.from(esperada));
+      if (!ok) return res.status(401).end();
+    }
 
+    let body;
+    try { body = JSON.parse(bruto.toString('utf8')); } catch { return res.status(400).end(); }
+
+    // Percorre TODOS os eventos do lote (a Meta agrupa entries/changes)
+    for (const entry of body?.entry || []) {
+      for (const ch of entry.changes || []) {
+        await processarChange(ch?.value);
+      }
+    }
+  } catch (err) {
+    console.error('whatsapp-webhook error', err);
+  }
+  return res.status(200).json({ received: true });
+}
+
+async function processarChange(change) {
+  const phoneNumberId = change?.metadata?.phone_number_id;
+  if (!phoneNumberId) return;
+
+  const tenant = await findTenantByPhoneNumberId(phoneNumberId);
+  if (!tenant) return;
+
+  try {
     // Atualizações de status de mensagens enviadas (entregue/lido/erro)
     for (const st of change.statuses || []) {
       await atualizarStatus(tenant.tenant_id, st);
     }
 
-    const message = change.messages?.[0];
-    if (!message) return;
+    // ECO DO CELULAR (coexistência): mensagem que a clínica mandou pelo APP do
+    // WhatsApp no telefone chega aqui espelhada — entra como 'enviada', sem
+    // contar não-lida, para a Central mostrar a conversa completa.
+    for (const eco of change.message_echoes || []) {
+      await registrarEco(tenant, phoneNumberId, change, eco);
+    }
 
-    const contato = change.contacts?.[0]?.profile?.name || message.from;
-    const telefone = message.from;
-    const { tipo, texto } = extrairConteudo(message);
+    for (const message of change.messages || []) {
+      const contato = change.contacts?.find(c => c.wa_id === message.from)?.profile?.name
+        || change.contacts?.[0]?.profile?.name || message.from;
+      const telefone = message.from;
+      const { tipo, texto } = extrairConteudo(message);
 
-    // ── Central WhatsApp: conexão → conversa → mensagem ──
+      // ── Central WhatsApp: conexão → conversa → mensagem ──
+      const conexao = await garantirConexao(tenant.tenant_id, phoneNumberId, change.metadata?.display_phone_number);
+      const conversa = await garantirConversa(tenant.tenant_id, conexao.id, telefone, contato);
+
+      // insert simples: o índice único (tenant_id, wa_msg_id) barra reentregas da Meta (23505)
+      const { error: msgErr } = await supabase.from('mensagens').insert({
+        tenant_id: tenant.tenant_id,
+        conversa_id: conversa.id,
+        direcao: 'recebida',
+        tipo,
+        conteudo: texto,
+        wa_msg_id: message.id,
+      });
+      if (msgErr) {
+        if (msgErr.code !== '23505') console.error('mensagens insert:', msgErr.message);
+        continue; // duplicata reentregue pela Meta: não conta não-lida nem atualiza preview de novo
+      }
+
+      await supabase.from('conversas').update({
+        contato_nome: contato,
+        ultima_msg: texto,
+        ultima_msg_at: new Date().toISOString(),
+        nao_lidas: (conversa.nao_lidas || 0) + 1,
+        ...(conversa.status === 'resolvida' ? { status: 'aberta' } : {}),
+      }).eq('id', conversa.id);
+
+      // Log legado (relatórios da aba WhatsApp & IA continuam funcionando)
+      await supabase.from('whatsapp_logs').insert({
+        tenant_id: tenant.tenant_id,
+        contato,
+        telefone,
+        mensagem: texto,
+        direcao: 'recebida',
+      });
+
+      await maybeAutoReply(tenant, telefone, contato, texto, conversa.id);
+    }
+  } catch (err) {
+    console.error('whatsapp-webhook change error', err);
+  }
+}
+
+// Coexistência: eco de mensagem enviada pelo APP do WhatsApp no celular.
+// `eco.to` é o paciente; grava como 'enviada' sem mexer nas não-lidas.
+async function registrarEco(tenant, phoneNumberId, change, eco) {
+  try {
+    const telefone = eco.to;
+    if (!telefone) return;
+    const { tipo, texto } = extrairConteudo(eco);
     const conexao = await garantirConexao(tenant.tenant_id, phoneNumberId, change.metadata?.display_phone_number);
-    const conversa = await garantirConversa(tenant.tenant_id, conexao.id, telefone, contato);
+    const conversa = await garantirConversa(tenant.tenant_id, conexao.id, telefone, telefone);
 
-    // insert simples: o índice único (tenant_id, wa_msg_id) barra reentregas da Meta (23505)
     const { error: msgErr } = await supabase.from('mensagens').insert({
       tenant_id: tenant.tenant_id,
       conversa_id: conversa.id,
-      direcao: 'recebida',
+      direcao: 'enviada',
       tipo,
       conteudo: texto,
-      wa_msg_id: message.id,
+      autor_nome: '📱 Celular da clínica',
+      wa_msg_id: eco.id,
+      status_envio: 'enviado',
     });
-    if (msgErr) {
-      if (msgErr.code !== '23505') console.error('mensagens insert:', msgErr.message);
-      return; // duplicata reentregue pela Meta: não conta não-lida nem atualiza preview de novo
-    }
+    if (msgErr) return; // 23505 = eco reentregue
 
     await supabase.from('conversas').update({
-      contato_nome: contato,
       ultima_msg: texto,
       ultima_msg_at: new Date().toISOString(),
-      nao_lidas: (conversa.nao_lidas || 0) + 1,
-      ...(conversa.status === 'resolvida' ? { status: 'aberta' } : {}),
     }).eq('id', conversa.id);
-
-    // Log legado (relatórios da aba WhatsApp & IA continuam funcionando)
-    await supabase.from('whatsapp_logs').insert({
-      tenant_id: tenant.tenant_id,
-      contato,
-      telefone,
-      mensagem: texto,
-      direcao: 'recebida',
-    });
-
-    await maybeAutoReply(tenant, telefone, contato, texto, conversa.id);
-  } catch (err) {
-    console.error('whatsapp-webhook error', err);
+  } catch (e) {
+    console.error('eco error', e);
   }
-  return res.status(200).json({ received: true });
 }
 
 function extrairConteudo(message) {
@@ -157,6 +238,13 @@ async function garantirConversa(tenantId, conexaoId, telefone, contato) {
 }
 
 async function findTenantByPhoneNumberId(phoneNumberId) {
+  // 1º: credencial da COEXISTÊNCIA (server-side, gravada pelo Embedded Signup)
+  const { data: cred } = await supabase.from('wa_credenciais')
+    .select('tenant_id, phone_number_id, access_token')
+    .eq('phone_number_id', phoneNumberId).maybeSingle();
+  if (cred) return { tenant_id: cred.tenant_id, whatsapp: { phoneNumberId: cred.phone_number_id, accessToken: cred.access_token } };
+
+  // legado: Cloud API configurada na mão (configuracoes.whatsapp_config)
   const { data } = await supabase
     .from('configuracoes')
     .select('tenant_id, valor')
@@ -245,7 +333,7 @@ function withinAllowedWindow(auto) {
 }
 
 async function sendWhatsappMessage(whatsapp, telefone, texto) {
-  const r = await fetch(`https://graph.facebook.com/v19.0/${whatsapp.phoneNumberId}/messages`, {
+  const r = await fetch(`https://graph.facebook.com/${process.env.META_GRAPH_VERSION || 'v24.0'}/${whatsapp.phoneNumberId}/messages`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${whatsapp.accessToken}` },
     body: JSON.stringify({ messaging_product: 'whatsapp', to: telefone, type: 'text', text: { body: texto } }),
