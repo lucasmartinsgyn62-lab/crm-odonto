@@ -337,7 +337,21 @@ export default function Orcamentos() {
                     {o.itens[0]?.dentista && <span>👨‍⚕️ {o.itens[0].dentista}</span>}
                   </div>
                 </div>
-                <span className="orc-status" style={{ background: st.fundo, color: st.cor }}>{st.icone} {st.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  <span className="orc-status" style={{ background: st.fundo, color: st.cor }}>{st.icone} {st.label}</span>
+                  <button data-guia="orc.excluir" title="Excluir orçamento"
+                    onClick={() => excluir(o)}
+                    style={{
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      color: '#dc2626', fontSize: 16, padding: 4, borderRadius: 6,
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#FEE2E2'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <i className="ti ti-trash"></i>
+                  </button>
+                </div>
               </div>
 
               <div className="orc-valor">
@@ -394,7 +408,6 @@ export default function Orcamentos() {
                     <button className="btsv orc-b" style={{ background: '#15803d' }} onClick={() => marcarPago(o)}>💰 Recebi</button>}
                   <button className="btsv orc-b" style={{ background: '#475569' }}
                     onClick={() => { setPacienteFoco(o.cliente.id); setActivePanel('prontuario'); }}>🦷 Ver a boca do paciente</button>
-                  <button className="btsv orc-b" data-guia="orc.excluir" style={{ background: '#dc2626' }} onClick={() => excluir(o)}>🗑️ Excluir orçamento</button>
                 </div>
               )}
             </div>
