@@ -270,6 +270,26 @@ export default function Orcamentos() {
     setAgendando(null);
     showToast(`📅 ${o.cliente.nome} agendado em ${data} às ${hora}`, 'success');
   }
+  // Excluir o orçamento do paciente (zera os itens do prontuário)
+  function excluir(o) {
+    if (!window.confirm(`Excluir o orçamento de ${o.cliente.nome}? O paciente continua cadastrado, só o orçamento some.`)) return;
+    dispatch({
+      type: 'UPDATE_CLIENTE',
+      payload: {
+        id: o.cliente.id,
+        prontuario: {
+          ...(o.cliente.prontuario || {}),
+          orcamento: {
+            status: 'aguardando', criado_em: null, validade: null,
+            desconto: 0, descontoTipo: '%', parcelas: 1, obs: '',
+            itens: [],
+          },
+        },
+      },
+    });
+    logAudit?.('excluiu', 'orçamento', `${o.cliente.nome} (${brl(o.total)})`);
+    showToast('🗑️ Orçamento excluído', 'warning');
+  }
 
   function imprimir() { window.print(); }
 
@@ -374,6 +394,7 @@ export default function Orcamentos() {
                     <button className="btsv orc-b" style={{ background: '#15803d' }} onClick={() => marcarPago(o)}>💰 Recebi</button>}
                   <button className="btsv orc-b" style={{ background: '#475569' }}
                     onClick={() => { setPacienteFoco(o.cliente.id); setActivePanel('prontuario'); }}>🦷 Ver a boca do paciente</button>
+                  <button className="btsv orc-b" data-guia="orc.excluir" style={{ background: '#dc2626' }} onClick={() => excluir(o)}>🗑️ Excluir orçamento</button>
                 </div>
               )}
             </div>
